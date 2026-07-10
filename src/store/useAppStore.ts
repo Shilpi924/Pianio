@@ -1,12 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AppState, Lesson, PracticeMode, Settings, Statistics, MIDIDevice, LessonProgress } from '../types';
+import type { AppState, Lesson, Settings, Statistics, MIDIDevice, LessonProgress } from '../types';
 
 interface AppStore extends AppState {
   // App state
   setCurrentView: (view: AppState['currentView']) => void;
   setCurrentLesson: (lesson: Lesson | null) => void;
-  setCurrentPracticeMode: (mode: PracticeMode | null) => void;
   setIsPlaying: (playing: boolean) => void;
   setTempo: (tempo: number) => void;
 
@@ -70,14 +69,12 @@ export const useAppStore = create<AppStore>()(
       // Initial app state
       currentView: 'home',
       currentLesson: null,
-      currentPracticeMode: null,
       isPlaying: false,
       tempo: 80,
 
       // App state setters
       setCurrentView: (view) => set({ currentView: view }),
       setCurrentLesson: (lesson) => set({ currentLesson: lesson }),
-      setCurrentPracticeMode: (mode) => set({ currentPracticeMode: mode }),
       setIsPlaying: (playing) => set({ isPlaying: playing }),
       setTempo: (tempo) => set({ tempo }),
 
@@ -159,7 +156,7 @@ export const useAppStore = create<AppStore>()(
       setAudioEnabled: (enabled) => set({ audioEnabled: enabled }),
     }),
     {
-      name: 'piano-mentor-storage',
+      name: 'pianio-storage',
       partialize: (state) => ({
         settings: state.settings,
         statistics: state.statistics,

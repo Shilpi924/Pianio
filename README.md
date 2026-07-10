@@ -1,4 +1,4 @@
-# Piano Mentor
+# Pianio
 
 An interactive 88-key piano learning application built with React, TypeScript, and modern web technologies. Designed to help beginners, especially children, learn to play piano using a connected MIDI keyboard or the on-screen virtual piano.
 

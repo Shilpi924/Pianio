@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -26,6 +26,14 @@ const menuItems = [
     icon: Music,
     color: 'bg-purple-500',
     action: 'practice',
+  },
+  {
+    id: 'scales',
+    title: 'Scales Trainer',
+    description: 'Learn major and minor scales',
+    icon: TrendingUp,
+    color: 'bg-teal-500',
+    action: 'scales',
   },
   {
     id: 'free-play',
@@ -92,7 +100,7 @@ export default function HomePage() {
         className="max-w-6xl mx-auto"
       >
         <h1 className="text-5xl font-bold text-center mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">
-          Piano Mentor
+          Pianio
         </h1>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-8 text-lg">
           Learn piano the fun way!

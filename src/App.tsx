@@ -7,6 +7,8 @@ import LessonPlayer from './components/LessonPlayer';
 import StatisticsPage from './pages/StatisticsPage';
 import SettingsPage from './pages/SettingsPage';
 import LessonCreatorPage from './pages/LessonCreatorPage';
+import ChordTrainerPage from './pages/ChordTrainerPage';
+import ScalesTrainerPage from './pages/ScalesTrainerPage';
 import './index.css';
 
 function App() {
@@ -43,7 +45,9 @@ function App() {
           <LessonLibraryPage />
         );
       case 'practice':
-        return <div className="p-8 text-center">Practice Mode - Coming Soon</div>;
+        return <ChordTrainerPage />;
+      case 'scales':
+        return <ScalesTrainerPage />;
       case 'free-play':
         return <FreePlayPage />;
       case 'statistics':

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Layers, Zap, Turtle, Hand, Repeat } from 'lucide-react';
+import { Play, Pause, RotateCcw, Layers, Zap, Turtle, Hand, Repeat, Clock } from 'lucide-react';
 import PianoKeyboard from './PianoKeyboard';
 import FingerHint from './FingerHint';
+import FallingNotes from './FallingNotes';
 import type { Lesson, PracticeMode } from '../types';
 import { audioService } from '../services/audioService';
 import { midiToNote } from '../utils/noteUtils';
@@ -24,6 +25,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [practiceMode, setPracticeMode] = useState<PracticeMode>('guided');
   const [selectedHand, setSelectedHand] = useState<'both' | 'left' | 'right'>('both');
   const [loopEnabled, setLoopEnabled] = useState(false);
+  const [useFallingNotes, setUseFallingNotes] = useState(false);
+  const [metronomeEnabled, setMetronomeEnabled] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const metronomeRef = useRef<number | null>(null);
 
   const currentNote = lesson.notes[currentNoteIndex];
   const progress = ((currentNoteIndex + 1) / lesson.notes.length) * 100;
@@ -47,6 +52,39 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       midiService.removeListener(handleMIDIMessage);
     };
   }, [isAudioInitialized]);
+
+  // Metronome effect
+  useEffect(() => {
+    if (metronomeEnabled && isPlaying) {
+      const interval = (60 / tempo) * 1000;
+      metronomeRef.current = window.setInterval(() => {
+        if (isAudioInitialized) {
+          audioService.playNote('C6', '16n');
+        }
+      }, interval);
+    } else {
+      if (metronomeRef.current) {
+        clearInterval(metronomeRef.current);
+        metronomeRef.current = null;
+      }
+    }
+
+    return () => {
+      if (metronomeRef.current) {
+        clearInterval(metronomeRef.current);
+      }
+    };
+  }, [metronomeEnabled, isPlaying, tempo, isAudioInitialized]);
+
+  // Time tracking for falling notes
+  useEffect(() => {
+    if (isPlaying && useFallingNotes) {
+      const interval = setInterval(() => {
+        setCurrentTime((prev) => prev + 0.016); // ~60fps
+      }, 16);
+      return () => clearInterval(interval);
+    }
+  }, [isPlaying, useFallingNotes]);
 
   useEffect(() => {
     if (isPlaying && currentNote) {
@@ -262,6 +300,30 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               +5
             </button>
           </div>
+
+          <button
+            onClick={() => setMetronomeEnabled(!metronomeEnabled)}
+            className={`p-3 rounded-xl transition-colors ${
+              metronomeEnabled
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+            title="Metronome"
+          >
+            <Clock className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={() => setUseFallingNotes(!useFallingNotes)}
+            className={`p-3 rounded-xl transition-colors ${
+              useFallingNotes
+                ? 'bg-purple-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+            title="Falling Notes"
+          >
+            <Layers className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Practice Mode Selector */}
@@ -340,11 +402,28 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       </div>
 
       {/* Piano Keyboard */}
-      <PianoKeyboard
-        onNoteOn={handleNotePlayed}
-        highlightedNotes={highlightedNotes}
-        disabled={!isPlaying}
-      />
+      {useFallingNotes ? (
+        <FallingNotes
+          notes={lesson.notes}
+          tempo={tempo}
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          onNoteHit={(note) => {
+            if (note === currentNote?.note) {
+              handleNotePlayed(note);
+            }
+          }}
+          onNoteMiss={() => {
+            // Handle missed notes for scoring
+          }}
+        />
+      ) : (
+        <PianoKeyboard
+          onNoteOn={handleNotePlayed}
+          highlightedNotes={highlightedNotes}
+          disabled={!isPlaying}
+        />
+      )}
     </div>
   );
 }
