@@ -9,6 +9,7 @@ import SettingsPage from './pages/SettingsPage';
 import LessonCreatorPage from './pages/LessonCreatorPage';
 import ChordTrainerPage from './pages/ChordTrainerPage';
 import ScalesTrainerPage from './pages/ScalesTrainerPage';
+import CurriculumPage from './pages/CurriculumPage';
 import './index.css';
 
 function App() {
@@ -48,6 +49,8 @@ function App() {
         return <ChordTrainerPage />;
       case 'scales':
         return <ScalesTrainerPage />;
+      case 'curriculum':
+        return <CurriculumPage />;
       case 'free-play':
         return <FreePlayPage />;
       case 'statistics':

@@ -28,6 +28,9 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [useFallingNotes, setUseFallingNotes] = useState(false);
   const [metronomeEnabled, setMetronomeEnabled] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [noteStartTime, setNoteStartTime] = useState(0);
+  const [timingFeedback, setTimingFeedback] = useState<'perfect' | 'good' | 'early' | 'late' | null>(null);
+  const [timingScore, setTimingScore] = useState(0);
   const metronomeRef = useRef<number | null>(null);
 
   const currentNote = lesson.notes[currentNoteIndex];
@@ -91,6 +94,9 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       // Highlight the current note
       setHighlightedNotes([currentNote.note]);
       
+      // Record note start time for timing feedback
+      setNoteStartTime(Date.now());
+      
       // Play the current note as a hint (only in guided mode)
       if (isAudioInitialized && practiceMode === 'guided') {
         audioService.playNote(currentNote.note, '4n');
@@ -120,6 +126,34 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       }
 
       if (playedNote === currentNote.note) {
+        // Calculate timing feedback
+        const timeDiff = Date.now() - noteStartTime;
+        const expectedTime = (60 / tempo) * 1000; // Expected time in ms
+        const tolerance = expectedTime * 0.2; // 20% tolerance
+
+        let feedback: 'perfect' | 'good' | 'early' | 'late' | null = null;
+        let score = 0;
+
+        if (Math.abs(timeDiff) < tolerance * 0.5) {
+          feedback = 'perfect';
+          score = 100;
+        } else if (Math.abs(timeDiff) < tolerance) {
+          feedback = 'good';
+          score = 80;
+        } else if (timeDiff < 0) {
+          feedback = 'early';
+          score = 50;
+        } else {
+          feedback = 'late';
+          score = 50;
+        }
+
+        setTimingFeedback(feedback);
+        setTimingScore((prev) => prev + score);
+
+        // Clear feedback after 1 second
+        setTimeout(() => setTimingFeedback(null), 1000);
+
         // Correct note
         setCorrectNotes((prev) => new Set(prev).add(currentNoteIndex));
 
@@ -145,7 +179,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         }
       }
     },
-    [isPlaying, currentNote, currentNoteIndex, lesson.notes.length, isAudioInitialized, onComplete, practiceMode, selectedHand, loopEnabled]
+    [isPlaying, currentNote, currentNoteIndex, lesson.notes.length, isAudioInitialized, onComplete, practiceMode, selectedHand, loopEnabled, tempo, noteStartTime]
   );
 
   const togglePlay = () => {
@@ -222,6 +256,27 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           </div>
         </div>
 
+        {/* Timing Feedback */}
+        {timingFeedback && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`mb-4 p-3 rounded-lg text-center font-semibold ${
+              timingFeedback === 'perfect'
+                ? 'bg-green-500 text-white'
+                : timingFeedback === 'good'
+                ? 'bg-blue-500 text-white'
+                : 'bg-yellow-500 text-white'
+            }`}
+          >
+            {timingFeedback === 'perfect' && '⭐ Perfect Timing!'}
+            {timingFeedback === 'good' && '✓ Good Timing'}
+            {timingFeedback === 'early' && '⏱️ Too Early'}
+            {timingFeedback === 'late' && '⏱️ Too Late'}
+          </motion.div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
@@ -229,14 +284,14 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
             <div className="text-xs text-gray-600 dark:text-gray-300">Accuracy</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{tempo}</div>
-            <div className="text-xs text-gray-600 dark:text-gray-300">BPM</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {timingScore > 0 ? Math.round(timingScore / (correctNotes.size || 1)) : 0}
+            </div>
+            <div className="text-xs text-gray-600 dark:text-gray-300">Avg Timing</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-              {correctNotes.size}
-            </div>
-            <div className="text-xs text-gray-600 dark:text-gray-300">Correct</div>
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{tempo}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-300">BPM</div>
           </div>
         </div>
       </div>

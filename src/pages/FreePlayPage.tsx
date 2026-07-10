@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, Mic, Square, Play as PlayIcon, Trash2 } from 'lucide-react';
 import PianoKeyboard from '../components/PianoKeyboard';
 import MIDIStatus from '../components/MIDIStatus';
 import { useAppStore } from '../store/useAppStore';
 import { audioService } from '../services/audioService';
 import { midiToNote } from '../utils/noteUtils';
 import { midiService, type MIDIMessage } from '../services/midiService';
+import { recordingService } from '../services/recordingService';
 
 export default function FreePlayPage() {
   const { setCurrentView, audioEnabled, setAudioEnabled } = useAppStore();
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
   const [activeNotes, setActiveNotes] = useState<Set<string>>(new Set());
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPlayingBack, setIsPlayingBack] = useState(false);
+  const [recordings, setRecordings] = useState(recordingService.getRecordings());
 
   useEffect(() => {
     const initAudio = async () => {
@@ -50,6 +54,11 @@ export default function FreePlayPage() {
   const handleNoteOn = (note: string) => {
     setActiveNotes((prev) => new Set(prev).add(note));
     
+    // Record note if recording
+    if (isRecording) {
+      recordingService.recordNoteOn(note);
+    }
+    
     if (audioEnabled && isAudioInitialized) {
       audioService.playNote(note);
     }
@@ -61,6 +70,57 @@ export default function FreePlayPage() {
       newSet.delete(note);
       return newSet;
     });
+
+    // Record note off if recording
+    if (isRecording) {
+      recordingService.recordNoteOff(note);
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      const recording = recordingService.stopRecording();
+      if (recording) {
+        setRecordings(recordingService.getRecordings());
+      }
+      setIsRecording(false);
+    } else {
+      recordingService.startRecording();
+      setIsRecording(true);
+    }
+  };
+
+  const playRecording = (recordingId: string) => {
+    const recording = recordingService.getRecording(recordingId);
+    if (!recording || isPlayingBack) return;
+
+    setIsPlayingBack(true);
+
+    recording.notes.forEach((note) => {
+      setTimeout(() => {
+        if (audioEnabled && isAudioInitialized) {
+          audioService.playNote(note.note);
+        }
+        setActiveNotes((prev) => new Set(prev).add(note.note));
+
+        setTimeout(() => {
+          setActiveNotes((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(note.note);
+            return newSet;
+          });
+        }, note.duration);
+      }, note.timestamp);
+    });
+
+    setTimeout(() => {
+      setIsPlayingBack(false);
+    }, recording.duration + 1000);
+  };
+
+  const deleteRecording = (recordingId: string) => {
+    recordingService.deleteRecording(recordingId);
+    setRecordings(recordingService.getRecordings());
   };
 
   const toggleAudio = () => {
@@ -88,6 +148,28 @@ export default function FreePlayPage() {
 
           <div className="flex items-center gap-4">
             <MIDIStatus />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleRecording}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl shadow-lg transition-colors ${
+                isRecording
+                  ? 'bg-red-500 text-white hover:bg-red-600'
+                  : 'bg-white dark:bg-gray-800 hover:shadow-xl'
+              }`}
+            >
+              {isRecording ? (
+                <>
+                  <Square className="w-5 h-5" />
+                  <span className="font-semibold">Stop Recording</span>
+                </>
+              ) : (
+                <>
+                  <Mic className="w-5 h-5" />
+                  <span className="font-semibold">Record</span>
+                </>
+              )}
+            </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -127,8 +209,59 @@ export default function FreePlayPage() {
             <li>• Click or tap the piano keys to play notes</li>
             <li>• Connect a MIDI keyboard for a better experience</li>
             <li>• Use the sound toggle to enable/disable audio</li>
+            <li>• Use the Record button to capture your playing</li>
           </ul>
         </motion.div>
+
+        {/* Recordings */}
+        {recordings.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="card mb-6"
+          >
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+              Your Recordings
+            </h2>
+            <div className="space-y-2">
+              {recordings.map((recording) => (
+                <motion.div
+                  key={recording.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
+                >
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{recording.name}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300">
+                      {Math.round(recording.duration / 1000)}s • {recording.notes.length} notes
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => playRecording(recording.id)}
+                      disabled={isPlayingBack}
+                      className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <PlayIcon className="w-4 h-4" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => deleteRecording(recording.id)}
+                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Piano Keyboard */}
         <motion.div

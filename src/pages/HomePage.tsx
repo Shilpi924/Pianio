@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -34,6 +34,14 @@ const menuItems = [
     icon: TrendingUp,
     color: 'bg-teal-500',
     action: 'scales',
+  },
+  {
+    id: 'curriculum',
+    title: 'Learning Path',
+    description: 'Follow structured lessons',
+    icon: GraduationCap,
+    color: 'bg-amber-500',
+    action: 'curriculum',
   },
   {
     id: 'free-play',
