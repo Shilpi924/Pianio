@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye, Hand } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -66,6 +66,14 @@ const menuItems = [
     icon: Eye,
     color: 'bg-emerald-500',
     action: 'sight-reading',
+  },
+  {
+    id: 'hand-positioning',
+    title: 'Hand Positioning',
+    description: 'Proper technique guide',
+    icon: Hand,
+    color: 'bg-pink-500',
+    action: 'hand-positioning',
   },
   {
     id: 'free-play',
