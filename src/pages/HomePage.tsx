@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -42,6 +42,14 @@ const menuItems = [
     icon: GraduationCap,
     color: 'bg-amber-500',
     action: 'curriculum',
+  },
+  {
+    id: 'ear-training',
+    title: 'Ear Training',
+    description: 'Train your musical ear',
+    icon: Ear,
+    color: 'bg-rose-500',
+    action: 'ear-training',
   },
   {
     id: 'free-play',

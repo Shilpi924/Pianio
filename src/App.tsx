@@ -10,6 +10,7 @@ import LessonCreatorPage from './pages/LessonCreatorPage';
 import ChordTrainerPage from './pages/ChordTrainerPage';
 import ScalesTrainerPage from './pages/ScalesTrainerPage';
 import CurriculumPage from './pages/CurriculumPage';
+import EarTrainingPage from './pages/EarTrainingPage';
 import './index.css';
 
 function App() {
@@ -51,6 +52,8 @@ function App() {
         return <ScalesTrainerPage />;
       case 'curriculum':
         return <CurriculumPage />;
+      case 'ear-training':
+        return <EarTrainingPage />;
       case 'free-play':
         return <FreePlayPage />;
       case 'statistics':
