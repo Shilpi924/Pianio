@@ -84,7 +84,7 @@ export interface LessonProgress {
 }
 
 export interface AppState {
-  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator';
+  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator';
   currentLesson: Lesson | null;
   isPlaying: boolean;
   tempo: number;

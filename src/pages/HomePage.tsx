@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -50,6 +50,14 @@ const menuItems = [
     icon: Ear,
     color: 'bg-rose-500',
     action: 'ear-training',
+  },
+  {
+    id: 'note-naming',
+    title: 'Note Naming',
+    description: 'Learn note names',
+    icon: Keyboard,
+    color: 'bg-cyan-500',
+    action: 'note-naming',
   },
   {
     id: 'free-play',
