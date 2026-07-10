@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -58,6 +58,14 @@ const menuItems = [
     icon: Keyboard,
     color: 'bg-cyan-500',
     action: 'note-naming',
+  },
+  {
+    id: 'sight-reading',
+    title: 'Sight Reading',
+    description: 'Read sheet music',
+    icon: Eye,
+    color: 'bg-emerald-500',
+    action: 'sight-reading',
   },
   {
     id: 'free-play',

@@ -12,6 +12,7 @@ import ScalesTrainerPage from './pages/ScalesTrainerPage';
 import CurriculumPage from './pages/CurriculumPage';
 import EarTrainingPage from './pages/EarTrainingPage';
 import NoteNamingPage from './pages/NoteNamingPage';
+import SightReadingPage from './pages/SightReadingPage';
 import './index.css';
 
 function App() {
@@ -57,6 +58,8 @@ function App() {
         return <EarTrainingPage />;
       case 'note-naming':
         return <NoteNamingPage />;
+      case 'sight-reading':
+        return <SightReadingPage />;
       case 'free-play':
         return <FreePlayPage />;
       case 'statistics':
