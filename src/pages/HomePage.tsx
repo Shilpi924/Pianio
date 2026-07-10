@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Play, Sparkles, Music, Star, ArrowRight } from 'lucide-react';
+import { Search, Play, Sparkles, Music, Star, ArrowRight, Upload } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { sampleLessons } from '../data/lessons';
 
@@ -150,6 +150,24 @@ export default function HomePage() {
               </motion.div>
             )}
           </div>
+        </motion.div>
+
+        {/* Upload Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="mb-8"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setCurrentView('song-upload')}
+            className="w-full bg-gradient-to-r from-green-400 to-teal-500 text-white rounded-3xl p-6 shadow-2xl hover:shadow-3xl transition-all flex items-center justify-center gap-3"
+          >
+            <Upload className="w-8 h-8" />
+            <span className="text-xl font-bold">Upload Your Own MusicXML File</span>
+          </motion.button>
         </motion.div>
 
         {/* Popular Songs */}

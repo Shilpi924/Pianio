@@ -36,6 +36,7 @@ export interface Lesson {
   notes: Note[];
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   category: string;
+  source: 'public-domain' | 'user-uploaded';
 }
 
 export type PracticeMode = 'guided' | 'performance' | 'slow-practice' | 'hands-separate' | 'loop';
@@ -84,7 +85,7 @@ export interface LessonProgress {
 }
 
 export interface AppState {
-  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator';
+  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator';
   currentLesson: Lesson | null;
   isPlaying: boolean;
   tempo: number;

@@ -17,6 +17,7 @@ import HandPositioningPage from './pages/HandPositioningPage';
 import PerformanceModePage from './pages/PerformanceModePage';
 import IntervalTrainingPage from './pages/IntervalTrainingPage';
 import TutorialsPage from './pages/TutorialsPage';
+import SongUploadPage from './pages/SongUploadPage';
 import './index.css';
 
 function App() {
@@ -72,6 +73,8 @@ function App() {
         return <IntervalTrainingPage />;
       case 'tutorials':
         return <TutorialsPage />;
+      case 'song-upload':
+        return <SongUploadPage />;
       case 'free-play':
         return <FreePlayPage />;
       case 'statistics':

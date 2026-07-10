@@ -14,6 +14,7 @@ export default function LessonCreatorPage() {
     tempo: 80,
     difficulty: 'beginner',
     category: 'Custom',
+    source: 'user-uploaded',
     notes: [],
   });
 
