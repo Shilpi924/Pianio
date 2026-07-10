@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye, Hand, Mic } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye, Hand, Mic, Music2 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -82,6 +82,14 @@ const menuItems = [
     icon: Mic,
     color: 'bg-violet-500',
     action: 'performance',
+  },
+  {
+    id: 'interval-training',
+    title: 'Interval Training',
+    description: 'Practice musical intervals',
+    icon: Music2,
+    color: 'bg-indigo-500',
+    action: 'interval-training',
   },
   {
     id: 'free-play',
