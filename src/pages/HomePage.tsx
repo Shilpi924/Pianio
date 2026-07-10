@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye, Hand, Mic, Music2 } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye, Hand, Mic, Music2, Video } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -90,6 +90,14 @@ const menuItems = [
     icon: Music2,
     color: 'bg-indigo-500',
     action: 'interval-training',
+  },
+  {
+    id: 'tutorials',
+    title: 'Video Tutorials',
+    description: 'Learn with video lessons',
+    icon: Video,
+    color: 'bg-teal-500',
+    action: 'tutorials',
   },
   {
     id: 'free-play',

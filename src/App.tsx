@@ -16,6 +16,7 @@ import SightReadingPage from './pages/SightReadingPage';
 import HandPositioningPage from './pages/HandPositioningPage';
 import PerformanceModePage from './pages/PerformanceModePage';
 import IntervalTrainingPage from './pages/IntervalTrainingPage';
+import TutorialsPage from './pages/TutorialsPage';
 import './index.css';
 
 function App() {
@@ -69,6 +70,8 @@ function App() {
         return <PerformanceModePage />;
       case 'interval-training':
         return <IntervalTrainingPage />;
+      case 'tutorials':
+        return <TutorialsPage />;
       case 'free-play':
         return <FreePlayPage />;
       case 'statistics':
