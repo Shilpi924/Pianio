@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Layers, Zap, Turtle, Hand, Repeat, Clock } from 'lucide-react';
+import { Play, Pause, RotateCcw, Layers, Zap, Turtle, Hand, Repeat, Clock, Music } from 'lucide-react';
 import PianoKeyboard from './PianoKeyboard';
 import FingerHint from './FingerHint';
 import FallingNotes from './FallingNotes';
+import SheetMusic from './SheetMusic';
 import type { Lesson, PracticeMode } from '../types';
 import { audioService } from '../services/audioService';
 import { midiToNote } from '../utils/noteUtils';
@@ -27,6 +28,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [useFallingNotes, setUseFallingNotes] = useState(false);
   const [metronomeEnabled, setMetronomeEnabled] = useState(false);
+  const [showSheetMusic, setShowSheetMusic] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [noteStartTime, setNoteStartTime] = useState(0);
   const [timingFeedback, setTimingFeedback] = useState<'perfect' | 'good' | 'early' | 'late' | null>(null);
@@ -379,6 +381,18 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           >
             <Layers className="w-5 h-5" />
           </button>
+
+          <button
+            onClick={() => setShowSheetMusic(!showSheetMusic)}
+            className={`p-3 rounded-xl transition-colors ${
+              showSheetMusic
+                ? 'bg-indigo-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+            title="Sheet Music"
+          >
+            <Music className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Practice Mode Selector */}
@@ -455,6 +469,15 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           </div>
         )}
       </div>
+
+      {/* Sheet Music */}
+      {showSheetMusic && (
+        <SheetMusic
+          notes={lesson.notes}
+          currentNoteIndex={currentNoteIndex}
+          title={lesson.title}
+        />
+      )}
 
       {/* Piano Keyboard */}
       {useFallingNotes ? (
