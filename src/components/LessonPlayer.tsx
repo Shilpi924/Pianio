@@ -33,6 +33,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [noteStartTime, setNoteStartTime] = useState(0);
   const [timingFeedback, setTimingFeedback] = useState<'perfect' | 'good' | 'early' | 'late' | null>(null);
   const [timingScore, setTimingScore] = useState(0);
+  const [fallingNotesSpeed, setFallingNotesSpeed] = useState(1);
   const metronomeRef = useRef<number | null>(null);
 
   const currentNote = lesson.notes[currentNoteIndex];
@@ -481,20 +482,44 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
 
       {/* Piano Keyboard */}
       {useFallingNotes ? (
-        <FallingNotes
-          notes={lesson.notes}
-          tempo={tempo}
-          isPlaying={isPlaying}
-          currentTime={currentTime}
-          onNoteHit={(note) => {
-            if (note === currentNote?.note) {
-              handleNotePlayed(note);
-            }
-          }}
-          onNoteMiss={() => {
-            // Handle missed notes for scoring
-          }}
-        />
+        <>
+          {/* Speed Controls */}
+          <div className="card">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-gray-900 dark:text-gray-100">Falling Notes Speed</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFallingNotesSpeed(Math.max(0.5, fallingNotesSpeed - 0.25))}
+                  className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  -
+                </button>
+                <span className="w-16 text-center font-bold text-lg">{fallingNotesSpeed}x</span>
+                <button
+                  onClick={() => setFallingNotesSpeed(Math.min(2, fallingNotesSpeed + 0.25))}
+                  className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+          <FallingNotes
+            notes={lesson.notes}
+            tempo={tempo}
+            isPlaying={isPlaying}
+            currentTime={currentTime}
+            speed={fallingNotesSpeed}
+            onNoteHit={(note) => {
+              if (note === currentNote?.note) {
+                handleNotePlayed(note);
+              }
+            }}
+            onNoteMiss={() => {
+              // Handle missed notes for scoring
+            }}
+          />
+        </>
       ) : (
         <PianoKeyboard
           onNoteOn={handleNotePlayed}
