@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye, Hand } from 'lucide-react';
+import { BookOpen, Music, Piano, Settings, BarChart3, Play, TrendingUp, GraduationCap, Ear, Keyboard, Eye, Hand, Mic } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const menuItems = [
@@ -74,6 +74,14 @@ const menuItems = [
     icon: Hand,
     color: 'bg-pink-500',
     action: 'hand-positioning',
+  },
+  {
+    id: 'performance',
+    title: 'Performance Mode',
+    description: 'Play with backing tracks',
+    icon: Mic,
+    color: 'bg-violet-500',
+    action: 'performance',
   },
   {
     id: 'free-play',

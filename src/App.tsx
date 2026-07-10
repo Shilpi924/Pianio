@@ -14,6 +14,7 @@ import EarTrainingPage from './pages/EarTrainingPage';
 import NoteNamingPage from './pages/NoteNamingPage';
 import SightReadingPage from './pages/SightReadingPage';
 import HandPositioningPage from './pages/HandPositioningPage';
+import PerformanceModePage from './pages/PerformanceModePage';
 import './index.css';
 
 function App() {
@@ -63,6 +64,8 @@ function App() {
         return <SightReadingPage />;
       case 'hand-positioning':
         return <HandPositioningPage />;
+      case 'performance':
+        return <PerformanceModePage />;
       case 'free-play':
         return <FreePlayPage />;
       case 'statistics':
