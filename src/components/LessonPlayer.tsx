@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Layers, Zap, Turtle, Hand, Repeat, Clock, Music } from 'lucide-react';
 import PianoKeyboard from './PianoKeyboard';
 import FingerHint from './FingerHint';
 import FallingNotes from './FallingNotes';
 import SheetMusic from './SheetMusic';
+import LevelUpAnimation from './LevelUpAnimation';
+import Mascot from './Mascot';
 import type { Lesson, PracticeMode } from '../types';
 import { audioService } from '../services/audioService';
 import { midiToNote } from '../utils/noteUtils';
 import { midiService, type MIDIMessage } from '../services/midiService';
+import { SoundEffects } from '../services/soundEffects';
 
 interface LessonPlayerProps {
   lesson: Lesson;
@@ -34,6 +37,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [timingFeedback, setTimingFeedback] = useState<'perfect' | 'good' | 'early' | 'late' | null>(null);
   const [timingScore, setTimingScore] = useState(0);
   const [fallingNotesSpeed, setFallingNotesSpeed] = useState(1);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [combo, setCombo] = useState(0);
+  const [mascotMood, setMascotMood] = useState<'happy' | 'excited' | 'thinking' | 'celebrating'>('happy');
+  const [mascotMessage, setMascotMessage] = useState('');
   const metronomeRef = useRef<number | null>(null);
 
   const currentNote = lesson.notes[currentNoteIndex];
@@ -140,19 +147,37 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         if (Math.abs(timeDiff) < tolerance * 0.5) {
           feedback = 'perfect';
           score = 100;
+          SoundEffects.playCorrect();
         } else if (Math.abs(timeDiff) < tolerance) {
           feedback = 'good';
           score = 80;
+          SoundEffects.playCorrect();
         } else if (timeDiff < 0) {
           feedback = 'early';
           score = 50;
+          SoundEffects.playIncorrect();
         } else {
           feedback = 'late';
           score = 50;
+          SoundEffects.playIncorrect();
         }
 
         setTimingFeedback(feedback);
         setTimingScore((prev) => prev + score);
+
+        // Update combo
+        setCombo((prev) => {
+          const newCombo = prev + 1;
+          if (newCombo > 5) {
+            SoundEffects.playCombo(newCombo);
+            setMascotMood('excited');
+            setMascotMessage(`Amazing! ${newCombo} in a row! 🎉`);
+          } else if (newCombo > 0) {
+            setMascotMood('happy');
+            setMascotMessage('Great job! Keep going!');
+          }
+          return newCombo;
+        });
 
         // Clear feedback after 1 second
         setTimeout(() => setTimingFeedback(null), 1000);
@@ -175,11 +200,21 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
             setCurrentNoteIndex(0);
           } else {
             setIsPlaying(false);
+            setMascotMood('celebrating');
+            setMascotMessage('You did it! 🎊');
+            SoundEffects.playLevelUp();
+            setShowLevelUp(true);
             if (onComplete) {
               onComplete();
             }
           }
         }
+      } else {
+        // Wrong note - reset combo
+        setCombo(0);
+        SoundEffects.playIncorrect();
+        setMascotMood('thinking');
+        setMascotMessage('Oops! Try again! 💪');
       }
     },
     [isPlaying, currentNote, currentNoteIndex, lesson.notes.length, isAudioInitialized, onComplete, practiceMode, selectedHand, loopEnabled, tempo, noteStartTime]
@@ -193,6 +228,9 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     setIsPlaying(false);
     setCurrentNoteIndex(0);
     setCorrectNotes(new Set());
+    setCombo(0);
+    setMascotMood('happy');
+    setMascotMessage('');
   };
 
   const adjustTempo = (delta: number) => {
@@ -224,6 +262,29 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
 
   return (
     <div className="space-y-6">
+      {/* Mascot */}
+      <div className="flex justify-end">
+        <Mascot mood={mascotMood} message={mascotMessage} />
+      </div>
+
+      {/* Combo Display */}
+      {combo > 0 && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="fixed top-4 right-4 bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg z-40"
+        >
+          🔥 {combo}x Combo!
+        </motion.div>
+      )}
+
+      {/* Level Up Animation */}
+      <AnimatePresence>
+        {showLevelUp && (
+          <LevelUpAnimation level={Math.floor(accuracy / 20) + 1} onComplete={() => setShowLevelUp(false)} />
+        )}
+      </AnimatePresence>
+
       {/* Lesson Info */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
@@ -281,7 +342,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-4 gap-4 text-center">
           <div>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">{accuracy}%</div>
             <div className="text-xs text-gray-600 dark:text-gray-300">Accuracy</div>
@@ -295,6 +356,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           <div>
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{tempo}</div>
             <div className="text-xs text-gray-600 dark:text-gray-300">BPM</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{combo}x</div>
+            <div className="text-xs text-gray-600 dark:text-gray-300">Combo</div>
           </div>
         </div>
       </div>

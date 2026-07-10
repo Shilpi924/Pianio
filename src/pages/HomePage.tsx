@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, Play, Sparkles, Music, Star, ArrowRight, Upload } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { sampleLessons } from '../data/lessons';
+import DailyChallenge from '../components/DailyChallenge';
 
 const POPULAR_SONGS = sampleLessons.slice(0, 6);
 
@@ -168,6 +169,16 @@ export default function HomePage() {
             <Upload className="w-8 h-8" />
             <span className="text-xl font-bold">Upload Your Own MusicXML File</span>
           </motion.button>
+        </motion.div>
+
+        {/* Daily Challenges */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mb-8"
+        >
+          <DailyChallenge />
         </motion.div>
 
         {/* Popular Songs */}
