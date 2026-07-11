@@ -9,6 +9,7 @@ interface FallingNote {
   index: number;
   startTime: number;
   duration: number;
+  height: number;
   y: number;
   color: string;
 }
@@ -81,6 +82,7 @@ export default function FallingNotes({
     const lookaheadTime = (lookaheadBeats * secondsPerBeat) / speed;
     const hitZoneFromBottom = 64;
     const travelHeight = Math.max(160, containerHeight - hitZoneFromBottom);
+    const pixelsPerBeat = Math.max(36, Math.min(64, travelHeight / lookaheadBeats));
     const visibleNotes: FallingNote[] = [];
     let beatOffset = 0;
     const laneTime = isPlaying ? currentTime : 0;
@@ -95,7 +97,9 @@ export default function FallingNotes({
         const progress = isCurrentTarget
           ? Math.min(laneTime / Math.max(secondsPerBeat / speed, 0.1), 1)
           : Math.max(0, Math.min((lookaheadTime - timeUntilNote) / lookaheadTime, 1));
-        const y = isPlaying ? progress * travelHeight : 28 + visibleIndex * 78;
+        const noteHeight = Math.max(48, Math.min(180, note.duration * pixelsPerBeat));
+        const noteBottomY = isPlaying ? progress * travelHeight : 72 + visibleIndex * 82;
+        const y = noteBottomY - noteHeight;
         const noteName = note.note.slice(0, -1);
         visibleNotes.push({
           note: note.note,
@@ -103,6 +107,7 @@ export default function FallingNotes({
           index,
           startTime: noteTime,
           duration: note.duration,
+          height: noteHeight,
           y,
           color: noteColors[noteName as keyof typeof noteColors] || handColors[note.hand],
         });
@@ -118,7 +123,7 @@ export default function FallingNotes({
   const handleNoteHit = (note: string) => {
     const hitZone = 50; // pixels from bottom
     const hitNote = fallingNotes.find(
-      (fn) => fn.note === note && Math.abs(fn.y - (containerHeight - hitZone)) < 42
+      (fn) => fn.note === note && Math.abs((fn.y + fn.height) - (containerHeight - hitZone)) < 42
     );
 
     if (hitNote) {
@@ -161,7 +166,7 @@ export default function FallingNotes({
         animate={{ scale: [1, 1.1, 1] }}
         transition={{ duration: 1, repeat: Infinity }}
       >
-        Press when it reaches here
+        Press here, hold until the note ends
       </motion.div>
 
       {!isPlaying && (
@@ -183,15 +188,17 @@ export default function FallingNotes({
               ease: 'linear',
               duration: isPlaying ? 0.08 : 0.2,
             }}
-            className="absolute top-0 left-1/2 h-16 w-11 -translate-x-1/2 rounded-2xl border-4 border-white/30 shadow-2xl md:h-20 md:w-12"
+            className="absolute top-0 left-1/2 w-11 -translate-x-1/2 rounded-2xl border-4 border-white/30 shadow-2xl md:w-12"
             style={{
               backgroundColor: fn.color,
+              height: `${fn.height}px`,
               left: `${getNoteXPosition(fn.note)}%`,
             }}
           >
             {/* Note label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white font-black text-lg drop-shadow-md">
               <span>{fn.note}</span>
+              <span className="text-xs font-semibold">{fn.duration} beat{fn.duration === 1 ? '' : 's'}</span>
               <span className="text-xs font-normal">{fn.hand}</span>
             </div>
             
