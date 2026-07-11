@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Volume2, VolumeX, Mic, Square, Play as PlayIcon, Trash2, Disc, Music, Activity } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, Mic, Square, Play as PlayIcon, Trash2, Disc, Music, Activity, Keyboard } from 'lucide-react';
 import PianoKeyboard from '../components/PianoKeyboard';
 import MIDIStatus from '../components/MIDIStatus';
+import ComputerKeyboard from '../components/ComputerKeyboard';
 import { useAppStore } from '../store/useAppStore';
 import { audioService } from '../services/audioService';
 import { midiToNote } from '../utils/noteUtils';
 import { midiService, type MIDIMessage } from '../services/midiService';
 import { recordingService } from '../services/recordingService';
 import { beatService, type BeatType } from '../services/beatService';
+import { useKeyboardPiano } from '../hooks/useKeyboardPiano';
 
 export default function FreePlayPage() {
   const { setCurrentView, audioEnabled, setAudioEnabled } = useAppStore();
@@ -19,6 +21,13 @@ export default function FreePlayPage() {
   const [recordings, setRecordings] = useState(recordingService.getRecordings());
   const [activeBeat, setActiveBeat] = useState<BeatType>('none');
   const [beatVolume, setBeatVolume] = useState(-6);
+  const [useComputerKeyboard, setUseComputerKeyboard] = useState(true);
+
+  const { activeComputerKeys } = useKeyboardPiano(
+    useComputerKeyboard,
+    (note) => handleNoteOn(note),
+    (note) => handleNoteOff(note)
+  );
 
   useEffect(() => {
     if (midiService.isSupported()) {
@@ -172,8 +181,18 @@ export default function FreePlayPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <MIDIStatus />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setUseComputerKeyboard(!useComputerKeyboard)}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all ${
+                useComputerKeyboard
+                  ? 'bg-purple-500 text-white shadow-md hover:bg-purple-600'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+              }`}
+            >
+              <Keyboard className="h-4 w-4" />
+              <span className="hidden sm:inline">{useComputerKeyboard ? 'PC Keyboard On' : 'PC Keyboard Off'}</span>
+            </button>
             <button
               onClick={toggleAudio}
               className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm transition-colors ${
@@ -185,6 +204,7 @@ export default function FreePlayPage() {
             >
               {audioEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
             </button>
+            <MIDIStatus />
           </div>
         </header>
 
@@ -304,10 +324,18 @@ export default function FreePlayPage() {
         {/* Keyboard */}
         <div className="rounded-[2.5rem] bg-white p-4 shadow-2xl shadow-indigo-100 dark:bg-slate-900 dark:shadow-none md:p-8">
           <PianoKeyboard
-            onNoteOn={handleNoteOn}
-            onNoteOff={handleNoteOff}
+            onNoteOn={(note) => handleNoteOn(note)}
+            onNoteOff={(note) => handleNoteOff(note)}
             highlightedNotes={Array.from(activeNotes)}
+            disabled={isPlayingBack}
+            showComputerKeys={useComputerKeyboard}
           />
+          
+          {useComputerKeyboard && (
+            <div className="mt-8">
+              <ComputerKeyboard activeKeys={activeComputerKeys} />
+            </div>
+          )}
         </div>
       </motion.div>
     </div>

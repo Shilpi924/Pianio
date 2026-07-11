@@ -10,6 +10,7 @@ interface PianoKeyboardProps {
   highlightedNotes?: string[];
   activeFingers?: { note: string; finger: number; hand: string }[];
   disabled?: boolean;
+  showComputerKeys?: boolean;
 }
 
 export default function PianoKeyboard({
@@ -18,6 +19,7 @@ export default function PianoKeyboard({
   highlightedNotes = [],
   activeFingers = [],
   disabled = false,
+  showComputerKeys = false,
 }: PianoKeyboardProps) {
   const { settings } = useAppStore();
   const [keyStates, setKeyStates] = useState<Record<string, KeyState>>({});
@@ -124,6 +126,7 @@ export default function PianoKeyboard({
                 onReleased={() => handleNoteOff(note)}
                 showLabel={settings.showKeyboardLabels}
                 showNoteName={settings.showNoteNames}
+                showComputerKey={showComputerKeys}
                 disabled={disabled}
                 finger={activeFinger}
               />

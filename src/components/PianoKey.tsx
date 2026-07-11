@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type { KeyState } from '../types';
+import { NOTE_TO_KEYBOARD } from '../utils/keyboardMap';
 
 interface PianoKeyProps {
   note: string;
@@ -13,6 +14,7 @@ interface PianoKeyProps {
   showFeedback?: boolean;
   feedbackType?: 'correct' | 'incorrect';
   finger?: { finger: number; hand: string };
+  showComputerKey?: boolean;
 }
 
 const keyStateStyles: Record<KeyState, string> = {
@@ -36,12 +38,14 @@ export default function PianoKey({
   showFeedback = false,
   feedbackType = 'correct',
   finger,
+  showComputerKey = false,
 }: PianoKeyProps) {
   const baseClasses = isBlack
     ? 'absolute z-10 w-8 h-24 bg-gray-900 rounded-b-lg shadow-lg hover:bg-gray-800 transition-colors touch-none select-none'
     : 'relative z-0 w-12 h-40 bg-white rounded-b-lg shadow-md hover:bg-gray-50 transition-colors border border-gray-200 dark:bg-gray-100 dark:border-gray-300 touch-none select-none';
 
   const stateClasses = keyStateStyles[state];
+  const computerKey = NOTE_TO_KEYBOARD[note];
 
   const handleMouseDown = () => {
     if (!disabled) {
@@ -86,8 +90,14 @@ export default function PianoKey({
         </span>
       )}
 
+      {showComputerKey && computerKey && (
+        <div className={`absolute ${isBlack ? 'top-10' : 'bottom-8'} left-1/2 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-md border-b-2 border-gray-300 bg-gray-100 text-[10px] font-bold uppercase text-gray-700 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300`}>
+          {computerKey}
+        </div>
+      )}
+
       {/* Finger Placement Guide */}
-      {finger && (
+      {finger && !showComputerKey && (
         <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full text-xs font-black text-white shadow-md z-20 ${finger.hand === 'right' ? 'bg-blue-500' : 'bg-red-500'}`}>
           {finger.finger}
         </div>
