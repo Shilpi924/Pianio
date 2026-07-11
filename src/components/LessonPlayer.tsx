@@ -196,7 +196,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       setHighlightedNotes([currentNote.note]);
       setNoteStartTime(Date.now());
       if (isAudioInitialized && practiceMode === 'guided' && waitModeEnabled) {
-        audioService.playNote(currentNote.note, '4n');
+        const durationInSeconds = (60 / tempo) * currentNote.duration;
+        audioService.playNote(currentNote.note, durationInSeconds);
       }
     } else {
       setHighlightedNotes([]);
@@ -234,7 +235,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     let delay = 0;
     lesson.notes.forEach((note, index) => {
       const timer = window.setTimeout(() => {
-        audioService.playNote(note.note, '8n');
+        const durationInSeconds = (60 / tempo) * note.duration;
+        audioService.playNote(note.note, durationInSeconds);
         setHighlightedNotes([note.note]);
         setCurrentNoteIndex(index);
         if (index === lesson.notes.length - 1) {
@@ -254,7 +256,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const hearCurrentNote = async () => {
     if (!currentNote) return;
     await ensureAudio();
-    audioService.playNote(currentNote.note, '4n');
+    const durationInSeconds = (60 / tempo) * currentNote.duration;
+    audioService.playNote(currentNote.note, durationInSeconds);
     setHighlightedNotes([currentNote.note]);
   };
 
@@ -266,7 +269,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       setCurrentTime(0);
       setMascotMood('happy');
       setMascotMessage('Press the glowing key. I will wait for the right note.');
-      audioService.playNote(currentNote.note, '4n');
+      const durationInSeconds = (60 / tempo) * currentNote.duration;
+      audioService.playNote(currentNote.note, durationInSeconds);
     }
   };
 
@@ -279,7 +283,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       }
 
       if (isAudioInitialized) {
-        audioService.playNote(playedNote, '4n');
+        const durationInSeconds = (60 / tempo) * currentNote.duration;
+        audioService.playNote(playedNote, durationInSeconds);
       }
 
       if (playedNote === currentNote.note) {

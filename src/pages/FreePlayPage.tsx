@@ -44,10 +44,10 @@ export default function FreePlayPage() {
     }
   };
 
-  const handleNoteOn = async (note: string) => {
+  const handleNoteOn = (note: string) => {
     if (!isAudioInitialized && audioEnabled) {
-      await audioService.initialize();
-      await beatService.initialize();
+      audioService.initialize();
+      beatService.initialize();
       setIsAudioInitialized(true);
     }
     setActiveNotes((prev) => new Set(prev).add(note));

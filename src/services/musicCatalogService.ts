@@ -83,6 +83,15 @@ const lessonEnhancements: Record<string, Partial<Lesson>> = {
     ageBand: 'all',
     sourceName: 'Pianio Core',
   },
+  'carol-of-the-bells': {
+    questTrack: 'rhythm',
+    focus: ['fast patterns', 'hand coordination'],
+    tags: ['holiday', 'speed'],
+    synopsis: 'A fantastic, fast-paced holiday classic that sounds impressive but is easy to learn.',
+    practiceTip: 'Start slow to get the four-note pattern down before speeding up.',
+    ageBand: 'all',
+    sourceName: 'Public Domain Classics',
+  },
 };
 
 export const recommendedTracks: RecommendedTrack[] = [
@@ -108,7 +117,7 @@ export const recommendedTracks: RecommendedTrack[] = [
     description: 'Sharpen pulse, repeated-note control, and confidence at higher speed.',
     color: 'from-orange-500 to-amber-500',
     icon: 'drum',
-    lessons: ['jingle-bells', 'row-row-row-your-boat', 'baa-baa-black-sheep'],
+    lessons: ['jingle-bells', 'carol-of-the-bells', 'row-row-row-your-boat', 'baa-baa-black-sheep'],
   },
   {
     id: 'classics-track',
