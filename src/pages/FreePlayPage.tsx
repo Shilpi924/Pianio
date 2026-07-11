@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Volume2, VolumeX, Mic, Square, Play as PlayIcon, Trash2 } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, Mic, Square, Play as PlayIcon, Trash2, Disc, Music, Activity } from 'lucide-react';
 import PianoKeyboard from '../components/PianoKeyboard';
 import MIDIStatus from '../components/MIDIStatus';
 import { useAppStore } from '../store/useAppStore';
@@ -8,6 +8,7 @@ import { audioService } from '../services/audioService';
 import { midiToNote } from '../utils/noteUtils';
 import { midiService, type MIDIMessage } from '../services/midiService';
 import { recordingService } from '../services/recordingService';
+import { beatService, type BeatType } from '../services/beatService';
 
 export default function FreePlayPage() {
   const { setCurrentView, audioEnabled, setAudioEnabled } = useAppStore();
@@ -16,35 +17,35 @@ export default function FreePlayPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [recordings, setRecordings] = useState(recordingService.getRecordings());
+  const [activeBeat, setActiveBeat] = useState<BeatType>('none');
 
   useEffect(() => {
     const initAudio = async () => {
       if (!isAudioInitialized && audioEnabled) {
         await audioService.initialize();
+        await beatService.initialize();
         setIsAudioInitialized(true);
       }
     };
 
     initAudio();
 
-    // Initialize MIDI
     if (midiService.isSupported()) {
       midiService.initialize().then(() => {
         console.log('MIDI initialized');
       });
-
       midiService.addListener(handleMIDIMessage);
     }
 
     return () => {
       midiService.removeListener(handleMIDIMessage);
+      beatService.stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAudioInitialized, audioEnabled]);
 
   const handleMIDIMessage = (message: MIDIMessage) => {
     const note = midiToNote(message.note, true);
-    
     if (message.velocity > 0) {
       handleNoteOn(note);
     } else {
@@ -54,12 +55,9 @@ export default function FreePlayPage() {
 
   const handleNoteOn = (note: string) => {
     setActiveNotes((prev) => new Set(prev).add(note));
-    
-    // Record note if recording
     if (isRecording) {
       recordingService.recordNoteOn(note);
     }
-    
     if (audioEnabled && isAudioInitialized) {
       audioService.playNote(note);
     }
@@ -71,8 +69,6 @@ export default function FreePlayPage() {
       newSet.delete(note);
       return newSet;
     });
-
-    // Record note off if recording
     if (isRecording) {
       recordingService.recordNoteOff(note);
     }
@@ -128,155 +124,207 @@ export default function FreePlayPage() {
     setAudioEnabled(!audioEnabled);
   };
 
+  const handleBeatToggle = async (beat: BeatType) => {
+    if (!isAudioInitialized) {
+      await audioService.initialize();
+      await beatService.initialize();
+      setIsAudioInitialized(true);
+    }
+    
+    if (activeBeat === beat) {
+      beatService.stop();
+      setActiveBeat('none');
+    } else {
+      beatService.playBeat(beat);
+      setActiveBeat(beat);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-8">
+    <div className="min-h-screen bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] md:p-8 overflow-x-hidden">
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
+        className="mx-auto max-w-6xl space-y-6"
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setCurrentView('home')}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold">Back</span>
-          </motion.button>
+        <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-3">
+            <button
+              onClick={() => setCurrentView('home')}
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </button>
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-fuchsia-500">
+                DJ Remix Station
+              </p>
+              <h1 className="mt-2 text-4xl font-black text-slate-900 dark:text-white">
+                Mix, Play & Record! 🎧
+              </h1>
+            </div>
+          </div>
 
           <div className="flex items-center gap-4">
             <MIDIStatus />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggleRecording}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl shadow-lg transition-colors ${
-                isRecording
-                  ? 'bg-red-500 text-white hover:bg-red-600'
-                  : 'bg-white dark:bg-gray-800 hover:shadow-xl'
-              }`}
-            >
-              {isRecording ? (
-                <>
-                  <Square className="w-5 h-5" />
-                  <span className="font-semibold">Stop Recording</span>
-                </>
-              ) : (
-                <>
-                  <Mic className="w-5 h-5" />
-                  <span className="font-semibold">Record</span>
-                </>
-              )}
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={toggleAudio}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm transition-colors ${
+                audioEnabled
+                  ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                  : 'bg-rose-500 text-white hover:bg-rose-600'
+              }`}
+              title={audioEnabled ? 'Mute Audio' : 'Enable Audio'}
             >
-              {audioEnabled ? (
-                <>
-                  <Volume2 className="w-5 h-5 text-green-500" />
-                  <span className="font-semibold">Sound On</span>
-                </>
+              {audioEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+            </button>
+          </div>
+        </header>
+
+        {/* DJ Deck and Studio */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* DJ Deck */}
+          <div className="col-span-1 rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200/50 dark:bg-slate-800/50 dark:shadow-none lg:col-span-2">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400">
+                <Disc className="h-5 w-5" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Backing Tracks</h2>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <BeatButton
+                label="Pop Dance"
+                icon={<Activity />}
+                color="from-sky-400 to-blue-500"
+                active={activeBeat === 'dance'}
+                onClick={() => handleBeatToggle('dance')}
+              />
+              <BeatButton
+                label="Hip Hop"
+                icon={<Disc />}
+                color="from-amber-400 to-orange-500"
+                active={activeBeat === 'hiphop'}
+                onClick={() => handleBeatToggle('hiphop')}
+              />
+              <BeatButton
+                label="Rock Band"
+                icon={<Music />}
+                color="from-rose-400 to-red-500"
+                active={activeBeat === 'rock'}
+                onClick={() => handleBeatToggle('rock')}
+              />
+              <BeatButton
+                label="Magic Synths"
+                icon={<Activity />}
+                color="from-violet-400 to-fuchsia-500"
+                active={activeBeat === 'ambient'}
+                onClick={() => handleBeatToggle('ambient')}
+              />
+            </div>
+          </div>
+
+          {/* Recording Studio */}
+          <div className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                  <Mic className="h-5 w-5" />
+                </div>
+                <h2 className="text-xl font-bold">Studio</h2>
+              </div>
+              <button
+                onClick={toggleRecording}
+                className={`flex h-12 w-12 items-center justify-center rounded-full transition-all ${
+                  isRecording
+                    ? 'animate-pulse bg-rose-500 text-white'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                {isRecording ? <Square className="h-5 w-5 fill-current" /> : <div className="h-4 w-4 rounded-full bg-rose-500" />}
+              </button>
+            </div>
+
+            {isRecording && (
+              <div className="mb-4 text-center text-sm font-bold text-rose-400">
+                Recording in progress...
+              </div>
+            )}
+
+            <div className="max-h-[120px] space-y-2 overflow-y-auto pr-2 custom-scrollbar">
+              {recordings.length === 0 ? (
+                <div className="text-center text-sm text-slate-500">No recordings yet</div>
               ) : (
-                <>
-                  <VolumeX className="w-5 h-5 text-gray-400" />
-                  <span className="font-semibold">Sound Off</span>
-                </>
+                recordings.map((rec, index) => (
+                  <div key={rec.id} className="flex items-center justify-between rounded-xl bg-white/5 p-3">
+                    <span className="text-sm font-semibold text-slate-300">Track {index + 1}</span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => playRecording(rec.id)}
+                        disabled={isPlayingBack}
+                        className="rounded-lg bg-emerald-500/20 p-2 text-emerald-400 hover:bg-emerald-500/40 disabled:opacity-50"
+                      >
+                        <PlayIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteRecording(rec.id)}
+                        className="rounded-lg bg-rose-500/20 p-2 text-rose-400 hover:bg-rose-500/40"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))
               )}
-            </motion.button>
+            </div>
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">
-          Free Play
-        </h1>
-
-        {/* Instructions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="card mb-6"
-        >
-          <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
-            How to Play
-          </h2>
-          <ul className="text-gray-600 dark:text-gray-300 space-y-1">
-            <li>• Click or tap the piano keys to play notes</li>
-            <li>• Connect a MIDI keyboard for a better experience</li>
-            <li>• Use the sound toggle to enable/disable audio</li>
-            <li>• Use the Record button to capture your playing</li>
-          </ul>
-        </motion.div>
-
-        {/* Recordings */}
-        {recordings.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="card mb-6"
-          >
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-              Your Recordings
-            </h2>
-            <div className="space-y-2">
-              {recordings.map((recording) => (
-                <motion.div
-                  key={recording.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
-                >
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-gray-100">{recording.name}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">
-                      {Math.round(recording.duration / 1000)}s • {recording.notes.length} notes
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => playRecording(recording.id)}
-                      disabled={isPlayingBack}
-                      className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <PlayIcon className="w-4 h-4" />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => deleteRecording(recording.id)}
-                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </motion.button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Piano Keyboard */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-        >
+        {/* Keyboard */}
+        <div className="rounded-[2.5rem] bg-white p-4 shadow-2xl shadow-indigo-100 dark:bg-slate-900 dark:shadow-none md:p-8">
           <PianoKeyboard
             onNoteOn={handleNoteOn}
             onNoteOff={handleNoteOff}
             highlightedNotes={Array.from(activeNotes)}
           />
-        </motion.div>
+        </div>
       </motion.div>
     </div>
+  );
+}
+
+function BeatButton({
+  label,
+  icon,
+  color,
+  active,
+  onClick,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`group relative flex h-28 flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl transition-all ${
+        active ? 'scale-95 shadow-inner' : 'hover:scale-105 shadow-md hover:shadow-xl'
+      }`}
+    >
+      <div className={`absolute inset-0 bg-gradient-to-br opacity-20 transition-opacity ${color} ${active ? 'opacity-100' : 'group-hover:opacity-30'}`} />
+      <div className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-sm ${active ? 'text-slate-900' : 'text-slate-600'}`}>
+        {icon}
+      </div>
+      <span className={`relative z-10 text-xs font-bold ${active ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>
+        {label}
+      </span>
+      {active && (
+        <span className="absolute right-2 top-2 flex h-2 w-2 rounded-full bg-white animate-pulse" />
+      )}
+    </button>
   );
 }
