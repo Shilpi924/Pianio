@@ -21,6 +21,7 @@ import TutorialsPage from './pages/TutorialsPage';
 import SongUploadPage from './pages/SongUploadPage';
 import OnboardingPage from './pages/OnboardingPage';
 import AIChatBot from './components/AIChatBot';
+import { audioService } from './services/audioService';
 import './index.css';
 
 function App() {
@@ -35,6 +36,12 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [settings.darkMode]);
+
+  useEffect(() => {
+    // Sync audio volume
+    // The slider goes from 0 to 100, audioService expects 0.0 to 1.0
+    audioService.setVolume(settings.audioVolume / 100);
+  }, [settings.audioVolume]);
 
   const renderCurrentView = () => {
     switch (currentView) {
