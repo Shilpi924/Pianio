@@ -1,4 +1,5 @@
 import type { Lesson } from '../types';
+import { popSongs } from './popSongs';
 
 export const sampleLessons: Lesson[] = [
   {
@@ -449,4 +450,5 @@ export const sampleLessons: Lesson[] = [
       { note: 'G4', duration: 0.5, finger: 1, hand: 'right' },
     ],
   },
+  ...popSongs,
 ];

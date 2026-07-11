@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, PlayCircle, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, PlayCircle, Clock, CheckCircle, X } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 const TUTORIALS = [
@@ -257,11 +257,11 @@ export default function TutorialsPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 {isPlaying ? (
-                  <div className="aspect-video w-full bg-black">
+                  <div className="aspect-video w-full bg-black relative group">
                     <iframe 
                       width="100%" 
                       height="100%" 
-                      src={`https://www.youtube.com/embed/${selectedTutorial.videoId}`} 
+                      src={`https://www.youtube.com/embed/${selectedTutorial.videoId}?controls=1`} 
                       title="YouTube video player" 
                       frameBorder="0" 
                       allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -283,6 +283,17 @@ export default function TutorialsPage() {
                     </div>
                   </div>
                 )}
+                
+                {/* Close Button */}
+                <button
+                  onClick={() => {
+                    setSelectedTutorial(null);
+                    setIsPlaying(false);
+                  }}
+                  className="absolute right-4 top-4 z-10 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
                 
                 <div className="p-8">
                   <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">

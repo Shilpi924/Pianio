@@ -142,7 +142,7 @@ export default function FallingNotes({
 
     notes.slice(currentNoteIndex, currentNoteIndex + 12).forEach((n, vi) => {
       const idx       = currentNoteIndex + vi;
-      const noteSecs  = (beat * spb) / speed;
+      const noteSecs  = beat * spb;
       const secsLeft  = noteSecs - (isPlaying ? currentTime : 0);
       const heightPx  = Math.max(24, n.duration * spb * pxPerSec * 0.9);
       const bottomY   = TRAVEL - secsLeft * pxPerSec;
