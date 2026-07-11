@@ -85,6 +85,7 @@ export default function TutorialsPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTutorial, setSelectedTutorial] = useState<typeof TUTORIALS[0] | null>(null);
   const [completedTutorials, setCompletedTutorials] = useState<Set<string>>(new Set());
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const filteredTutorials = selectedCategory === 'All'
     ? TUTORIALS
@@ -220,7 +221,10 @@ export default function TutorialsPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-            onClick={() => setSelectedTutorial(null)}
+            onClick={() => {
+              setSelectedTutorial(null);
+              setIsPlaying(false);
+            }}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
@@ -228,18 +232,34 @@ export default function TutorialsPage() {
               className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-t-2xl flex items-center justify-center">
-                <div className="text-8xl">{selectedTutorial.thumbnail}</div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="p-4 bg-white/90 dark:bg-gray-800/90 rounded-full"
-                  >
-                    <PlayCircle className="w-16 h-16 text-blue-500" />
-                  </motion.button>
+              {isPlaying ? (
+                <div className="aspect-video bg-black rounded-t-2xl overflow-hidden w-full">
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src={`https://www.youtube.com/embed/iMmwvG_14Wc?autoplay=1`} 
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerPolicy="strict-origin-when-cross-origin" 
+                    allowFullScreen
+                  />
                 </div>
-              </div>
+              ) : (
+                <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-t-2xl flex items-center justify-center relative">
+                  <div className="text-8xl">{selectedTutorial.thumbnail}</div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setIsPlaying(true)}
+                      className="p-4 bg-white/90 dark:bg-gray-800/90 rounded-full"
+                    >
+                      <PlayCircle className="w-16 h-16 text-blue-500" />
+                    </motion.button>
+                  </div>
+                </div>
+              )}
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -276,17 +296,23 @@ export default function TutorialsPage() {
                   {selectedTutorial.description}
                 </p>
                 <div className="flex gap-4">
+                  {!isPlaying && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsPlaying(true)}
+                      className="flex-1 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                    >
+                      Play Tutorial
+                    </motion.button>
+                  )}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex-1 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                  >
-                    Play Tutorial
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedTutorial(null)}
+                    onClick={() => {
+                      setSelectedTutorial(null);
+                      setIsPlaying(false);
+                    }}
                     className="flex-1 py-3 bg-gray-200 dark:bg-gray-700 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                   >
                     Close
