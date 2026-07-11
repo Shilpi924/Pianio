@@ -18,6 +18,7 @@ export default function FreePlayPage() {
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [recordings, setRecordings] = useState(recordingService.getRecordings());
   const [activeBeat, setActiveBeat] = useState<BeatType>('none');
+  const [beatVolume, setBeatVolume] = useState(-6);
 
   useEffect(() => {
     const initAudio = async () => {
@@ -140,6 +141,12 @@ export default function FreePlayPage() {
     }
   };
 
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const vol = parseFloat(e.target.value);
+    setBeatVolume(vol);
+    beatService.setVolume(vol);
+  };
+
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] md:p-8 overflow-x-hidden">
       <motion.div
@@ -222,6 +229,20 @@ export default function FreePlayPage() {
                 color="from-violet-400 to-fuchsia-500"
                 active={activeBeat === 'ambient'}
                 onClick={() => handleBeatToggle('ambient')}
+              />
+            </div>
+
+            {/* Volume Control */}
+            <div className="mt-6 flex items-center gap-4 rounded-xl bg-slate-50 p-4 dark:bg-slate-900/50">
+              <Volume2 className="h-5 w-5 text-slate-400" />
+              <input
+                type="range"
+                min="-30"
+                max="0"
+                step="1"
+                value={beatVolume}
+                onChange={handleVolumeChange}
+                className="h-2 flex-1 appearance-none rounded-full bg-slate-200 accent-fuchsia-500 dark:bg-slate-700"
               />
             </div>
           </div>

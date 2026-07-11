@@ -7,6 +7,7 @@ class BeatService {
   private snare: Tone.NoiseSynth | null = null;
   private hihat: Tone.MetalSynth | null = null;
   private synth: Tone.PolySynth | null = null;
+  private masterVolume: Tone.Volume | null = null;
   
   private currentPart: Tone.Part | null = null;
   private currentBeatType: BeatType = 'none';
@@ -17,18 +18,20 @@ class BeatService {
     
     await Tone.start();
 
+    this.masterVolume = new Tone.Volume(-6).toDestination(); // Start slightly quieter
+
     // Create instruments
     this.kick = new Tone.MembraneSynth({
       pitchDecay: 0.05,
       octaves: 4,
       oscillator: { type: 'sine' },
       envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4, attackCurve: 'exponential' }
-    }).toDestination();
+    }).connect(this.masterVolume);
 
     this.snare = new Tone.NoiseSynth({
       noise: { type: 'white' },
       envelope: { attack: 0.005, decay: 0.2, sustain: 0, release: 0.2 }
-    }).toDestination();
+    }).connect(this.masterVolume);
 
     this.hihat = new Tone.MetalSynth({
       envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
@@ -36,17 +39,23 @@ class BeatService {
       modulationIndex: 32,
       resonance: 4000,
       octaves: 1.5
-    }).toDestination();
+    }).connect(this.masterVolume);
     this.hihat.frequency.value = 200;
     this.hihat.volume.value = -12; // Keep it quiet
 
     this.synth = new Tone.PolySynth(Tone.Synth, {
       oscillator: { type: 'triangle' },
       envelope: { attack: 0.05, decay: 0.1, sustain: 0.3, release: 1 }
-    }).toDestination();
+    }).connect(this.masterVolume);
     this.synth.volume.value = -16;
 
     this.isInitialized = true;
+  }
+
+  setVolume(db: number) {
+    if (this.masterVolume) {
+      this.masterVolume.volume.value = db;
+    }
   }
 
   playBeat(type: BeatType) {
