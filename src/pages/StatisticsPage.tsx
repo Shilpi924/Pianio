@@ -9,7 +9,7 @@ const lessons = getEnhancedLessons();
 
 export default function StatisticsPage() {
   const { setCurrentView, statistics, lessonProgress } = useAppStore();
-  const { userProfile } = useUserProfileStore();
+  const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
 
   const totalXP = userProfile?.experiencePoints ?? statistics.totalPracticeTime * 10 + statistics.correctNotes * 5;
   const currentLevel = calculateLevel(totalXP);

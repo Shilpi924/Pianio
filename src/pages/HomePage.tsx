@@ -4,6 +4,7 @@ import { ArrowRight, BarChart3, Library, Music2, Play, Settings, Volume2 } from 
 import DailyChallenge from '../components/DailyChallenge';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
+import ProfileSwitcher from '../components/ProfileSwitcher';
 import { getEnhancedLessons } from '../services/musicCatalogService';
 import { audioService } from '../services/audioService';
 import type { Lesson } from '../types';
@@ -13,7 +14,7 @@ const starterLessons = allLessons.filter((lesson) => lesson.difficulty === 'begi
 
 export default function HomePage() {
   const { setCurrentView, setCurrentLesson, lessonProgress, statistics } = useAppStore();
-  const { userProfile } = useUserProfileStore();
+  const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const [selectedLesson, setSelectedLesson] = useState<Lesson>(starterLessons[0] ?? allLessons[0]);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const previewTimers = useRef<number[]>([]);
@@ -63,6 +64,18 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto max-w-6xl space-y-6"
       >
+        <header className="mb-8 flex flex-col items-start justify-between gap-4 md:mb-12 md:flex-row md:items-center">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-5xl">
+              Hi, {userProfile?.name || 'Pianist'}! 🎹
+            </h1>
+            <p className="mt-2 text-lg text-slate-600">Ready for your next musical adventure?</p>
+          </div>
+          <div className="flex w-full items-center justify-between md:w-auto md:justify-end gap-3">
+            <ProfileSwitcher />
+          </div>
+        </header>
+
         <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 md:p-8">
           <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
             <div className="flex flex-col justify-between gap-8">

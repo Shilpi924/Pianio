@@ -11,7 +11,7 @@ const allLessons = getEnhancedLessons();
 
 export default function LessonLibraryPage() {
   const { setCurrentView, setCurrentLesson, lessonProgress, statistics } = useAppStore();
-  const { userProfile } = useUserProfileStore();
+  const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
@@ -78,10 +78,10 @@ export default function LessonLibraryPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300">
                   Song Library
                 </p>
-                <h1 className="mt-2 text-4xl font-black">A bigger shelf, organized like a game world.</h1>
+                <h1 className="mt-2 text-4xl font-black">Pick a song and start playing.</h1>
               </div>
               <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-base">
-                Browse by quest track, difficulty, or style now. The source panel below is also ready for a much larger catalog once we connect more score and metadata providers.
+                Choose a song that looks fun, or ask a grown-up to add a new one with a piano song file.
               </p>
             </div>
 
@@ -134,11 +134,11 @@ export default function LessonLibraryPage() {
                 <div>
                   <div className="flex items-center gap-3">
                     <Sparkles className="h-5 w-5 text-rose-500" />
-                    <h2 className="text-2xl font-bold text-slate-900">Get more songs</h2>
+                    <h2 className="text-2xl font-bold text-slate-900">Want a different song?</h2>
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Search can find trendy songs and artist metadata, but Pianio needs MusicXML,
-                    MIDI, or licensed note data before a song becomes playable.
+                    Search for song ideas, then ask a grown-up to add a piano file so Pianio can
+                    turn it into a lesson.
                   </p>
                 </div>
                 <button
@@ -146,7 +146,7 @@ export default function LessonLibraryPage() {
                   className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-bold text-white"
                 >
                   <Upload className="h-4 w-4" />
-                  Import playable file
+                  Add song file
                 </button>
               </div>
 
@@ -156,7 +156,7 @@ export default function LessonLibraryPage() {
                   <input
                     value={discoveryQuery}
                     onChange={(event) => setDiscoveryQuery(event.target.value)}
-                    placeholder="Try an artist, song, or style like teen pop piano"
+                    placeholder="Type a song, artist, or style"
                     className="min-h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 outline-none focus:border-rose-400"
                   />
                 </div>
@@ -167,7 +167,7 @@ export default function LessonLibraryPage() {
                   className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-rose-500 px-5 py-3 font-bold text-white"
                 >
                   <ExternalLink className="h-5 w-5" />
-                  Search metadata
+                  Find song ideas
                 </a>
                 <a
                   href={publicDomainSearchUrl}
@@ -176,18 +176,18 @@ export default function LessonLibraryPage() {
                   className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-bold text-white"
                 >
                   <ExternalLink className="h-5 w-5" />
-                  Public domain
+                  Find free classics
                 </a>
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <DiscoveryStep title="1. Discover" text="Use chart, artist, or song searches to see what teens are asking for." />
-                <DiscoveryStep title="2. Check rights" text="Modern songs usually need licensed score data or a user-owned upload." />
-                <DiscoveryStep title="3. Import" text="Drop MusicXML into Pianio and it becomes a playable lesson." />
+                <DiscoveryStep title="1. Pick" text="Search for a song you want to learn." />
+                <DiscoveryStep title="2. Ask" text="A grown-up checks if we can use that song." />
+                <DiscoveryStep title="3. Add" text="Upload a piano file and Pianio makes a lesson." />
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="flex gap-4 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory hide-scrollbar">
               {filteredLessons.map((lesson) => {
                 const progress = lessonProgress[lesson.id];
                 const percent = progress
@@ -199,9 +199,10 @@ export default function LessonLibraryPage() {
                     key={lesson.id}
                     whileHover={{ y: -4 }}
                     onClick={() => startLesson(lesson)}
-                    className="rounded-[24px] border border-slate-200 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-lg"
+                    className="min-w-[280px] w-[280px] md:min-w-[320px] md:w-[320px] shrink-0 snap-start rounded-[24px] border border-slate-200 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-lg flex flex-col justify-between"
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
                           {lesson.questTrack}
@@ -242,6 +243,7 @@ export default function LessonLibraryPage() {
                     ) : (
                       <div className="mt-4 text-sm font-medium text-slate-500">Tip: {lesson.practiceTip}</div>
                     )}
+                    </div>
                   </motion.button>
                 );
               })}
@@ -249,7 +251,7 @@ export default function LessonLibraryPage() {
 
             {filteredLessons.length === 0 && (
               <div className="card !rounded-[24px] !bg-white/90 text-center text-slate-600">
-                No songs match those filters yet. This will get much stronger once we expand the external catalog.
+                No songs match those filters yet. Try another song name or ask a grown-up to add a song file.
               </div>
             )}
           </div>
@@ -283,8 +285,11 @@ export default function LessonLibraryPage() {
             <div className="card !rounded-[24px] !bg-white/90">
               <div className="mb-4 flex items-center gap-3">
                 <Crown className="h-5 w-5 text-violet-600" />
-                <h2 className="text-xl font-bold text-slate-900">Source roadmap</h2>
+                <h2 className="text-xl font-bold text-slate-900">For grown-ups</h2>
               </div>
+              <p className="mb-4 text-sm leading-6 text-slate-600">
+                These are the places Pianio can use to discover songs or import legal piano files.
+              </p>
               <div className="space-y-3">
                 {catalogSources.map((source) => (
                   <div key={source.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">

@@ -55,7 +55,8 @@ type Setting = ToggleSetting | SliderSetting;
 
 export default function SettingsPage() {
   const { setCurrentView, settings, updateSettings } = useAppStore();
-  const { userProfile, updatePersonalization } = useUserProfileStore();
+  const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
+  const updatePersonalization = useUserProfileStore((state) => state.updatePersonalization);
   const [activeTab, setActiveTab] = useState<'account' | 'preferences'>('account');
   const [isPersonalizationOpen, setIsPersonalizationOpen] = useState(true);
   const [personalization, setPersonalization] = useState<PersonalizationData>({

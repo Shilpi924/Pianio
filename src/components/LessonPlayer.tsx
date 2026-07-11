@@ -11,6 +11,7 @@ import type { Lesson, PracticeMode } from '../types';
 import { audioService } from '../services/audioService';
 import { midiToNote } from '../utils/noteUtils';
 import { midiService, type MIDIMessage } from '../services/midiService';
+import { pitchDetectionService } from '../services/pitchDetectionService';
 import { SoundEffects } from '../services/soundEffects';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
@@ -38,6 +39,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [showSheetMusic, setShowSheetMusic] = useState(false);
   const [waitModeEnabled, setWaitModeEnabled] = useState(true);
   const [showGhostHand, setShowGhostHand] = useState(true);
+  const [useMicrophone, setUseMicrophone] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [noteStartTime, setNoteStartTime] = useState(0);
   const [timingFeedback, setTimingFeedback] = useState<'perfect' | 'good' | 'early' | 'late' | null>(null);
@@ -83,6 +85,23 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       midiService.removeListener(handleMIDIMessage);
     };
   }, [isAudioInitialized]);
+
+  useEffect(() => {
+    if (isPlaying && useMicrophone) {
+      pitchDetectionService.start((note) => {
+        handleNotePlayed(note);
+      }).catch(err => {
+        console.error('Failed to start pitch detection', err);
+        setUseMicrophone(false);
+      });
+    } else {
+      pitchDetectionService.stop();
+    }
+    
+    return () => {
+      pitchDetectionService.stop();
+    };
+  }, [isPlaying, useMicrophone, handleNotePlayed]);
 
   useEffect(() => {
     return () => {
@@ -377,8 +396,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   };
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="space-y-4">
+    <div className={isPlaying ? "fixed inset-0 z-50 bg-[#f8fbff] dark:bg-gray-900 p-4 md:p-8 overflow-y-auto" : "grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px]"}>
+      <div className={`space-y-4 ${isPlaying ? 'max-w-5xl mx-auto flex flex-col justify-center min-h-full' : ''}`}>
         <div className="hidden justify-end lg:flex">
           <Mascot mood={mascotMood} message={mascotMessage} />
         </div>
@@ -543,7 +562,14 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
 
             {showSheetMusic && (
               <div className="mt-4">
-                <SheetMusic notes={lesson.notes} currentNoteIndex={currentNoteIndex} title={lesson.title} />
+                <SheetMusic 
+                  notes={lesson.notes} 
+                  currentNoteIndex={currentNoteIndex} 
+                  title={lesson.title} 
+                  currentTime={currentTime}
+                  tempo={tempo}
+                  isPlaying={isPlaying}
+                />
               </div>
             )}
           </div>
@@ -671,6 +697,23 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           )}
         </div>
 
+        {/* Render Finger Hint here in immersive mode */}
+        {isPlaying && currentNote && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center justify-center gap-6 glass-panel p-4 rounded-2xl mx-auto w-max"
+          >
+            <div className="text-center">
+              <div className="mb-1 text-sm font-semibold text-gray-600 dark:text-gray-300">Target Note</div>
+              <div className="text-4xl font-black text-blue-600 dark:text-blue-400">{currentNote.note}</div>
+            </div>
+            <div className="relative inline-block w-24 h-24">
+              <FingerHint finger={currentNote.finger} hand={currentNote.hand} show={showGhostHand} />
+            </div>
+          </motion.div>
+        )}
+
         <PianoKeyboard
           onNoteOn={(note) => handleNotePlayed(note)}
           highlightedNotes={highlightedNotes}
@@ -678,7 +721,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         />
       </div>
 
-      <div className="space-y-4">
+      {!isPlaying && (
+        <div className="space-y-4">
         {currentNote && (
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
@@ -714,6 +758,12 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               description="The song pauses until the child presses the right key."
               enabled={waitModeEnabled}
               onToggle={() => setWaitModeEnabled(!waitModeEnabled)}
+            />
+            <CoachRow
+              label="Use Microphone"
+              description="Listen for a real piano (pitch detection)."
+              enabled={useMicrophone}
+              onToggle={() => setUseMicrophone(!useMicrophone)}
             />
             <CoachRow
               label="Show finger"

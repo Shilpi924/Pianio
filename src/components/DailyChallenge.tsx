@@ -16,7 +16,7 @@ interface DailyChallenge {
 
 export default function DailyChallenge() {
   const { statistics } = useAppStore();
-  const { userProfile } = useUserProfileStore();
+  const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const goals = userProfile?.practiceGoals;
   const streak = userProfile?.currentStreak ?? statistics.streak;
   const practiceMinutes = Math.round(statistics.totalPracticeTime / 60);

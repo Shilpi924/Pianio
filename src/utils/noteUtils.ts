@@ -66,39 +66,17 @@ export function midiToNote(midi: number, useSharps: boolean = true): string {
 
 export function isBlackKey(note: string): boolean {
   const noteName = note.slice(0, -1) as NoteName;
-  return noteName.includes('#');
+  return noteName.includes('#') || noteName.includes('b');
 }
 
-export function getNoteFrequency(note: string): number {
-  const midi = noteToMidi(note);
-  return 440 * Math.pow(2, (midi - 69) / 12);
-}
 
-export function getOctave(note: string): number {
-  return parseInt(note.slice(-1));
-}
-
-export function getNoteName(note: string): NoteName {
-  return note.slice(0, -1) as NoteName;
-}
-
-export function transposeNote(note: string, semitones: number): string {
-  const midi = noteToMidi(note);
-  const newMidi = midi + semitones;
-  return midiToNote(newMidi);
-}
 
 export function getNoteIndex(note: string): number {
   const midi = noteToMidi(note);
   return midi - 21; // A0 is MIDI 21, the lowest key on 88-key piano
 }
 
-export function isNoteInRange(note: string, minNote: string = 'A0', maxNote: string = 'C8'): boolean {
-  const midi = noteToMidi(note);
-  const minMidi = noteToMidi(minNote);
-  const maxMidi = noteToMidi(maxNote);
-  return midi >= minMidi && midi <= maxMidi;
-}
+
 
 export function getAllNotesInRange(minNote: string = 'A0', maxNote: string = 'C8'): string[] {
   const notes: string[] = [];

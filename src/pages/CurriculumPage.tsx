@@ -9,7 +9,7 @@ const lessons = getEnhancedLessons();
 
 export default function CurriculumPage() {
   const { setCurrentView, setCurrentLesson, lessonProgress, statistics } = useAppStore();
-  const { userProfile } = useUserProfileStore();
+  const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
 
   const completedSongIds = new Set(statistics.songsCompleted);
 

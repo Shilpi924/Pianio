@@ -4,6 +4,7 @@ export type LearningGoal = 'fun' | 'classical' | 'pop' | 'jazz' | 'exams' | 'pro
 export type PracticeFrequency = 'daily' | 'few-times-week' | 'weekly' | 'occasional';
 
 export interface UserProfile {
+  id: string;
   name: string;
   age: number;
   ageGroup: AgeGroup;
