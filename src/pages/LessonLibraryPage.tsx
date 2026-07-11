@@ -58,14 +58,14 @@ export default function LessonLibraryPage() {
   const publicDomainSearchUrl = `https://imslp.org/index.php?search=${encodedDiscoveryQuery}`;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 md:p-8 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)]">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-3 md:p-6 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)]">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto max-w-7xl space-y-6"
       >
-        <section className="rounded-[28px] bg-slate-950 p-6 text-white shadow-2xl md:p-8">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <section className="rounded-[24px] bg-slate-950 p-5 text-white shadow-2xl md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="space-y-3">
               <button
                 onClick={() => setCurrentView('home')}
@@ -85,7 +85,7 @@ export default function LessonLibraryPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-3 gap-2 md:gap-3 text-center">
               <LibraryMetric label="Songs" value={`${allLessons.length}`} />
               <LibraryMetric label="Recommended" value={`${recommendedIds.size}`} />
               <LibraryMetric label="Sources" value={`${catalogSources.length}`} />
@@ -93,7 +93,7 @@ export default function LessonLibraryPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[1.4fr_0.85fr]">
+        <section className="grid gap-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
           <div className="space-y-6">
             <div className="card !rounded-[24px] !bg-white/90">
               <div className="mb-5 flex items-center gap-3">
@@ -101,7 +101,7 @@ export default function LessonLibraryPage() {
                 <h2 className="text-2xl font-bold text-slate-900">Find the right song fast</h2>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
                 <div className="md:col-span-4">
                   <div className="relative">
                     <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -150,7 +150,7 @@ export default function LessonLibraryPage() {
                 </button>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+              <div className="grid gap-3 sm:grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_auto]">
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                   <input
@@ -164,7 +164,7 @@ export default function LessonLibraryPage() {
                   href={musicBrainzSearchUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-rose-500 px-5 py-3 font-bold text-white"
+                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-rose-500 px-4 py-3 font-bold text-white text-sm whitespace-nowrap"
                 >
                   <ExternalLink className="h-5 w-5" />
                   Find song ideas
@@ -173,22 +173,22 @@ export default function LessonLibraryPage() {
                   href={publicDomainSearchUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-bold text-white"
+                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 font-bold text-white text-sm whitespace-nowrap"
                 >
                   <ExternalLink className="h-5 w-5" />
                   Find free classics
                 </a>
               </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <DiscoveryStep title="1. Pick" text="Search for a song you want to learn." />
                 <DiscoveryStep title="2. Ask" text="A grown-up checks if we can use that song." />
                 <DiscoveryStep title="3. Add" text="Upload a piano file and Pianio makes a lesson." />
               </div>
             </div>
 
-            <div className="flex gap-4 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory hide-scrollbar">
-              {filteredLessons.map((lesson) => {
+              <div className="grid gap-4 sm:grid-cols-2">
+            {filteredLessons.map((lesson) => {
                 const progress = lessonProgress[lesson.id];
                 const percent = progress
                   ? Math.round((progress.currentNoteIndex / lesson.notes.length) * 100)
@@ -197,9 +197,9 @@ export default function LessonLibraryPage() {
                 return (
                   <motion.button
                     key={lesson.id}
-                    whileHover={{ y: -4 }}
+                    whileHover={{ y: -2 }}
                     onClick={() => startLesson(lesson)}
-                    className="min-w-[280px] w-[280px] md:min-w-[320px] md:w-[320px] shrink-0 snap-start rounded-[24px] border border-slate-200 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-lg flex flex-col justify-between"
+                    className="w-full rounded-[20px] border border-slate-200 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-md flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-start justify-between gap-3">
@@ -247,8 +247,7 @@ export default function LessonLibraryPage() {
                   </motion.button>
                 );
               })}
-            </div>
-
+              </div>
             {filteredLessons.length === 0 && (
               <div className="card !rounded-[24px] !bg-white/90 text-center text-slate-600">
                 No songs match those filters yet. Try another song name or ask a grown-up to add a song file.

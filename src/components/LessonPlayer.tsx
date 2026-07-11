@@ -69,7 +69,18 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         try {
           await audioService.initialize();
           setIsAudioInitialized(true);
-          setSamplesLoaded(audioService.isSamplesLoaded());
+          
+          // Poll until samples are loaded
+          if (!audioService.isSamplesLoaded()) {
+            const interval = setInterval(() => {
+              if (audioService.isSamplesLoaded()) {
+                setSamplesLoaded(true);
+                clearInterval(interval);
+              }
+            }, 500);
+          } else {
+            setSamplesLoaded(true);
+          }
         } catch {
           setMascotMood('thinking');
           setMascotMessage('Tap a sound button to turn on piano sound.');
@@ -267,6 +278,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         return;
       }
 
+      if (isAudioInitialized) {
+        audioService.playNote(playedNote, '4n');
+      }
+
       if (playedNote === currentNote.note) {
         recordNotePlayed(true);
         const timeDiff = Date.now() - noteStartTime;
@@ -312,9 +327,6 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         });
 
         setCorrectNotes((prev) => new Set(prev).add(currentNoteIndex));
-        if (isAudioInitialized) {
-          audioService.playNote(currentNote.note, '4n');
-        }
 
         if (currentNoteIndex < lesson.notes.length - 1) {
           const nextNoteIndex = currentNoteIndex + 1;

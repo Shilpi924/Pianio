@@ -1,18 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Note } from '../types';
-import { getAllNotesInRange, isBlackKey } from '../utils/noteUtils';
 
 interface FallingNoteData {
   id: string;
   note: string;
   hand: 'left' | 'right';
   finger: number;
-  duration: number;
-  leftPct: number;    // % from left
-  widthPct: number;   // % width
-  heightPx: number;   // pixel height proportional to duration
-  topPx: number;      // distance from top of container (animated)
+  heightPx: number;
+  topPx: number;
+  col: number;        // column index in keyboard
+  totalCols: number;  // total white keys displayed
+  isBlack: boolean;
 }
 
 interface FallingNotesProps {
@@ -25,32 +24,77 @@ interface FallingNotesProps {
   activeNotes?: string[];
 }
 
-// Pre-build a position map for the visible 3-octave range
-const ALL_NOTES = getAllNotesInRange('C3', 'C6');
-const WHITE_NOTES = ALL_NOTES.filter(n => !isBlackKey(n));
-const WHITE_COUNT = WHITE_NOTES.length;
+// ── Note helpers ──────────────────────────────────────────────────────────────
+const CHROMATIC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const BLACK_SET  = new Set(['C#','D#','F#','G#','A#']);
 
-function getNoteLayout(note: string) {
-  const isBlack = isBlackKey(note);
-  if (isBlack) {
-    // Find the note between white neighbors
-    const idx = ALL_NOTES.indexOf(note);
-    const prevWhite = ALL_NOTES.slice(0, idx).filter(n => !isBlackKey(n));
-    const whiteIdx = prevWhite.length - 1;
-    const leftPct = ((whiteIdx + 0.7) / WHITE_COUNT) * 100;
-    return { leftPct, widthPct: (0.6 / WHITE_COUNT) * 100, isBlack: true };
+function parseNote(n: string) {
+  // e.g. 'D#5', 'Bb4', 'C4'
+  const m = n.match(/^([A-G](?:#|b)?)(\d)$/);
+  if (!m) return null;
+  let name = m[1];
+  const oct  = parseInt(m[2], 10);
+  // normalise flats → sharps
+  const flat2sharp: Record<string,string> = { 'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#' };
+  if (flat2sharp[name]) name = flat2sharp[name];
+  const idx = CHROMATIC.indexOf(name);
+  if (idx === -1) return null;
+  return { name, oct, idx, midi: (oct + 1) * 12 + idx };
+}
+
+function buildKeyboard(notes: Note[]) {
+  // Find min/max midi, pad to nearest octave boundary
+  let minMidi = 999, maxMidi = 0;
+  for (const n of notes) {
+    const p = parseNote(n.note);
+    if (p) { minMidi = Math.min(minMidi, p.midi); maxMidi = Math.max(maxMidi, p.midi); }
+  }
+  // Extend to full octave boundaries + 2 white keys padding
+  const startMidi = Math.max(21, Math.floor((minMidi - 5) / 12) * 12);
+  const endMidi   = Math.min(108, Math.ceil((maxMidi + 5) / 12) * 12);
+
+  const keys: { midi: number; name: string; isBlack: boolean }[] = [];
+  for (let m = startMidi; m <= endMidi; m++) {
+    const oct  = Math.floor(m / 12) - 1;
+    const name = CHROMATIC[m % 12] + oct;
+    const isBlack = BLACK_SET.has(CHROMATIC[m % 12]);
+    keys.push({ midi: m, name, isBlack });
+  }
+  const whiteKeys = keys.filter(k => !k.isBlack);
+  return { keys, whiteKeys, startMidi, endMidi };
+}
+
+function getLayout(
+  noteName: string,
+  whiteKeys: { midi: number; name: string }[],
+  totalWhite: number,
+) {
+  const parsed = parseNote(noteName);
+  if (!parsed) return null;
+  const isBlack = BLACK_SET.has(parsed.name);
+
+  if (!isBlack) {
+    const wi = whiteKeys.findIndex(k => k.midi === parsed.midi);
+    if (wi === -1) return null;
+    return { leftPct: (wi / totalWhite) * 100, widthPct: (1 / totalWhite) * 100, isBlack: false };
   } else {
-    const whiteIdx = WHITE_NOTES.indexOf(note);
-    const leftPct = (whiteIdx / WHITE_COUNT) * 100;
-    return { leftPct, widthPct: (1 / WHITE_COUNT) * 100, isBlack: false };
+    // Position between the two neighbouring white keys
+    const prevWhiteIdx = whiteKeys.findIndex(k => k.midi === parsed.midi - 1);
+    if (prevWhiteIdx === -1) return null;
+    return {
+      leftPct: ((prevWhiteIdx + 0.65) / totalWhite) * 100,
+      widthPct: (0.6 / totalWhite) * 100,
+      isBlack: true,
+    };
   }
 }
 
 const HAND_COLORS = {
-  right: { bg: '#3b82f6', border: '#1d4ed8', text: '#eff6ff' },  // blue
-  left:  { bg: '#ef4444', border: '#b91c1c', text: '#fff1f2' },  // red
+  right: { bg: '#3b82f6', border: '#1d4ed8', text: '#eff6ff', glow: '#3b82f688' },
+  left:  { bg: '#ef4444', border: '#b91c1c', text: '#fff1f2', glow: '#ef444488' },
 };
 
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function FallingNotes({
   notes,
   tempo,
@@ -61,173 +105,166 @@ export default function FallingNotes({
   activeNotes = [],
 }: FallingNotesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(360);
-  const [fallingNotes, setFallingNotes] = useState<FallingNoteData[]>([]);
+  const [containerH, setContainerH] = useState(360);
 
-  // Measure container
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setContainerHeight(el.clientHeight));
+    const ro = new ResizeObserver(() => setContainerH(el.clientHeight));
     ro.observe(el);
-    setContainerHeight(el.clientHeight);
+    setContainerH(el.clientHeight);
     return () => ro.disconnect();
   }, []);
 
-  // Build visible note list
-  useEffect(() => {
-    if (!notes.length) { setFallingNotes([]); return; }
+  // Build keyboard layout dynamically from the actual lesson notes
+  const { keys, whiteKeys } = useMemo(() => {
+    if (!notes.length) return { keys: [], whiteKeys: [] };
+    return buildKeyboard(notes);
+  }, [notes]);
 
-    const HIT_ZONE_H = 64;       // height of keyboard strip at bottom
-    const TRAVEL = containerHeight - HIT_ZONE_H;
-    const secondsPerBeat = 60 / tempo;
-    const lookaheadBeats = 4;
-    const lookaheadSecs = (lookaheadBeats * secondsPerBeat) / speed;
-    const pxPerSec = TRAVEL / lookaheadSecs;
+  const totalWhite = whiteKeys.length;
+
+  // Build visible falling notes
+  const fallingNotes = useMemo((): FallingNoteData[] => {
+    if (!notes.length || !totalWhite) return [];
+
+    const HIT_H   = 60;
+    const TRAVEL  = containerH - HIT_H;
+    const spb      = 60 / tempo;
+    const lookSecs = (4 * spb) / speed;
+    const pxPerSec = TRAVEL / lookSecs;
 
     const visible: FallingNoteData[] = [];
-    let beatOffset = 0;
+    let beat = 0;
 
-    notes.slice(currentNoteIndex, currentNoteIndex + 10).forEach((note, vi) => {
-      const index = currentNoteIndex + vi;
-      const noteTime = (beatOffset * secondsPerBeat) / speed;
-      const secsUntilHit = noteTime - (isPlaying ? currentTime : 0);
+    notes.slice(currentNoteIndex, currentNoteIndex + 12).forEach((n, vi) => {
+      const idx       = currentNoteIndex + vi;
+      const noteSecs  = (beat * spb) / speed;
+      const secsLeft  = noteSecs - (isPlaying ? currentTime : 0);
+      const heightPx  = Math.max(24, n.duration * spb * pxPerSec * 0.9);
+      const bottomY   = TRAVEL - secsLeft * pxPerSec;
+      const topPx     = bottomY - heightPx;
 
-      const heightPx = Math.max(28, note.duration * secondsPerBeat * pxPerSec);
-
-      // topPx: how far the BOTTOM of the note is from the top of container
-      // When secsUntilHit = 0  → bottom sits exactly on the hit line
-      // When secsUntilHit > 0  → note is above
-      const bottomFromTop = TRAVEL - secsUntilHit * pxPerSec;
-      const topPx = bottomFromTop - heightPx;
-
-      // Only show notes on screen
-      if (topPx < containerHeight + 100 && bottomFromTop > -heightPx) {
-        const layout = getNoteLayout(note.note);
+      if (topPx < containerH + 60 && bottomY > -20) {
+        const layout = getLayout(n.note, whiteKeys, totalWhite);
         if (layout) {
           visible.push({
-            id: `${note.note}-${index}`,
-            note: note.note,
-            hand: note.hand,
-            finger: note.finger,
-            duration: note.duration,
-            leftPct: layout.leftPct,
-            widthPct: layout.widthPct,
+            id: `${n.note}-${idx}`,
+            note: n.note,
+            hand: n.hand,
+            finger: n.finger,
             heightPx,
             topPx,
-          });
+            col: layout.leftPct,
+            totalCols: layout.widthPct,
+            isBlack: layout.isBlack,
+          } as any);
+          // Attach leftPct/widthPct via spread trick
+          Object.assign(visible[visible.length - 1], layout);
         }
       }
-
-      beatOffset += note.duration;
+      beat += n.duration;
     });
 
-    setFallingNotes(visible);
-  }, [notes, tempo, isPlaying, currentTime, currentNoteIndex, speed, containerHeight]);
+    return visible;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notes, tempo, isPlaying, currentTime, currentNoteIndex, speed, containerH, totalWhite]);
 
   return (
     <div
       ref={containerRef}
       className="relative w-full overflow-hidden rounded-xl shadow-2xl select-none"
-      style={{ height: 'clamp(280px, 44vh, 440px)', background: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%)' }}
+      style={{
+        height: 'clamp(280px, 44vh, 440px)',
+        background: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 65%, #0f172a 100%)',
+      }}
     >
-      {/* Starfield background dots */}
-      {[...Array(30)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full bg-white/20"
-          style={{
-            width: Math.random() * 2 + 1,
-            height: Math.random() * 2 + 1,
-            left: `${(i * 37) % 100}%`,
-            top: `${(i * 53) % 80}%`,
-          }}
-        />
-      ))}
-
-      {/* Vertical lane guides */}
-      {WHITE_NOTES.map((_, i) => (
+      {/* Lane guides */}
+      {whiteKeys.map((_, i) => (
         <div
           key={i}
           className="absolute top-0 bottom-16 border-l border-white/5"
-          style={{ left: `${(i / WHITE_COUNT) * 100}%` }}
+          style={{ left: `${(i / totalWhite) * 100}%` }}
         />
       ))}
 
-      {/* Hit zone glow line */}
+      {/* Hit glow line */}
       <div
-        className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-lg"
-        style={{ bottom: 64, boxShadow: '0 0 20px 4px rgba(34,211,238,0.5)' }}
+        className="absolute left-0 right-0 h-1"
+        style={{
+          bottom: 60,
+          background: 'linear-gradient(90deg, transparent, #22d3ee, transparent)',
+          boxShadow: '0 0 20px 6px rgba(34,211,238,0.45)',
+        }}
       />
 
-      {/* Falling Notes */}
+      {/* Falling note tiles */}
       <AnimatePresence>
-        {fallingNotes.map((fn) => {
-          const colors = HAND_COLORS[fn.hand];
-          const isActive = activeNotes.includes(fn.note);
+        {(fallingNotes as any[]).map((fn) => {
+          const colors  = HAND_COLORS[fn.hand as 'left' | 'right'];
+          const isHit   = activeNotes.includes(fn.note);
           return (
             <motion.div
               key={fn.id}
-              initial={{ opacity: 0, scaleX: 0.8 }}
-              animate={{ opacity: 1, scaleX: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
-              className="absolute rounded-lg flex flex-col items-center justify-center font-bold text-xs shadow-lg border"
+              transition={{ duration: 0.08 }}
+              className="absolute flex flex-col items-center justify-center rounded-lg border font-bold"
               style={{
-                left: `calc(${fn.leftPct}% + 1px)`,
-                width: `calc(${fn.widthPct}% - 2px)`,
-                top: fn.topPx,
+                left:   `calc(${fn.leftPct}% + 1px)`,
+                width:  `calc(${fn.widthPct}% - 2px)`,
+                top:    fn.topPx,
                 height: fn.heightPx,
-                backgroundColor: isActive ? '#fbbf24' : colors.bg,
-                borderColor: isActive ? '#d97706' : colors.border,
-                color: colors.text,
-                boxShadow: isActive
-                  ? '0 0 20px 6px rgba(251,191,36,0.6)'
-                  : `0 0 12px 2px ${colors.bg}88`,
-                transition: 'top 0.06s linear, background-color 0.1s',
-                zIndex: isBlackKey(fn.note) ? 10 : 5,
+                background:   isHit ? '#fbbf24' : colors.bg,
+                borderColor:  isHit ? '#d97706' : colors.border,
+                color:        isHit ? '#1c1917' : colors.text,
+                boxShadow:    isHit
+                  ? '0 0 22px 6px rgba(251,191,36,0.65)'
+                  : `0 0 10px 2px ${colors.glow}`,
+                transition: 'top 0.07s linear, background-color 0.08s',
+                zIndex: fn.isBlack ? 10 : 5,
               }}
             >
-              {fn.heightPx >= 32 && (
-                <>
-                  <span className="leading-none drop-shadow" style={{ fontSize: fn.heightPx > 50 ? 13 : 10 }}>
-                    {fn.note}
-                  </span>
-                  {fn.heightPx > 52 && (
-                    <span className="opacity-70 text-[9px] leading-none mt-0.5">
-                      {fn.hand === 'right' ? 'R' : 'L'}{fn.finger}
-                    </span>
-                  )}
-                </>
+              {fn.heightPx >= 28 && (
+                <span style={{ fontSize: fn.heightPx > 48 ? 12 : 9 }} className="leading-none drop-shadow">
+                  {fn.note}
+                </span>
+              )}
+              {fn.heightPx > 50 && (
+                <span className="text-[9px] leading-none opacity-70 mt-0.5">
+                  {fn.hand === 'right' ? 'R' : 'L'}{fn.finger}
+                </span>
               )}
             </motion.div>
           );
         })}
       </AnimatePresence>
 
-      {/* Mini keyboard strip at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gray-900 border-t-2 border-cyan-500/50">
+      {/* Mini keyboard */}
+      <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gray-950 border-t-2 border-cyan-500/40">
         <div className="relative h-full">
-          {ALL_NOTES.map((note) => {
-            const isBlack = isBlackKey(note);
-            const layout = getNoteLayout(note);
-            const isHighlighted = activeNotes.includes(note);
+          {keys.map((key) => {
+            const layout = getLayout(key.name, whiteKeys, totalWhite);
+            if (!layout) return null;
+            const isActive = activeNotes.includes(key.name);
             return (
               <div
-                key={note}
-                className="absolute top-0 rounded-b transition-colors duration-75"
+                key={key.name}
+                className="absolute top-0 rounded-b"
                 style={{
-                  left: `${layout.leftPct}%`,
-                  width: `calc(${layout.widthPct}% - 1px)`,
-                  height: isBlack ? '60%' : '100%',
-                  background: isHighlighted
+                  left:   `${layout.leftPct}%`,
+                  width:  `calc(${layout.widthPct}% - 1px)`,
+                  height: key.isBlack ? '58%' : '100%',
+                  background: isActive
                     ? '#fbbf24'
-                    : isBlack
+                    : key.isBlack
                     ? '#1f2937'
-                    : 'linear-gradient(180deg, #f9fafb, #e5e7eb)',
-                  zIndex: isBlack ? 10 : 5,
-                  border: isBlack ? '1px solid #374151' : '1px solid #d1d5db',
-                  boxShadow: isHighlighted ? '0 0 12px 4px rgba(251,191,36,0.7)' : undefined,
+                    : 'linear-gradient(180deg,#f9fafb,#e5e7eb)',
+                  zIndex:    key.isBlack ? 10 : 5,
+                  border:    key.isBlack ? '1px solid #374151' : '1px solid #d1d5db',
+                  boxShadow: isActive ? '0 0 14px 4px rgba(251,191,36,0.7)' : undefined,
+                  transition: 'background-color 0.07s',
                 }}
               />
             );
@@ -235,14 +272,13 @@ export default function FallingNotes({
         </div>
       </div>
 
-      {/* Status text */}
+      {/* Status overlay */}
       {!isPlaying && (
-        <div className="absolute inset-x-4 top-3 z-20 rounded-2xl bg-black/70 px-4 py-2.5 text-center font-bold text-white backdrop-blur-md border border-white/10 text-sm">
+        <div className="absolute inset-x-4 top-3 z-20 rounded-2xl bg-black/70 px-4 py-2.5 text-center text-sm font-bold text-white backdrop-blur-md border border-white/10">
           🎹 Press <span className="text-cyan-400">Start</span> — notes will fall toward the keyboard
         </div>
       )}
 
-      {/* Speed badge */}
       <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-white text-xs font-bold border border-white/10 z-20">
         {speed}x
       </div>
