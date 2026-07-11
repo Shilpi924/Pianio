@@ -21,16 +21,6 @@ export default function FreePlayPage() {
   const [beatVolume, setBeatVolume] = useState(-6);
 
   useEffect(() => {
-    const initAudio = async () => {
-      if (!isAudioInitialized && audioEnabled) {
-        await audioService.initialize();
-        await beatService.initialize();
-        setIsAudioInitialized(true);
-      }
-    };
-
-    initAudio();
-
     if (midiService.isSupported()) {
       midiService.initialize().then(() => {
         console.log('MIDI initialized');
@@ -54,12 +44,17 @@ export default function FreePlayPage() {
     }
   };
 
-  const handleNoteOn = (note: string) => {
+  const handleNoteOn = async (note: string) => {
+    if (!isAudioInitialized && audioEnabled) {
+      await audioService.initialize();
+      await beatService.initialize();
+      setIsAudioInitialized(true);
+    }
     setActiveNotes((prev) => new Set(prev).add(note));
     if (isRecording) {
       recordingService.recordNoteOn(note);
     }
-    if (audioEnabled && isAudioInitialized) {
+    if (audioEnabled) {
       audioService.playNote(note);
     }
   };
