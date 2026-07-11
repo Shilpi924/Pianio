@@ -41,7 +41,7 @@ const defaultSettings: Settings = {
   useSharps: true,
   darkMode: false,
   selectedMIDIDevice: null,
-  audioVolume: 0.7,
+  audioVolume: 70,
   animationSpeed: 1,
   fingerColors: {
     thumb: '#ef4444',

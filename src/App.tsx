@@ -40,7 +40,10 @@ function App() {
   useEffect(() => {
     // Sync audio volume
     // The slider goes from 0 to 100, audioService expects 0.0 to 1.0
-    audioService.setVolume(settings.audioVolume / 100);
+    // Handle corrupted local storage where volume was saved as 0.7 instead of 70
+    const rawVol = settings.audioVolume;
+    const normalizedVol = (rawVol > 0 && rawVol <= 1) ? rawVol * 100 : rawVol;
+    audioService.setVolume(normalizedVol / 100);
   }, [settings.audioVolume]);
 
   const renderCurrentView = () => {
