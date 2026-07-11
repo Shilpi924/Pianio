@@ -20,6 +20,7 @@ import IntervalTrainingPage from './pages/IntervalTrainingPage';
 import TutorialsPage from './pages/TutorialsPage';
 import SongUploadPage from './pages/SongUploadPage';
 import OnboardingPage from './pages/OnboardingPage';
+import AIChatBot from './components/AIChatBot';
 import './index.css';
 
 function App() {
@@ -99,7 +100,12 @@ function App() {
     }
   };
 
-  return <div className="min-h-screen">{renderCurrentView()}</div>;
+  return (
+    <div className="min-h-screen">
+      {renderCurrentView()}
+      <AIChatBot />
+    </div>
+  );
 }
 
 export default App;
