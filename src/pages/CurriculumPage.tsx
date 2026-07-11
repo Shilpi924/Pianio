@@ -1,214 +1,181 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lock, CheckCircle, Star, Trophy } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Lock, Star, Trophy } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { curriculum, getLevelById, isLevelUnlocked, calculateLevelProgress } from '../data/curriculum';
+import { useUserProfileStore } from '../store/useUserProfileStore';
+import { getEnhancedLessons, recommendedTracks } from '../services/musicCatalogService';
+import type { Lesson } from '../types';
+
+const lessons = getEnhancedLessons();
 
 export default function CurriculumPage() {
-  const { setCurrentView } = useAppStore();
-  const [completedLevels] = useState<string[]>([]);
-  const [completedLessons] = useState<string[]>([]);
-  const [totalXP] = useState(0);
+  const { setCurrentView, setCurrentLesson, lessonProgress, statistics } = useAppStore();
+  const { userProfile } = useUserProfileStore();
 
-  const handleLevelClick = (levelId: string) => {
-    if (isLevelUnlocked(levelId, completedLevels)) {
-      // Navigate to the first lesson of this level
-      const level = getLevelById(levelId);
-      if (level && level.lessons.length > 0) {
-        // In a real app, this would navigate to the lesson player
-        console.log('Starting level:', level.name);
-      }
-    }
-  };
+  const completedSongIds = new Set(statistics.songsCompleted);
 
-  const getLevelStatus = (levelId: string): 'locked' | 'unlocked' | 'completed' => {
-    if (completedLevels.includes(levelId)) return 'completed';
-    if (isLevelUnlocked(levelId, completedLevels)) return 'unlocked';
-    return 'locked';
+  const startLesson = (lesson: Lesson) => {
+    setCurrentLesson(lesson);
+    setCurrentView('lesson');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-8">
+    <div className="min-h-screen bg-[linear-gradient(180deg,_#f7fbff_0%,_#fff7ed_100%)] p-4 md:p-8 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)]">
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto"
+        className="mx-auto max-w-6xl space-y-6"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setCurrentView('home')}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold">Back</span>
-          </motion.button>
-
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">
-            Learning Path
-          </h1>
-
-          <div className="w-24" />
-        </div>
-
-        {/* Progress Overview */}
-        <div className="card mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your Progress</h2>
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-yellow-500" />
-              <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{totalXP} XP</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400">{completedLevels.length}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">Levels Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{completedLessons.length}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">Lessons Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {Math.round((completedLevels.length / curriculum.length) * 100)}%
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">Overall Progress</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Learning Path */}
-        <div className="space-y-4">
-          {curriculum.map((level, index) => {
-            const status = getLevelStatus(level.id);
-            const progress = calculateLevelProgress(level.id, completedLessons);
-            const isUnlocked = status !== 'locked';
-
-            return (
-              <motion.div
-                key={level.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`card ${!isUnlocked ? 'opacity-60' : ''}`}
+        <section className="rounded-[28px] bg-slate-950 p-6 text-white shadow-2xl md:p-8">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <button
+                onClick={() => setCurrentView('home')}
+                className="mb-4 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white"
               >
-                <div className="flex items-start gap-4">
-                  {/* Level Badge */}
-                  <div className={`w-16 h-16 rounded-xl flex items-center justify-center text-3xl ${
-                    status === 'completed'
-                      ? 'bg-green-500 text-white'
-                      : status === 'unlocked'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-300 dark:bg-gray-600 text-gray-500'
-                  }`}>
-                    {status === 'completed' ? (
-                      <CheckCircle className="w-8 h-8" />
-                    ) : status === 'locked' ? (
-                      <Lock className="w-8 h-8" />
-                    ) : (
-                      level.badge
-                    )}
-                  </div>
-
-                  {/* Level Info */}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                        {level.name}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-yellow-500" />
-                        <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                          {level.xpReward} XP
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300 mb-3">{level.description}</p>
-                    
-                    {/* Progress Bar */}
-                    {isUnlocked && (
-                      <div className="mb-3">
-                        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
-                          <span>Progress</span>
-                          <span>{Math.round(progress)}%</span>
-                        </div>
-                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 0.5 }}
-                            className="h-full bg-blue-500 dark:bg-blue-400"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Lessons */}
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                      <span>{level.lessons.length} lessons</span>
-                      <span>•</span>
-                      <span className="capitalize">{level.difficulty}</span>
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  {isUnlocked && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleLevelClick(level.id)}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      {status === 'completed' ? 'Review' : 'Start'}
-                    </motion.button>
-                  )}
-                </div>
-
-                {/* Prerequisites */}
-                {level.prerequisites.length > 0 && status === 'locked' && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Requires: {level.prerequisites.map((prereq) => {
-                        const prereqLevel = getLevelById(prereq);
-                        return prereqLevel?.name;
-                      }).join(', ')}
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Badges Section */}
-        {completedLevels.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="card mt-6"
-          >
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Earned Badges</h2>
-            <div className="flex flex-wrap gap-4">
-              {completedLevels.map((levelId) => {
-                const level = getLevelById(levelId);
-                return (
-                  <div
-                    key={levelId}
-                    className="w-16 h-16 rounded-xl bg-green-500 text-white flex items-center justify-center text-3xl"
-                    title={level?.name}
-                  >
-                    {level?.badge}
-                  </div>
-                );
-              })}
+                <ArrowLeft className="h-4 w-4" />
+                Back home
+              </button>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300">
+                Guided path
+              </p>
+              <h1 className="mt-2 text-4xl font-black">A clearer journey for kids and a calmer summary for parents.</h1>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300 md:text-base">
+                The curriculum now follows real song tracks instead of placeholder lesson IDs, so progress actually matches what the learner plays.
+              </p>
             </div>
-          </motion.div>
-        )}
+
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <OverviewMetric label="Completed songs" value={`${statistics.songsCompleted.length}`} />
+              <OverviewMetric label="Learner level" value={`${userProfile?.level ?? 1}`} />
+              <OverviewMetric label="XP" value={`${userProfile?.experiencePoints ?? 0}`} />
+            </div>
+          </div>
+        </section>
+
+        <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+          <div className="space-y-5">
+            {recommendedTracks.map((track, index) => {
+              const trackLessons = track.lessons
+                .map((id) => lessons.find((lesson) => lesson.id === id))
+                .filter((lesson): lesson is Lesson => Boolean(lesson));
+              const completedCount = trackLessons.filter((lesson) => completedSongIds.has(lesson.id)).length;
+              const progress = trackLessons.length > 0 ? Math.round((completedCount / trackLessons.length) * 100) : 0;
+              const isUnlocked = index === 0 || recommendedTracks[index - 1].lessons.every((id) => completedSongIds.has(id));
+
+              return (
+                <motion.div
+                  key={track.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.08 }}
+                  className="card !rounded-[24px] !bg-white/92"
+                >
+                  <div className="mb-4 flex items-start justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        Track {index + 1}
+                      </div>
+                      <h2 className="mt-1 text-2xl font-bold text-slate-900">{track.title}</h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{track.description}</p>
+                    </div>
+                    <div className={`rounded-2xl bg-gradient-to-br ${track.color} px-4 py-3 text-sm font-bold text-white shadow-lg`}>
+                      {isUnlocked ? `${progress}%` : 'Locked'}
+                    </div>
+                  </div>
+
+                  <div className="mb-4 h-2 rounded-full bg-slate-100">
+                    <div className="h-2 rounded-full bg-emerald-500" style={{ width: `${progress}%` }} />
+                  </div>
+
+                  <div className="space-y-3">
+                    {trackLessons.map((lesson) => {
+                      const progressState = lessonProgress[lesson.id];
+                      const isCompleted = completedSongIds.has(lesson.id);
+                      const noteProgress = progressState
+                        ? Math.round((progressState.currentNoteIndex / lesson.notes.length) * 100)
+                        : 0;
+
+                      return (
+                        <button
+                          key={lesson.id}
+                          onClick={() => isUnlocked && startLesson(lesson)}
+                          disabled={!isUnlocked}
+                          className={`flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition-colors ${
+                            isUnlocked
+                              ? 'border-slate-200 bg-slate-50 hover:border-emerald-300'
+                              : 'border-slate-200 bg-slate-100 opacity-70'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {isCompleted ? (
+                              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                            ) : isUnlocked ? (
+                              <Star className="h-5 w-5 text-amber-500" />
+                            ) : (
+                              <Lock className="h-5 w-5 text-slate-400" />
+                            )}
+                            <div>
+                              <div className="font-semibold text-slate-900">{lesson.title}</div>
+                              <div className="text-sm text-slate-600">
+                                {lesson.practiceTip}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                            {isCompleted ? 'Done' : progressState ? `${noteProgress}%` : 'Ready'}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="space-y-6">
+            <div className="card !rounded-[24px] !bg-white/92">
+              <div className="mb-4 flex items-center gap-3">
+                <Trophy className="h-5 w-5 text-amber-500" />
+                <h2 className="text-xl font-bold text-slate-900">Parent snapshot</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <SideBox label="Age band" value={userProfile?.ageGroup ?? '9-12'} />
+                <SideBox label="Goal" value={userProfile?.learningGoal ?? 'fun'} />
+                <SideBox label="Practice rhythm" value={userProfile?.practiceFrequency ?? 'few-times-week'} />
+                <SideBox label="Current streak" value={`${userProfile?.currentStreak ?? 0} days`} />
+              </div>
+            </div>
+
+            <div className="card !rounded-[24px] !bg-white/92">
+              <h2 className="mb-4 text-xl font-bold text-slate-900">What still needs polish</h2>
+              <ul className="space-y-3 text-sm leading-6 text-slate-600">
+                <li>The structure is now real, but the library still needs many more playable songs.</li>
+                <li>We should eventually track best accuracy per song, not just aggregate accuracy.</li>
+                <li>A dedicated parent mode can come later, but the summaries are already moving in the right direction.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </motion.div>
+    </div>
+  );
+}
+
+function OverviewMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white/10 px-4 py-3">
+      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
+      <div className="mt-2 text-xl font-bold text-white">{value}</div>
+    </div>
+  );
+}
+
+function SideBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-slate-50 p-4">
+      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</div>
+      <div className="mt-2 font-semibold text-slate-900">{value}</div>
     </div>
   );
 }

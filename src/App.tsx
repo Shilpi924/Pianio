@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useAppStore } from './store/useAppStore';
+import { useUserProfileStore } from './store/useUserProfileStore';
 import HomePage from './pages/HomePage';
 import FreePlayPage from './pages/FreePlayPage';
 import LessonLibraryPage from './pages/LessonLibraryPage';
@@ -18,10 +19,12 @@ import PerformanceModePage from './pages/PerformanceModePage';
 import IntervalTrainingPage from './pages/IntervalTrainingPage';
 import TutorialsPage from './pages/TutorialsPage';
 import SongUploadPage from './pages/SongUploadPage';
+import OnboardingPage from './pages/OnboardingPage';
 import './index.css';
 
 function App() {
   const { currentView, settings, currentLesson, setCurrentView, setCurrentLesson } = useAppStore();
+  const { completeOnboarding } = useUserProfileStore();
 
   useEffect(() => {
     // Apply dark mode
@@ -38,11 +41,14 @@ function App() {
         return <HomePage />;
       case 'lesson':
         return currentLesson ? (
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-8">
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-3 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 md:p-4">
             <div className="max-w-7xl mx-auto">
               <LessonPlayer
                 lesson={currentLesson}
-                onExit={() => setCurrentView('lesson')}
+                onExit={() => {
+                  setCurrentLesson(null);
+                  setCurrentView('lesson');
+                }}
                 onComplete={() => {
                   setCurrentView('lesson');
                   setCurrentLesson(null);
@@ -75,6 +81,11 @@ function App() {
         return <TutorialsPage />;
       case 'song-upload':
         return <SongUploadPage />;
+      case 'onboarding':
+        return <OnboardingPage onComplete={(data) => {
+          completeOnboarding(data);
+          setCurrentView('home');
+        }} />;
       case 'free-play':
         return <FreePlayPage />;
       case 'statistics':

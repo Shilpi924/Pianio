@@ -56,7 +56,7 @@ const defaultStatistics: Statistics = {
   totalPracticeTime: 0,
   notesPlayed: 0,
   correctNotes: 0,
-  accuracy: 100,
+  accuracy: 0,
   streak: 0,
   songsCompleted: [],
   hardestMeasures: [],

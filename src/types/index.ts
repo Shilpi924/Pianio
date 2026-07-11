@@ -37,6 +37,13 @@ export interface Lesson {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   category: string;
   source: 'public-domain' | 'user-uploaded';
+  sourceName?: string;
+  focus?: string[];
+  tags?: string[];
+  questTrack?: 'starter' | 'songs' | 'rhythm' | 'classics' | 'performance';
+  synopsis?: string;
+  practiceTip?: string;
+  ageBand?: 'kids' | 'teens' | 'all';
 }
 
 export type PracticeMode = 'guided' | 'performance' | 'slow-practice' | 'hands-separate' | 'loop';
@@ -84,8 +91,28 @@ export interface LessonProgress {
   attempts: number;
 }
 
+export interface MusicCatalogSource {
+  id: string;
+  name: string;
+  type: 'built-in' | 'public-domain' | 'metadata' | 'scanner';
+  description: string;
+  access: 'ready' | 'bring-your-key' | 'manual-import';
+  formats: string[];
+  website: string;
+  notes: string;
+}
+
+export interface RecommendedTrack {
+  id: string;
+  title: string;
+  description: string;
+  color: string;
+  icon: string;
+  lessons: string[];
+}
+
 export interface AppState {
-  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator';
+  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator';
   currentLesson: Lesson | null;
   isPlaying: boolean;
   tempo: number;

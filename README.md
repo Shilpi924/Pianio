@@ -1,154 +1,155 @@
 # Pianio
 
-An interactive 88-key piano learning application built with React, TypeScript, and modern web technologies. Designed to help beginners, especially children, learn to play piano using a connected MIDI keyboard or the on-screen virtual piano.
+Pianio is a kid-friendly piano learning app built for first wins: pick a familiar song, hear the melody, and press the glowing key. It combines an 88-key virtual piano, guided lessons, MIDI input, falling-note practice, and progress tracking in a React + TypeScript experience designed for children and families.
 
-## Features
+## Why Pianio
 
-- **88-Key Virtual Piano** - Realistic full 88-key keyboard with white and black keys
-- **MIDI Support** - Automatic detection and connection of MIDI keyboards
-- **Lesson Engine** - JSON-based lesson system with note highlighting and tempo control
-- **Finger Guidance** - Color-coded finger hints (Thumb=Red, Index=Orange, Middle=Yellow, Ring=Green, Pinky=Blue)
-- **Visual Feedback** - Animations for correct (glow) and incorrect (shake) notes
-- **Statistics Tracking** - Practice time, accuracy, streak, and completed songs
-- **Settings** - Customizable keyboard labels, note names, dark mode, audio volume, and animation speed
-- **Beautiful UI** - Modern, kid-friendly design with smooth animations and dark mode support
+Most beginner piano apps quickly become too abstract for kids: too many modes, too many stats, and not enough obvious cause-and-effect. Pianio keeps the first loop simple.
 
-## Technology Stack
+1. Choose a starter song.
+2. Hear what it should sound like.
+3. Press the highlighted key.
+4. Let the app wait until the right note is played.
+5. Build confidence one note at a time.
 
-- **Frontend**: React 19, TypeScript, Vite
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **Audio**: Tone.js
-- **MIDI**: Web MIDI API
-- **Testing**: Vitest
-- **Linting**: ESLint, Prettier
-- **Package Manager**: npm
+The interface is tuned for children first, with parent-facing progress and catalog expansion tools kept nearby but quieter.
+
+## Highlights
+
+- **Simple song-first home**: starts with “Hear the song” and “Start lesson,” not a wall of menus.
+- **Guided lesson player**: shows the current note, finger, hand, and glowing piano key.
+- **Smoother falling notes**: responsive practice lane with animation-frame timing and iPad-friendly sizing.
+- **Wait mode**: pauses lesson progress until the learner plays the correct note.
+- **88-key virtual piano**: playable on screen with note labels and highlights.
+- **MIDI keyboard support**: listens to connected MIDI keyboards through the Web MIDI API.
+- **MusicXML import**: turns uploaded MusicXML files into playable lessons.
+- **Song discovery path**: searches metadata and public-domain sources while keeping modern-song rights clear.
+- **Real progress tracking**: practice time, completed songs, accuracy, and streaks come from app state, not hardcoded numbers.
+- **Personalized learning profile**: age group, skill level, goals, favorite genres, and practice rhythm.
+
+## Practice Flow
+
+Pianio is designed around a small, repeatable practice loop.
+
+```text
+Home
+  -> Pick a starter song
+  -> Hear the song
+  -> Start lesson
+  -> Watch the falling note
+  -> Press the glowing key
+  -> Advance only after the right note
+```
+
+For younger learners, the best default is **Copy me** mode with **Wait for me** enabled. For more confident learners, **Try alone**, **Slow song**, **One hand**, and **Repeat** provide more challenge without changing the lesson structure.
+
+## Song Library
+
+The built-in lesson library includes public-domain and starter songs such as:
+
+- Twinkle Twinkle Little Star
+- Mary Had a Little Lamb
+- Happy Birthday
+- Ode to Joy
+- Für Elise
+
+The library is organized by quest-style learning tracks and supports filtering by difficulty, category, and focus.
+
+## Adding More Songs
+
+There are two different problems to solve:
+
+- **Finding songs**: metadata search can help discover artists, titles, trends, and public-domain works.
+- **Playing songs**: Pianio needs note-level data, such as MusicXML, MIDI, licensed score data, or authored JSON lessons.
+
+Modern teen/trendy songs are usually copyrighted. Pianio can help discover them, but they should only become playable when you have the right to use the note data.
+
+Current expansion paths:
+
+- **MusicXML upload** for user-owned or legally usable scores.
+- **MusicBrainz metadata search** for song, artist, genre, and recording discovery.
+- **IMSLP/public-domain search** for classical repertoire.
+- **Future MIDI/MusicXML pipeline** for licensed or user-authored song imports.
+
+## Tech Stack
+
+- **React 19**
+- **TypeScript**
+- **Vite**
+- **Tailwind CSS**
+- **Zustand**
+- **Framer Motion**
+- **Tone.js**
+- **Lucide React**
+- **Vitest**
+- **Web MIDI API**
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or pnpm
+- Node.js 18+
+- npm
 
-### Installation
+### Install
 
 ```bash
-# Install dependencies
 npm install
+```
 
-# Start development server
+### Run Locally
+
+```bash
 npm run dev
+```
 
-# Build for production
+The app runs at:
+
+```text
+http://localhost:5173
+```
+
+### Build
+
+```bash
 npm run build
+```
 
-# Run tests
+### Test
+
+```bash
 npm test
 ```
 
-### Development
-
-The application runs on `http://localhost:5173` during development.
-
 ## Project Structure
 
-```
-/src
-  /components      # Reusable UI components
-    PianoKey.tsx
-    PianoKeyboard.tsx
-    LessonPlayer.tsx
-    FingerHint.tsx
-    MIDIStatus.tsx
-  /pages          # Page components
-    HomePage.tsx
-    FreePlayPage.tsx
-    LessonLibraryPage.tsx
-    StatisticsPage.tsx
-    SettingsPage.tsx
-  /features       # Feature-specific modules
-  /hooks          # Custom React hooks
-  /lib            # Third-party library configurations
-  /services       # Business logic services
-    midiService.ts
-    audioService.ts
-  /store          # State management
-    useAppStore.ts
-  /types          # TypeScript type definitions
-    index.ts
-    webmidi.d.ts
-  /utils          # Utility functions
-    noteUtils.ts
-  /data           # Static data
-    lessons.ts
-  /assets         # Images, fonts, etc.
-  /test           # Test setup and utilities
+```text
+src/
+  components/        reusable UI and practice components
+  data/              built-in lesson data
+  pages/             app screens and flows
+  services/          audio, MIDI, catalog, recommendation, import logic
+  store/             Zustand app and profile state
+  test/              Vitest coverage
+  types/             shared TypeScript types
+  utils/             note conversion and piano helpers
 ```
 
-## Usage
+## Key Screens
 
-### Home Screen
+- **Home**: starter-song selection, preview playback, and simple entry into lessons.
+- **Lesson Player**: falling notes, current key guidance, tempo controls, and practice modes.
+- **Song Library**: filters, recommendations, source roadmap, and song discovery.
+- **Upload Song**: MusicXML import and lesson preview.
+- **Progress**: real learner stats and achievements.
+- **Settings**: display, sound, personalization, and practice preferences.
 
-Navigate to different features:
-- **Continue Lesson** - Resume your last lesson
-- **Lesson Library** - Browse and select lessons
-- **Practice Mode** - Practice with different modes
-- **Free Play** - Play freely on the piano
-- **Statistics** - View your progress
-- **Settings** - Customize your experience
+## Development Notes
 
-### Playing Lessons
-
-1. Go to Lesson Library
-2. Select a lesson by difficulty or category
-3. Click "Start" or "Continue"
-4. Follow the finger guidance and note highlighting
-5. Play the correct note on your MIDI keyboard or click the virtual piano
-6. Adjust tempo using the +/- buttons
-7. Track your accuracy in real-time
-
-### Free Play
-
-- Click piano keys to play notes
-- Connect a MIDI keyboard for better experience
-- Toggle sound on/off
-- View MIDI connection status
-
-### Settings
-
-Customize your experience:
-- **Display**: Toggle keyboard labels, note names, sharps/flats, dark mode
-- **Audio**: Adjust volume
-- **Animation**: Control animation speed
-
-## Sample Lessons
-
-The app includes several sample lessons:
-- Twinkle Twinkle Little Star (Beginner)
-- Mary Had a Little Lamb (Beginner)
-- Happy Birthday (Beginner)
-- Ode to Joy (Intermediate)
-
-## Future Features
-
-The architecture is designed to support future additions:
-- Falling notes visualization
-- Sheet music display
-- AI-generated lessons
-- AI practice feedback
-- Voice instructions
-- Cloud sync
-- Multiple child profiles
-- Achievements system
-- Multiplayer mode
-- Recording and playback
-- Chord trainer
-- Scales trainer
-- Ear training
-- Sight reading practice
+- Browser audio requires a user gesture, so sound is started from learner actions like “Hear song,” “Hear note,” or “Start.”
+- Progress should always come from Zustand stores, not hardcoded demo values.
+- Trendy/popular song discovery should be separated from playable lesson import because licensing and note-level data are separate concerns.
+- The lesson layout should stay usable on an iPad landscape screen without making the learner hunt for controls.
 
 ## License
 

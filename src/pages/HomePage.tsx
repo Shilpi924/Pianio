@@ -1,260 +1,201 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Play, Sparkles, Music, Star, ArrowRight, Upload } from 'lucide-react';
-import { useAppStore } from '../store/useAppStore';
-import { sampleLessons } from '../data/lessons';
+import { ArrowRight, BarChart3, Library, Music2, Play, Settings, Volume2 } from 'lucide-react';
 import DailyChallenge from '../components/DailyChallenge';
+import { useAppStore } from '../store/useAppStore';
+import { useUserProfileStore } from '../store/useUserProfileStore';
+import { getEnhancedLessons } from '../services/musicCatalogService';
+import { audioService } from '../services/audioService';
+import type { Lesson } from '../types';
 
-const POPULAR_SONGS = sampleLessons.slice(0, 6);
+const allLessons = getEnhancedLessons();
+const starterLessons = allLessons.filter((lesson) => lesson.difficulty === 'beginner').slice(0, 3);
 
 export default function HomePage() {
-  const { setCurrentView, setCurrentLesson } = useAppStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<typeof sampleLessons>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const { setCurrentView, setCurrentLesson, lessonProgress, statistics } = useAppStore();
+  const { userProfile } = useUserProfileStore();
+  const [selectedLesson, setSelectedLesson] = useState<Lesson>(starterLessons[0] ?? allLessons[0]);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const previewTimers = useRef<number[]>([]);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query.length > 0) {
-      setIsSearching(true);
-      const results = sampleLessons.filter(lesson =>
-        lesson.title.toLowerCase().includes(query.toLowerCase()) ||
-        lesson.category.toLowerCase().includes(query.toLowerCase())
-      );
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-      setIsSearching(false);
-    }
-  };
-
-  const handlePlaySong = (lesson: typeof sampleLessons[0]) => {
+  const startLesson = (lesson: Lesson) => {
+    stopPreview();
     setCurrentLesson(lesson);
     setCurrentView('lesson');
   };
 
-  const handleQuickStart = () => {
-    // Start with the first song
-    setCurrentLesson(sampleLessons[0]);
-    setCurrentView('lesson');
+  const stopPreview = () => {
+    previewTimers.current.forEach((timer) => window.clearTimeout(timer));
+    previewTimers.current = [];
+    audioService.stopAllNotes();
+    setIsPreviewing(false);
   };
 
+  const previewLesson = async (lesson: Lesson) => {
+    stopPreview();
+    setSelectedLesson(lesson);
+    await audioService.initialize();
+    setIsPreviewing(true);
+
+    let delay = 0;
+    lesson.notes.forEach((note, index) => {
+      const timer = window.setTimeout(() => {
+        audioService.playNote(note.note, '8n');
+        if (index === lesson.notes.length - 1) {
+          const doneTimer = window.setTimeout(() => setIsPreviewing(false), 800);
+          previewTimers.current.push(doneTimer);
+        }
+      }, delay);
+      previewTimers.current.push(timer);
+      delay += (60 / lesson.tempo) * 1000 * note.duration;
+    });
+  };
+
+  const activeProgress = lessonProgress[selectedLesson.id];
+  const progressPercent = activeProgress
+    ? Math.round((activeProgress.currentNoteIndex / selectedLesson.notes.length) * 100)
+    : 0;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-400 to-yellow-300 dark:from-purple-900 dark:via-pink-900 dark:to-yellow-700 p-4 md:p-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
+    <div className="min-h-screen bg-[#f8fbff] p-4 text-slate-950 md:p-8">
+      <motion.main
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-6xl mx-auto"
+        className="mx-auto max-w-6xl space-y-6"
       >
-        {/* Header */}
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-center mb-8"
-        >
-          <motion.h1
-            className="text-6xl md:text-8xl font-bold mb-4 text-white drop-shadow-lg"
-            animate={{
-              textShadow: [
-                "0 0 20px rgba(255,255,255,0.5)",
-                "0 0 40px rgba(255,255,255,0.8)",
-                "0 0 20px rgba(255,255,255,0.5)"
-              ],
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            🎹 Pianio
-          </motion.h1>
-          <motion.p
-            className="text-2xl md:text-3xl text-white font-semibold drop-shadow-md"
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            Learn piano the fun way! ✨
-          </motion.p>
-        </motion.div>
+        <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 md:p-8">
+          <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
+            <div className="flex flex-col justify-between gap-8">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full bg-sky-100 px-4 py-2 text-sm font-bold text-sky-800">
+                  <Music2 className="h-4 w-4" />
+                  Pick a song. Hear it. Play the glowing key.
+                </div>
+                <div>
+                  <h1 className="text-4xl font-black tracking-normal text-slate-950 md:text-6xl">
+                    Learn piano one note at a time.
+                  </h1>
+                  <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
+                    Start with a familiar song. Pianio plays the melody, then waits while the child
+                    presses each highlighted key.
+                  </p>
+                </div>
+              </div>
 
-        {/* Quick Start Button */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-center mb-8"
-        >
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleQuickStart}
-            className="bg-white text-purple-600 px-12 py-6 rounded-full text-2xl font-bold shadow-2xl hover:shadow-3xl transition-all flex items-center gap-3 mx-auto"
-          >
-            <Play className="w-8 h-8" />
-            Start Playing Now!
-          </motion.button>
-        </motion.div>
-
-        {/* AI Search */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-8"
-        >
-          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <Sparkles className="w-6 h-6 text-purple-500" />
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                AI Song Search
-              </h2>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Search for your favorite song... 🎵"
-                className="w-full pl-14 pr-4 py-4 rounded-2xl text-lg border-2 border-purple-300 focus:border-purple-500 focus:outline-none dark:bg-gray-700 dark:border-purple-500 dark:text-white"
-              />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  onClick={() => previewLesson(selectedLesson)}
+                  className="inline-flex min-h-16 items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-5 py-4 text-lg font-black text-white shadow-sm transition-colors hover:bg-emerald-600"
+                >
+                  <Volume2 className="h-6 w-6" />
+                  {isPreviewing ? 'Playing song' : 'Hear the song'}
+                </button>
+                <button
+                  onClick={() => startLesson(selectedLesson)}
+                  className="inline-flex min-h-16 items-center justify-center gap-3 rounded-2xl bg-slate-950 px-5 py-4 text-lg font-black text-white shadow-sm transition-colors hover:bg-slate-800"
+                >
+                  <Play className="h-6 w-6" />
+                  Start lesson
+                </button>
+              </div>
             </div>
 
-            {/* Search Results */}
-            {isSearching && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 space-y-2 max-h-64 overflow-y-auto"
-              >
-                {searchResults.length > 0 ? (
-                  searchResults.map((song, index) => (
-                    <motion.button
-                      key={song.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      onClick={() => handlePlaySong(song)}
-                      className="w-full p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 rounded-xl hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-800/50 dark:hover:to-pink-800/50 transition-all flex items-center justify-between group"
-                    >
-                      <div className="text-left">
-                        <div className="font-semibold text-gray-900 dark:text-gray-100">{song.title}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">{song.category}</div>
-                      </div>
-                      <ArrowRight className="w-6 h-6 text-purple-500 group-hover:translate-x-2 transition-transform" />
-                    </motion.button>
-                  ))
-                ) : (
-                  <div className="text-center text-gray-500 dark:text-gray-400 py-4">
-                    No songs found. Try a different search! 🎶
-                  </div>
-                )}
-              </motion.div>
-            )}
+            <div className="rounded-3xl bg-sky-50 p-5 ring-1 ring-sky-100">
+              <div className="text-sm font-bold uppercase tracking-normal text-sky-700">Today song</div>
+              <h2 className="mt-2 text-3xl font-black text-slate-950">{selectedLesson.title}</h2>
+              <p className="mt-3 leading-7 text-slate-600">
+                {selectedLesson.synopsis ?? 'A short starter song for practicing simple piano notes.'}
+              </p>
+              <div className="mt-5 grid grid-cols-3 gap-3">
+                <SimpleMetric label="Notes" value={`${selectedLesson.notes.length}`} />
+                <SimpleMetric label="Speed" value={`${selectedLesson.tempo}`} />
+                <SimpleMetric label="Done" value={`${progressPercent}%`} />
+              </div>
+              <div className="mt-5 rounded-2xl bg-white p-4 text-sm leading-6 text-slate-600">
+                In the lesson, the blue key is the next key to press. If Wait mode is on, the app
+                does not move ahead until the right note is played.
+              </div>
+            </div>
           </div>
-        </motion.div>
+        </section>
 
-        {/* Upload Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="mb-8"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setCurrentView('song-upload')}
-            className="w-full bg-gradient-to-r from-green-400 to-teal-500 text-white rounded-3xl p-6 shadow-2xl hover:shadow-3xl transition-all flex items-center justify-center gap-3"
-          >
-            <Upload className="w-8 h-8" />
-            <span className="text-xl font-bold">Upload Your Own MusicXML File</span>
-          </motion.button>
-        </motion.div>
-
-        {/* Daily Challenges */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mb-8"
-        >
-          <DailyChallenge />
-        </motion.div>
-
-        {/* Popular Songs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <Star className="w-6 h-6 text-yellow-500" />
-            <h2 className="text-2xl font-bold text-white drop-shadow-md">
-              Popular Songs
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {POPULAR_SONGS.map((song, index) => (
-              <motion.button
-                key={song.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handlePlaySong(song)}
-                className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all text-left group"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <Music className="w-8 h-8 text-purple-500" />
-                  <div className="text-3xl">{index + 1}</div>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  {song.title}
-                </h3>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                  <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full">
-                    {song.difficulty}
-                  </span>
-                  <span>•</span>
-                  <span>{song.tempo} BPM</span>
-                </div>
-                <div className="mt-3 flex items-center gap-2 text-purple-500 group-hover:gap-4 transition-all">
-                  <span className="font-semibold">Play Now</span>
-                  <ArrowRight className="w-5 h-5" />
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Features Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
-          className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4"
-        >
-          {[
-            { icon: '🎯', title: 'Fun Games', desc: 'Learn while playing' },
-            { icon: '🏆', title: 'Earn Points', desc: 'Track your progress' },
-            { icon: '🎵', title: '100+ Songs', desc: 'Popular hits included' },
-            { icon: '⭐', title: 'Easy Start', desc: 'No experience needed' },
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.1 + index * 0.1 }}
-              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-4 text-center shadow-lg"
+        <section className="grid gap-4 md:grid-cols-3">
+          {starterLessons.map((lesson) => (
+            <button
+              key={lesson.id}
+              onClick={() => {
+                stopPreview();
+                setSelectedLesson(lesson);
+              }}
+              className={`rounded-2xl p-5 text-left shadow-sm ring-1 transition-colors ${
+                selectedLesson.id === lesson.id
+                  ? 'bg-slate-950 text-white ring-slate-950'
+                  : 'bg-white text-slate-950 ring-slate-200 hover:ring-sky-300'
+              }`}
             >
-              <div className="text-4xl mb-2">{feature.icon}</div>
-              <div className="font-bold text-gray-900 dark:text-gray-100">{feature.title}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">{feature.desc}</div>
-            </motion.div>
+              <div className="text-sm font-bold uppercase tracking-normal opacity-70">Starter song</div>
+              <h3 className="mt-2 text-xl font-black">{lesson.title}</h3>
+              <p className={`mt-3 text-sm leading-6 ${selectedLesson.id === lesson.id ? 'text-slate-200' : 'text-slate-600'}`}>
+                {lesson.practiceTip ?? 'Listen once, then copy the highlighted notes.'}
+              </p>
+              <div className="mt-4 inline-flex items-center gap-2 text-sm font-bold">
+                Choose song
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </button>
           ))}
-        </motion.div>
-      </motion.div>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[1fr_320px]">
+          <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <div className="mb-4 text-sm font-bold uppercase tracking-normal text-slate-500">More places</div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <NavButton icon={Library} label="Song library" onClick={() => setCurrentView('lesson')} />
+              <NavButton icon={BarChart3} label="Progress" onClick={() => setCurrentView('statistics')} />
+              <NavButton icon={Settings} label="Settings" onClick={() => setCurrentView('settings')} />
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <div className="text-sm font-bold uppercase tracking-normal text-slate-500">Parent snapshot</div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <SimpleMetric label="Minutes" value={`${Math.round(statistics.totalPracticeTime / 60)}`} />
+              <SimpleMetric label="Streak" value={`${userProfile?.currentStreak ?? 0}`} />
+            </div>
+          </div>
+        </section>
+
+        <DailyChallenge />
+      </motion.main>
     </div>
+  );
+}
+
+function SimpleMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white p-3 text-center ring-1 ring-slate-200">
+      <div className="text-xl font-black text-slate-950">{value}</div>
+      <div className="text-xs font-bold uppercase tracking-normal text-slate-500">{label}</div>
+    </div>
+  );
+}
+
+function NavButton({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof Library;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 font-bold text-slate-800 transition-colors hover:bg-slate-200"
+    >
+      <Icon className="h-5 w-5" />
+      {label}
+    </button>
   );
 }

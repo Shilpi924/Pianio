@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Note } from '../types';
+import { getNoteIndex as getPianoNoteIndex } from '../utils/noteUtils';
 
 interface FallingNote {
   note: string;
   hand: 'left' | 'right';
+  index: number;
   startTime: number;
   duration: number;
   y: number;
@@ -16,6 +18,7 @@ interface FallingNotesProps {
   tempo: number;
   isPlaying: boolean;
   currentTime: number;
+  currentNoteIndex: number;
   speed: number;
   onNoteHit: (note: string) => void;
   onNoteMiss: (note: string) => void;
@@ -46,81 +49,95 @@ export default function FallingNotes({
   tempo,
   isPlaying,
   currentTime,
+  currentNoteIndex,
   speed = 1,
   onNoteHit,
   onNoteMiss,
 }: FallingNotesProps) {
   const [fallingNotes, setFallingNotes] = useState<FallingNote[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(600);
+  const [containerHeight, setContainerHeight] = useState(360);
 
   useEffect(() => {
-    if (containerRef.current) {
-      setContainerHeight(containerRef.current.clientHeight);
-    }
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateHeight = () => setContainerHeight(container.clientHeight);
+    updateHeight();
+
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
   }, []);
 
-  // Calculate note timing based on tempo and speed
-  const getNoteTime = (index: number) => {
-    const beatsPerSecond = (tempo / 60) * speed;
-    return index / beatsPerSecond;
-  };
-
-  // Generate falling notes based on current time
   useEffect(() => {
-    if (!isPlaying) {
+    if (notes.length === 0) {
       setFallingNotes([]);
       return;
     }
 
-    const lookaheadTime = 3 / speed; // Show notes based on speed
+    const secondsPerBeat = 60 / tempo;
+    const lookaheadBeats = 4;
+    const lookaheadTime = (lookaheadBeats * secondsPerBeat) / speed;
+    const hitZoneFromBottom = 64;
+    const travelHeight = Math.max(160, containerHeight - hitZoneFromBottom);
     const visibleNotes: FallingNote[] = [];
+    let beatOffset = 0;
+    const laneTime = isPlaying ? currentTime : 0;
 
-    notes.forEach((note, index) => {
-      const noteTime = getNoteTime(index);
-      const timeUntilNote = noteTime - currentTime;
+    notes.slice(currentNoteIndex, currentNoteIndex + 6).forEach((note, visibleIndex) => {
+      const index = currentNoteIndex + visibleIndex;
+      const noteTime = (beatOffset * secondsPerBeat) / speed;
+      const timeUntilNote = noteTime - laneTime;
+      const isCurrentTarget = visibleIndex === 0;
 
-      if (timeUntilNote > 0 && timeUntilNote < lookaheadTime) {
-        const y = (timeUntilNote / lookaheadTime) * containerHeight;
+      if (isCurrentTarget || (timeUntilNote >= 0 && timeUntilNote <= lookaheadTime)) {
+        const progress = isCurrentTarget
+          ? Math.min(laneTime / Math.max(secondsPerBeat / speed, 0.1), 1)
+          : Math.max(0, Math.min((lookaheadTime - timeUntilNote) / lookaheadTime, 1));
+        const y = isPlaying ? progress * travelHeight : 28 + visibleIndex * 78;
         const noteName = note.note.slice(0, -1);
         visibleNotes.push({
           note: note.note,
           hand: note.hand,
+          index,
           startTime: noteTime,
           duration: note.duration,
           y,
           color: noteColors[noteName as keyof typeof noteColors] || handColors[note.hand],
         });
       }
+
+      beatOffset += note.duration;
     });
 
     setFallingNotes(visibleNotes);
-  }, [notes, tempo, isPlaying, currentTime, containerHeight, speed]);
+  }, [notes, tempo, isPlaying, currentTime, currentNoteIndex, containerHeight, speed]);
 
   // Handle note hit detection
   const handleNoteHit = (note: string) => {
     const hitZone = 50; // pixels from bottom
     const hitNote = fallingNotes.find(
-      (fn) => fn.note === note && Math.abs(fn.y - (containerHeight - hitZone)) < 30
+      (fn) => fn.note === note && Math.abs(fn.y - (containerHeight - hitZone)) < 42
     );
 
     if (hitNote) {
       onNoteHit(note);
-      setFallingNotes((prev) => prev.filter((fn) => fn.note !== note || fn.y !== hitNote.y));
+      setFallingNotes((prev) => prev.filter((fn) => fn.index !== hitNote.index));
     }
   };
 
   // Handle missed notes
   useEffect(() => {
-    const missedNotes = fallingNotes.filter((fn) => fn.y < -50);
+    const missedNotes = fallingNotes.filter((fn) => fn.y > containerHeight + 50);
     missedNotes.forEach((mn) => onNoteMiss(mn.note));
   }, [fallingNotes, onNoteMiss]);
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full bg-gradient-to-b from-purple-900 via-pink-800 to-yellow-700 rounded-xl overflow-hidden shadow-2xl"
-      style={{ height: containerHeight }}
+      className="relative w-full bg-gradient-to-b from-slate-950 via-sky-900 to-slate-800 rounded-xl overflow-hidden shadow-2xl"
+      style={{ height: 'clamp(280px, 42vh, 420px)' }}
     >
       {/* Animated background */}
       <div className="absolute inset-0 opacity-20">
@@ -129,7 +146,7 @@ export default function FallingNotes({
 
       {/* Hit line */}
       <motion.div
-        className="absolute bottom-12 left-0 right-0 h-2 bg-white/50 border-t-4 border-dashed border-white shadow-lg"
+        className="absolute bottom-16 left-0 right-0 h-2 bg-white/50 border-t-4 border-dashed border-white shadow-lg"
         animate={{
           boxShadow: [
             '0 0 20px rgba(255,255,255,0.3)',
@@ -144,24 +161,29 @@ export default function FallingNotes({
         animate={{ scale: [1, 1.1, 1] }}
         transition={{ duration: 1, repeat: Infinity }}
       >
-        🎵 Hit Here! 🎵
+        Press when it reaches here
       </motion.div>
+
+      {!isPlaying && (
+        <div className="absolute inset-x-4 top-4 z-10 rounded-2xl bg-white/12 px-4 py-3 text-center font-bold text-white backdrop-blur-sm">
+          Press Start to make the note fall.
+        </div>
+      )}
 
       {/* Falling notes */}
       <AnimatePresence>
-        {fallingNotes.map((fn, index) => (
+        {fallingNotes.map((fn) => (
           <motion.div
-            key={`${fn.note}-${fn.startTime}-${index}`}
-            initial={{ y: -50, opacity: 0, scale: 0.8 }}
+            key={`${fn.note}-${fn.index}`}
+            initial={{ y: -48, opacity: 0, scale: 0.9 }}
             animate={{ y: fn.y, opacity: 1, scale: 1 }}
             exit={{ y: containerHeight + 50, opacity: 0, scale: 0.8 }}
-            transition={{ 
-              type: 'spring', 
-              stiffness: 50, 
-              damping: 15,
-              duration: 0.5 / speed
+            transition={{
+              type: 'tween',
+              ease: 'linear',
+              duration: isPlaying ? 0.08 : 0.2,
             }}
-            className="absolute left-1/2 -translate-x-1/2 w-12 h-20 rounded-2xl shadow-2xl border-4 border-white/30"
+            className="absolute top-0 left-1/2 h-16 w-11 -translate-x-1/2 rounded-2xl border-4 border-white/30 shadow-2xl md:h-20 md:w-12"
             style={{
               backgroundColor: fn.color,
               left: `${getNoteXPosition(fn.note)}%`,
@@ -170,7 +192,7 @@ export default function FallingNotes({
             {/* Note label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white font-black text-lg drop-shadow-md">
               <span>{fn.note}</span>
-              <span className="text-xs font-normal">{fn.hand === 'left' ? '👈' : '👉'}</span>
+              <span className="text-xs font-normal">{fn.hand}</span>
             </div>
             
             {/* Glow effect */}
@@ -195,10 +217,10 @@ export default function FallingNotes({
                     : 'w-10 h-full bg-gradient-to-b from-white to-gray-200 border-r-2 border-gray-300 rounded-b-lg shadow-md'
                 }`}
                 style={{ left: `${(i / 52) * 100}%` }}
-                onClick={() => handleNoteHit(getNoteFromIndex(i))}
+                onClick={() => handleNoteHit(getNoteFromWhiteKeyIndex(i))}
               >
                 <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-700">
-                  {getNoteFromIndex(i)}
+                  {getNoteFromWhiteKeyIndex(i)}
                 </span>
               </motion.button>
             );
@@ -216,21 +238,15 @@ export default function FallingNotes({
 
 // Helper functions
 function getNoteXPosition(note: string): number {
-  const noteIndex = getNoteIndex(note);
-  return (noteIndex / 52) * 100;
+  const noteIndex = Math.max(0, Math.min(87, getPianoNoteIndex(note)));
+  return ((noteIndex + 0.5) / 88) * 100;
 }
 
-function getNoteIndex(note: string): number {
-  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const noteName = note.slice(0, -1);
-  const octave = parseInt(note.slice(-1));
-  const noteIndex = notes.indexOf(noteName);
-  return (octave - 3) * 12 + noteIndex;
-}
-
-function getNoteFromIndex(index: number): string {
-  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const octave = Math.floor(index / 12) + 3;
-  const noteIndex = index % 12;
-  return `${notes[noteIndex]}${octave}`;
+function getNoteFromWhiteKeyIndex(index: number): string {
+  const whiteNotes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  const noteName = whiteNotes[index % whiteNotes.length];
+  const octave = noteName === 'A' || noteName === 'B'
+    ? Math.floor(index / whiteNotes.length)
+    : Math.floor(index / whiteNotes.length) + 1;
+  return `${noteName}${octave}`;
 }

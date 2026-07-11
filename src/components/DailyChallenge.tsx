@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Flame, Target, Clock, Award, Calendar } from 'lucide-react';
+import { useAppStore } from '../store/useAppStore';
+import { useUserProfileStore } from '../store/useUserProfileStore';
 
 interface DailyChallenge {
   id: string;
@@ -14,39 +15,45 @@ interface DailyChallenge {
 }
 
 export default function DailyChallenge() {
-  const [streak] = useState(3);
-  const [challenges, setChallenges] = useState<DailyChallenge[]>([
+  const { statistics } = useAppStore();
+  const { userProfile } = useUserProfileStore();
+  const goals = userProfile?.practiceGoals;
+  const streak = userProfile?.currentStreak ?? statistics.streak;
+  const practiceMinutes = Math.round(statistics.totalPracticeTime / 60);
+  const songsCompleted = statistics.songsCompleted.length;
+  const accuracy = statistics.notesPlayed > 0 ? statistics.accuracy : 0;
+  const challenges: DailyChallenge[] = [
     {
-      id: 'practice-10-min',
-      title: 'Practice for 10 minutes',
-      description: 'Practice any song for 10 minutes today',
-      target: 10,
-      current: 7,
+      id: 'practice-minutes',
+      title: `Practice for ${goals?.dailyMinutes ?? 0} minutes`,
+      description: 'Practice time counted from real lesson play',
+      target: goals?.dailyMinutes ?? 0,
+      current: practiceMinutes,
       reward: 50,
-      completed: false,
+      completed: goals ? practiceMinutes >= goals.dailyMinutes : false,
       icon: 'clock',
     },
     {
-      id: 'complete-3-songs',
-      title: 'Complete 3 songs',
-      description: 'Finish playing 3 different songs',
-      target: 3,
-      current: 1,
+      id: 'complete-songs',
+      title: `Complete ${goals?.weeklySongs ?? 0} songs`,
+      description: 'Finished songs counted from completed lessons',
+      target: goals?.weeklySongs ?? 0,
+      current: songsCompleted,
       reward: 100,
-      completed: false,
+      completed: goals ? songsCompleted >= goals.weeklySongs : false,
       icon: 'target',
     },
     {
-      id: 'perfect-score',
-      title: 'Get 90%+ accuracy',
-      description: 'Achieve 90% accuracy on any song',
-      target: 90,
-      current: 75,
+      id: 'accuracy-goal',
+      title: `Reach ${goals?.monthlyAccuracy ?? 0}% accuracy`,
+      description: 'Accuracy updates after notes are played',
+      target: goals?.monthlyAccuracy ?? 0,
+      current: accuracy,
       reward: 150,
-      completed: false,
+      completed: goals ? accuracy >= goals.monthlyAccuracy : false,
       icon: 'award',
     },
-  ]);
+  ];
 
   const iconMap = {
     flame: Flame,
@@ -95,7 +102,7 @@ export default function DailyChallenge() {
       <div className="space-y-4">
         {challenges.map((challenge, index) => {
           const Icon = iconMap[challenge.icon];
-          const progress = Math.min((challenge.current / challenge.target) * 100, 100);
+          const progress = challenge.target > 0 ? Math.min((challenge.current / challenge.target) * 100, 100) : 0;
           
           return (
             <motion.div
@@ -171,22 +178,6 @@ export default function DailyChallenge() {
                 {challenge.completed && (
                   <div className="text-3xl">✅</div>
                 )}
-                {progress >= 100 && !challenge.completed && (
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="text-2xl"
-                    onClick={() => {
-                      setChallenges(prev =>
-                        prev.map(c =>
-                          c.id === challenge.id ? { ...c, completed: true } : c
-                        )
-                      );
-                    }}
-                  >
-                    🎁
-                  </motion.button>
-                )}
               </div>
             </motion.div>
           );
@@ -203,7 +194,7 @@ export default function DailyChallenge() {
             
             return (
               <div
-                key={day}
+                key={`${day}-${index}`}
                 className={`flex-1 text-center py-2 rounded-lg ${
                   isCompleted
                     ? 'bg-orange-500 text-white'
