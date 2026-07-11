@@ -261,10 +261,10 @@ export default function TutorialsPage() {
                     <iframe 
                       width="100%" 
                       height="100%" 
-                      src={`https://www.youtube.com/embed/${selectedTutorial.videoId}?controls=1`} 
+                      src={`https://www.youtube.com/embed/${selectedTutorial.videoId}?controls=1&autoplay=1`} 
                       title="YouTube video player" 
                       frameBorder="0" 
-                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                      allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                       allowFullScreen
                     />
                   </div>

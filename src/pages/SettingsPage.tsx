@@ -37,7 +37,7 @@ const PRACTICE_FREQUENCY: { value: PracticeFrequency; label: string; description
 const GENRES = ['Classical', 'Pop', 'Jazz', 'Rock', 'Country', 'Hip Hop', 'R&B', 'Electronic', 'Film Music', 'Musicals'];
 
 type ToggleSetting = {
-  key: 'showKeyboardLabels' | 'showNoteNames' | 'useSharps' | 'darkMode';
+  key: 'showKeyboardLabels' | 'showNoteNames' | 'useSharps' | 'darkMode' | 'backgroundMusic';
   label: string;
   type: 'toggle';
 };
@@ -142,6 +142,11 @@ export default function SettingsPage() {
       icon: Volume2,
       color: 'from-blue-500 to-indigo-500',
       settings: [
+        {
+          key: 'backgroundMusic',
+          label: 'Background Music',
+          type: 'toggle' as const,
+        },
         {
           key: 'audioVolume',
           label: 'Audio Volume',

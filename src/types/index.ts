@@ -76,6 +76,7 @@ export interface Settings {
   };
   highPerformanceGraphics?: boolean;
   claudeApiKey?: string;
+  backgroundMusic?: boolean;
 }
 
 export interface MIDIDevice {
@@ -114,8 +115,17 @@ export interface RecommendedTrack {
 }
 
 export interface AppState {
-  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator';
+  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator' | 'rhythm-training';
   currentLesson: Lesson | null;
   isPlaying: boolean;
   tempo: number;
+}
+
+export interface RhythmExercise {
+  id: string;
+  name: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  timeSignature: [number, number]; // e.g., [4, 4]
+  tempo: number;
+  sequence: { type: 'note' | 'rest'; duration: number }[]; // duration in beats (e.g., 1 for quarter, 0.5 for eighth)
 }
