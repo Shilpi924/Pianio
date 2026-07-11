@@ -8,6 +8,7 @@ interface PianoKeyboardProps {
   onNoteOn?: (note: string, midi: number) => void;
   onNoteOff?: (note: string, midi: number) => void;
   highlightedNotes?: string[];
+  activeFingers?: { note: string; finger: number; hand: string }[];
   disabled?: boolean;
 }
 
@@ -15,6 +16,7 @@ export default function PianoKeyboard({
   onNoteOn,
   onNoteOff,
   highlightedNotes = [],
+  activeFingers = [],
   disabled = false,
 }: PianoKeyboardProps) {
   const { settings } = useAppStore();
@@ -103,6 +105,7 @@ export default function PianoKeyboard({
       <div className="relative mx-auto" style={{ width: `${totalWidth}px`, height: '160px' }}>
         {notePositions.map(({ note, isBlack, position }) => {
           const state = getKeyState(note);
+          const activeFinger = activeFingers.find((f) => f.note === note);
 
           return (
             <div
@@ -122,6 +125,7 @@ export default function PianoKeyboard({
                 showLabel={settings.showKeyboardLabels}
                 showNoteName={settings.showNoteNames}
                 disabled={disabled}
+                finger={activeFinger}
               />
             </div>
           );

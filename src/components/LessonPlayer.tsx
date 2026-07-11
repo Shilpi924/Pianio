@@ -736,6 +736,11 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         <PianoKeyboard
           onNoteOn={(note) => handleNotePlayed(note)}
           highlightedNotes={highlightedNotes}
+          activeFingers={
+            showGhostHand && currentNote && currentNote.finger
+              ? [{ note: currentNote.note, finger: currentNote.finger, hand: currentNote.hand }]
+              : []
+          }
           disabled={!isPlaying}
         />
       </div>

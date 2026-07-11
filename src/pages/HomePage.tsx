@@ -1,214 +1,137 @@
-import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, BarChart3, Library, Music2, Play, Settings, Volume2 } from 'lucide-react';
-import DailyChallenge from '../components/DailyChallenge';
+import { Play, Music, Library, Sparkles, Piano, Settings, Award } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import ProfileSwitcher from '../components/ProfileSwitcher';
-import { getEnhancedLessons } from '../services/musicCatalogService';
-import { audioService } from '../services/audioService';
-import type { Lesson } from '../types';
-
-const allLessons = getEnhancedLessons();
-const starterLessons = allLessons.filter((lesson) => lesson.difficulty === 'beginner').slice(0, 3);
 
 export default function HomePage() {
-  const { setCurrentView, setCurrentLesson, lessonProgress, statistics } = useAppStore();
+  const { setCurrentView } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
-  const [selectedLesson, setSelectedLesson] = useState<Lesson>(starterLessons[0] ?? allLessons[0]);
-  const [isPreviewing, setIsPreviewing] = useState(false);
-  const previewTimers = useRef<number[]>([]);
-
-  const startLesson = (lesson: Lesson) => {
-    stopPreview();
-    setCurrentLesson(lesson);
-    setCurrentView('lesson');
-  };
-
-  const stopPreview = () => {
-    previewTimers.current.forEach((timer) => window.clearTimeout(timer));
-    previewTimers.current = [];
-    audioService.stopAllNotes();
-    setIsPreviewing(false);
-  };
-
-  const previewLesson = async (lesson: Lesson) => {
-    stopPreview();
-    setSelectedLesson(lesson);
-    await audioService.initialize();
-    setIsPreviewing(true);
-
-    let delay = 0;
-    lesson.notes.forEach((note, index) => {
-      const timer = window.setTimeout(() => {
-        audioService.playNote(note.note, '8n');
-        if (index === lesson.notes.length - 1) {
-          const doneTimer = window.setTimeout(() => setIsPreviewing(false), 800);
-          previewTimers.current.push(doneTimer);
-        }
-      }, delay);
-      previewTimers.current.push(timer);
-      delay += (60 / lesson.tempo) * 1000 * note.duration;
-    });
-  };
-
-  const activeProgress = lessonProgress[selectedLesson.id];
-  const progressPercent = activeProgress
-    ? Math.round((activeProgress.currentNoteIndex / selectedLesson.notes.length) * 100)
-    : 0;
 
   return (
-    <div className="min-h-screen bg-[#f8fbff] p-4 text-slate-950 md:p-8">
+    <div className="min-h-screen bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] md:p-8">
       <motion.main
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-6xl space-y-6"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="mx-auto max-w-5xl space-y-8"
       >
-        <header className="mb-8 flex flex-col items-start justify-between gap-4 md:mb-12 md:flex-row md:items-center">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-5xl">
-              Hi, {userProfile?.name || 'Pianist'}! 🎹
+        {/* Header */}
+        <header className="flex flex-col items-center justify-between gap-6 md:flex-row md:items-center">
+          <div className="text-center md:text-left">
+            <motion.div
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mb-2 inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-bold text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+            >
+              <Sparkles className="h-4 w-4" />
+              Let's make some music!
+            </motion.div>
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white md:text-6xl">
+              Hello, {userProfile?.name || 'Pianist'}! 🎹
             </h1>
-            <p className="mt-2 text-lg text-slate-600">Ready for your next musical adventure?</p>
           </div>
-          <div className="flex w-full items-center justify-between md:w-auto md:justify-end gap-3">
+          <div className="flex items-center gap-3">
             <ProfileSwitcher />
           </div>
         </header>
 
-        <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 md:p-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
-            <div className="flex flex-col justify-between gap-8">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full bg-sky-100 px-4 py-2 text-sm font-bold text-sky-800">
-                  <Music2 className="h-4 w-4" />
-                  Pick a song. Hear it. Play the glowing key.
-                </div>
-                <div>
-                  <h1 className="text-4xl font-black tracking-normal text-slate-950 md:text-6xl">
-                    Learn piano one note at a time.
-                  </h1>
-                  <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
-                    Start with a familiar song. Pianio plays the melody, then waits while the child
-                    presses each highlighted key.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <button
-                  onClick={() => previewLesson(selectedLesson)}
-                  className="inline-flex min-h-16 items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-5 py-4 text-lg font-black text-white shadow-sm transition-colors hover:bg-emerald-600"
-                >
-                  <Volume2 className="h-6 w-6" />
-                  {isPreviewing ? 'Playing song' : 'Hear the song'}
-                </button>
-                <button
-                  onClick={() => startLesson(selectedLesson)}
-                  className="inline-flex min-h-16 items-center justify-center gap-3 rounded-2xl bg-slate-950 px-5 py-4 text-lg font-black text-white shadow-sm transition-colors hover:bg-slate-800"
-                >
-                  <Play className="h-6 w-6" />
-                  Start lesson
-                </button>
-              </div>
+        {/* Big Action Grid */}
+        <section className="grid gap-6 md:grid-cols-2">
+          {/* Main Play Action */}
+          <button
+            onClick={() => setCurrentView('free-play')}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sky-400 to-indigo-500 p-8 text-left shadow-xl shadow-indigo-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[280px]"
+          >
+            <div className="absolute right-0 top-0 -mr-8 -mt-8 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
+              <Piano className="h-64 w-64 text-white" />
             </div>
-
-            <div className="rounded-3xl bg-sky-50 p-5 ring-1 ring-sky-100">
-              <div className="text-sm font-bold uppercase tracking-normal text-sky-700">Today song</div>
-              <h2 className="mt-2 text-3xl font-black text-slate-950">{selectedLesson.title}</h2>
-              <p className="mt-3 leading-7 text-slate-600">
-                {selectedLesson.synopsis ?? 'A short starter song for practicing simple piano notes.'}
+            <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
+              <Piano className="h-8 w-8" />
+            </div>
+            <div className="relative z-10 mt-12 text-white">
+              <h2 className="text-4xl font-black tracking-tight">Free Play</h2>
+              <p className="mt-2 text-lg font-medium text-white/80">
+                Just jam! No rules, just you and the piano.
               </p>
-              <div className="mt-5 grid grid-cols-3 gap-3">
-                <SimpleMetric label="Notes" value={`${selectedLesson.notes.length}`} />
-                <SimpleMetric label="Speed" value={`${selectedLesson.tempo}`} />
-                <SimpleMetric label="Done" value={`${progressPercent}%`} />
-              </div>
-              <div className="mt-5 rounded-2xl bg-white p-4 text-sm leading-6 text-slate-600">
-                In the lesson, the blue key is the next key to press. If Wait mode is on, the app
-                does not move ahead until the right note is played.
-              </div>
             </div>
-          </div>
-        </section>
+          </button>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          {starterLessons.map((lesson) => (
-            <button
-              key={lesson.id}
-              onClick={() => {
-                stopPreview();
-                setSelectedLesson(lesson);
-              }}
-              className={`rounded-2xl p-5 text-left shadow-sm ring-1 transition-colors ${
-                selectedLesson.id === lesson.id
-                  ? 'bg-slate-950 text-white ring-slate-950'
-                  : 'bg-white text-slate-950 ring-slate-200 hover:ring-sky-300'
-              }`}
-            >
-              <div className="text-sm font-bold uppercase tracking-normal opacity-70">Starter song</div>
-              <h3 className="mt-2 text-xl font-black">{lesson.title}</h3>
-              <p className={`mt-3 text-sm leading-6 ${selectedLesson.id === lesson.id ? 'text-slate-200' : 'text-slate-600'}`}>
-                {lesson.practiceTip ?? 'Listen once, then copy the highlighted notes.'}
+          {/* Library Action */}
+          <button
+            onClick={() => setCurrentView('lesson')}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-rose-400 to-orange-400 p-8 text-left shadow-xl shadow-orange-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[280px]"
+          >
+            <div className="absolute right-0 top-0 -mr-8 -mt-8 opacity-20 transition-transform duration-700 group-hover:-rotate-12 group-hover:scale-110">
+              <Music className="h-64 w-64 text-white" />
+            </div>
+            <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
+              <Library className="h-8 w-8" />
+            </div>
+            <div className="relative z-10 mt-12 text-white">
+              <h2 className="text-4xl font-black tracking-tight">Song Library</h2>
+              <p className="mt-2 text-lg font-medium text-white/80">
+                Learn your favorite songs step-by-step.
               </p>
-              <div className="mt-4 inline-flex items-center gap-2 text-sm font-bold">
-                Choose song
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </button>
-          ))}
+            </div>
+          </button>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[1fr_320px]">
-          <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="mb-4 text-sm font-bold uppercase tracking-normal text-slate-500">More places</div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <NavButton icon={Library} label="Song library" onClick={() => setCurrentView('lesson')} />
-              <NavButton icon={BarChart3} label="Progress" onClick={() => setCurrentView('statistics')} />
-              <NavButton icon={Settings} label="Settings" onClick={() => setCurrentView('settings')} />
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="text-sm font-bold uppercase tracking-normal text-slate-500">Parent snapshot</div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <SimpleMetric label="Minutes" value={`${Math.round(statistics.totalPracticeTime / 60)}`} />
-              <SimpleMetric label="Streak" value={`${userProfile?.currentStreak ?? 0}`} />
-            </div>
-          </div>
+        {/* Secondary Options */}
+        <section className="grid gap-6 sm:grid-cols-3">
+          <SecondaryCard
+            icon={Play}
+            title="Tutorials"
+            subtitle="Learn the basics"
+            color="from-emerald-400 to-teal-500"
+            onClick={() => setCurrentView('tutorials')}
+          />
+          <SecondaryCard
+            icon={Award}
+            title="My Progress"
+            subtitle="See your achievements"
+            color="from-purple-400 to-fuchsia-500"
+            onClick={() => setCurrentView('statistics')}
+          />
+          <SecondaryCard
+            icon={Settings}
+            title="Settings"
+            subtitle="Tweak your piano"
+            color="from-slate-400 to-slate-600"
+            onClick={() => setCurrentView('settings')}
+          />
         </section>
-
-        <DailyChallenge />
       </motion.main>
     </div>
   );
 }
 
-function SimpleMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-white p-3 text-center ring-1 ring-slate-200">
-      <div className="text-xl font-black text-slate-950">{value}</div>
-      <div className="text-xs font-bold uppercase tracking-normal text-slate-500">{label}</div>
-    </div>
-  );
-}
-
-function NavButton({
+function SecondaryCard({
   icon: Icon,
-  label,
+  title,
+  subtitle,
+  color,
   onClick,
 }: {
-  icon: typeof Library;
-  label: string;
+  icon: any;
+  title: string;
+  subtitle: string;
+  color: string;
   onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
-      className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 font-bold text-slate-800 transition-colors hover:bg-slate-200"
+      className={`group flex items-center gap-4 rounded-3xl bg-gradient-to-br ${color} p-6 text-left text-white shadow-lg shadow-slate-200 transition-transform hover:scale-105 dark:shadow-none`}
     >
-      <Icon className="h-5 w-5" />
-      {label}
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md">
+        <Icon className="h-6 w-6 text-white transition-transform group-hover:scale-110" />
+      </div>
+      <div>
+        <h3 className="text-xl font-black">{title}</h3>
+        <p className="text-sm font-medium text-white/80">{subtitle}</p>
+      </div>
     </button>
   );
 }

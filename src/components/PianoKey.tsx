@@ -12,6 +12,7 @@ interface PianoKeyProps {
   disabled?: boolean;
   showFeedback?: boolean;
   feedbackType?: 'correct' | 'incorrect';
+  finger?: { finger: number; hand: string };
 }
 
 const keyStateStyles: Record<KeyState, string> = {
@@ -34,6 +35,7 @@ export default function PianoKey({
   disabled = false,
   showFeedback = false,
   feedbackType = 'correct',
+  finger,
 }: PianoKeyProps) {
   const baseClasses = isBlack
     ? 'absolute z-10 w-8 h-24 bg-gray-900 rounded-b-lg shadow-lg hover:bg-gray-800 transition-colors'
@@ -77,8 +79,15 @@ export default function PianoKey({
       )}
       {showLabel && !isBlack && (
         <span className="absolute top-2 left-1/2 -translate-x-1/2 text-xs text-gray-400">
-          {note.slice(0, -1)}
+          <div className="text-xs font-bold">{note.replace(/\d/, '')}</div>
         </span>
+      )}
+
+      {/* Finger Placement Guide */}
+      {finger && (
+        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full text-xs font-black text-white shadow-md z-20 ${finger.hand === 'right' ? 'bg-blue-500' : 'bg-red-500'}`}>
+          {finger.finger}
+        </div>
       )}
 
       {/* Visual Feedback Animations */}
