@@ -1,8 +1,8 @@
-import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import { useAppStore } from '../store/useAppStore';
 
 const getApiKey = () => {
-  return useAppStore.getState().settings.geminiApiKey || import.meta.env.VITE_GEMINI_API_KEY || '';
+  return useAppStore.getState().settings.claudeApiKey || import.meta.env.VITE_CLAUDE_API_KEY || '';
 };
 
 const SYSTEM_INSTRUCTION = `You are Pianio Bot, the incredibly helpful, encouraging, and highly knowledgeable AI assistant built directly into the Pianio app. Your job is twofold:
@@ -34,29 +34,22 @@ const SYSTEM_INSTRUCTION = `You are Pianio Bot, the incredibly helpful, encourag
 If a user asks how to do something in the app, give them clear, step-by-step instructions based on the features above.`;
 
 class AIService {
-  private chatSession: ChatSession | null = null;
+  private anthropic: Anthropic | null = null;
+  private history: Anthropic.MessageParam[] = [];
 
   initializeChat() {
     const key = getApiKey();
     if (!key) {
-      console.error('Gemini API key is missing. Please add VITE_GEMINI_API_KEY to your environment variables or app settings.');
+      console.error('Claude API key is missing. Please add VITE_CLAUDE_API_KEY to your environment variables or app settings.');
       return;
     }
 
     try {
-      const genAI = new GoogleGenerativeAI(key);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
-        systemInstruction: SYSTEM_INSTRUCTION,
+      this.anthropic = new Anthropic({
+        apiKey: key,
+        dangerouslyAllowBrowser: true,
       });
-
-      this.chatSession = model.startChat({
-        history: [],
-        generationConfig: {
-          maxOutputTokens: 1000,
-          temperature: 0.7,
-        },
-      });
+      this.history = [];
     } catch (error) {
       console.error('Failed to initialize AI Chat Session:', error);
     }
@@ -65,22 +58,37 @@ class AIService {
   async sendMessage(message: string): Promise<string> {
     const key = getApiKey();
     if (!key) {
-      return "I'm sorry, my AI brain isn't connected right now! Ask a grown-up to add the `VITE_GEMINI_API_KEY` to the app settings.";
+      return "I'm sorry, my AI brain isn't connected right now! Ask a grown-up to add the `VITE_CLAUDE_API_KEY` to the app settings.";
     }
 
-    if (!this.chatSession) {
+    if (!this.anthropic) {
       this.initializeChat();
     }
 
-    if (!this.chatSession) {
+    if (!this.anthropic) {
       return "I ran into a problem starting up. Please try again later!";
     }
 
     try {
-      const result = await this.chatSession.sendMessage(message);
-      return result.response.text();
+      this.history.push({ role: 'user', content: message });
+
+      const msg = await this.anthropic.messages.create({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 1000,
+        temperature: 0.7,
+        system: SYSTEM_INSTRUCTION,
+        messages: this.history,
+      });
+
+      const text = msg.content[0].type === 'text' ? msg.content[0].text : "I couldn't generate a text response.";
+      
+      this.history.push({ role: 'assistant', content: text });
+      
+      return text;
     } catch (error: any) {
       console.error('AI Send Message Error:', error);
+      // Remove the last user message if there was an error
+      this.history.pop();
       return "Oops, I got a little confused just now. Could you ask that again?";
     }
   }

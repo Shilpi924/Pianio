@@ -75,7 +75,7 @@ export interface Settings {
     pinky: string;
   };
   highPerformanceGraphics?: boolean;
-  geminiApiKey?: string;
+  claudeApiKey?: string;
 }
 
 export interface MIDIDevice {

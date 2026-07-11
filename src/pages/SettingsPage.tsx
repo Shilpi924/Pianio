@@ -43,7 +43,7 @@ type ToggleSetting = {
 };
 
 type StringSetting = {
-  key: 'geminiApiKey';
+  key: 'claudeApiKey';
   label: string;
   type: 'string';
   placeholder?: string;
@@ -173,8 +173,8 @@ export default function SettingsPage() {
       color: 'from-slate-700 to-slate-900',
       settings: [
         {
-          key: 'geminiApiKey',
-          label: 'Gemini API Key',
+          key: 'claudeApiKey',
+          label: 'Claude API Key',
           type: 'string' as const,
           placeholder: 'AI will not work without it',
           description: 'Required for the Pianio AI Assistant to work on hosted versions.',
