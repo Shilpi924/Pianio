@@ -294,19 +294,15 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         if (Math.abs(timeDiff) < tolerance * 0.5) {
           feedback = 'perfect';
           score = 100;
-          SoundEffects.playCorrect();
         } else if (Math.abs(timeDiff) < tolerance) {
           feedback = 'good';
           score = 80;
-          SoundEffects.playCorrect();
         } else if (timeDiff < 0) {
           feedback = 'early';
           score = 50;
-          SoundEffects.playIncorrect();
         } else {
           feedback = 'late';
           score = 50;
-          SoundEffects.playIncorrect();
         }
 
         setTimingFeedback(feedback);
