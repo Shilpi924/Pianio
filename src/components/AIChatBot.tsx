@@ -145,6 +145,7 @@ export default function AIChatBot() {
                 <button
                   onClick={handleSend}
                   disabled={!input.trim() || isTyping}
+                  aria-label="Send message"
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white transition-colors hover:bg-sky-600 disabled:bg-slate-300 dark:disabled:bg-slate-700"
                 >
                   <Send className="h-5 w-5" />
