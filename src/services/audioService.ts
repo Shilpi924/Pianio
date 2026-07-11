@@ -1,27 +1,50 @@
 import * as Tone from 'tone';
 
-// A piano-like synth using FM synthesis layered with a pluck envelope.
-// Each octave gets progressively brighter and shorter decay — just like a real piano.
-function buildPianoSynth(): Tone.PolySynth {
-  return new Tone.PolySynth(Tone.Synth, {
-    oscillator: {
-      // Sine base + 3rd harmonic partial gives a warm, piano-like tone
-      type: 'custom',
-      partials: [1, 0, 0.4, 0, 0.1, 0, 0.05],
-    },
-    envelope: {
-      attack: 0.005,    // Very fast attack — like a hammer strike
-      decay: 0.8,       // Noticeable string decay
-      sustain: 0.15,    // Low sustain (piano strings don't "hold" like organ pipes)
-      release: 1.2,     // Natural ring-off
-    },
-  });
-}
+// ---------------------------------------------------------------------------
+// Salamander Grand Piano — open-licensed samples (CC BY 3.0)
+// Source: https://gleitz.github.io/midi-js-soundfonts/
+// Tone.Sampler automatically pitch-shifts neighbouring samples to fill gaps.
+// ---------------------------------------------------------------------------
+const SAMPLE_BASE = 'https://gleitz.github.io/midi-js-soundfonts/MusyngKite/acoustic_grand_piano-mp3/';
+
+const SAMPLE_URLS: Record<string, string> = {
+  A0:  `${SAMPLE_BASE}A0.mp3`,
+  C1:  `${SAMPLE_BASE}C1.mp3`,
+  'D#1': `${SAMPLE_BASE}Ds1.mp3`,
+  'F#1': `${SAMPLE_BASE}Fs1.mp3`,
+  A1:  `${SAMPLE_BASE}A1.mp3`,
+  C2:  `${SAMPLE_BASE}C2.mp3`,
+  'D#2': `${SAMPLE_BASE}Ds2.mp3`,
+  'F#2': `${SAMPLE_BASE}Fs2.mp3`,
+  A2:  `${SAMPLE_BASE}A2.mp3`,
+  C3:  `${SAMPLE_BASE}C3.mp3`,
+  'D#3': `${SAMPLE_BASE}Ds3.mp3`,
+  'F#3': `${SAMPLE_BASE}Fs3.mp3`,
+  A3:  `${SAMPLE_BASE}A3.mp3`,
+  C4:  `${SAMPLE_BASE}C4.mp3`,
+  'D#4': `${SAMPLE_BASE}Ds4.mp3`,
+  'F#4': `${SAMPLE_BASE}Fs4.mp3`,
+  A4:  `${SAMPLE_BASE}A4.mp3`,
+  C5:  `${SAMPLE_BASE}C5.mp3`,
+  'D#5': `${SAMPLE_BASE}Ds5.mp3`,
+  'F#5': `${SAMPLE_BASE}Fs5.mp3`,
+  A5:  `${SAMPLE_BASE}A5.mp3`,
+  C6:  `${SAMPLE_BASE}C6.mp3`,
+  'D#6': `${SAMPLE_BASE}Ds6.mp3`,
+  'F#6': `${SAMPLE_BASE}Fs6.mp3`,
+  A6:  `${SAMPLE_BASE}A6.mp3`,
+  C7:  `${SAMPLE_BASE}C7.mp3`,
+  'D#7': `${SAMPLE_BASE}Ds7.mp3`,
+  'F#7': `${SAMPLE_BASE}Fs7.mp3`,
+  A7:  `${SAMPLE_BASE}A7.mp3`,
+  C8:  `${SAMPLE_BASE}C8.mp3`,
+};
 
 class AudioService {
-  private synth: Tone.PolySynth | null = null;
+  private sampler: Tone.Sampler | null = null;
   private reverb: Tone.Reverb | null = null;
   private initialized: boolean = false;
+  private samplesLoaded: boolean = false;
   private volume: number = 0.7;
 
   async initialize(): Promise<void> {
@@ -29,48 +52,74 @@ class AudioService {
 
     await Tone.start();
 
-    // Build reverb (acoustic room effect — makes it sound like a real instrument)
-    this.reverb = new Tone.Reverb({
-      decay: 1.5,
-      wet: 0.25,
-    }).toDestination();
+    // Subtle room reverb — makes the piano sound like it's in a room
+    this.reverb = new Tone.Reverb({ decay: 1.8, wet: 0.2 }).toDestination();
 
-    // Build the piano-like polyphonic synth and route through reverb
-    this.synth = buildPianoSynth();
-    this.synth.connect(this.reverb);
+    // Load real grand piano samples. Sampler pitch-shifts between anchor notes
+    // so every key sounds like the actual recorded instrument.
+    return new Promise<void>((resolve) => {
+      this.sampler = new Tone.Sampler({
+        urls: SAMPLE_URLS,
+        onload: () => {
+          this.samplesLoaded = true;
+          this.initialized = true;
+          resolve();
+        },
+        onerror: (err) => {
+          console.warn('Piano samples failed to load, falling back to synth:', err);
+          // Fallback: build a decent FM synth if samples fail
+          this.sampler = null;
+          this._buildFallbackSynth();
+          this.initialized = true;
+          resolve();
+        },
+      }).connect(this.reverb!);
 
-    this.setVolume(this.volume);
-    this.initialized = true;
+      this.setVolume(this.volume);
+    });
+  }
+
+  /** Fallback synth used when samples can't load (e.g. offline) */
+  private _buildFallbackSynth() {
+    const synth = new Tone.PolySynth(Tone.FMSynth, {
+      harmonicity: 3.01,
+      modulationIndex: 14,
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 1.2 },
+      modulation: { type: 'square' },
+      modulationEnvelope: { attack: 0.002, decay: 0.2, sustain: 0, release: 0.2 },
+    });
+    // Wrap in the same interface
+    (this as any).sampler = synth;
   }
 
   playNote(note: string, duration: string = '8n'): void {
-    if (!this.synth || !this.initialized) return;
-
-    // Scale decay based on octave: higher octaves decay faster (like a real piano)
-    const octave = parseInt(note.slice(-1), 10);
-    if (!isNaN(octave)) {
-      // Octave 2-3: slow decay, 6-7: fast bright decay
-      const decayTime = Math.max(0.2, 1.2 - (octave - 2) * 0.15);
-      this.synth.set({ envelope: { decay: decayTime } });
+    if (!this.initialized) return;
+    try {
+      this.sampler?.triggerAttackRelease(note, duration);
+    } catch {
+      // Sampler may not have that exact note — silent fail
     }
-
-    this.synth.triggerAttackRelease(note, duration);
   }
 
   playNotes(notes: string[], duration: string = '8n'): void {
-    if (!this.synth || !this.initialized) return;
-    this.synth.triggerAttackRelease(notes, duration);
+    if (!this.initialized) return;
+    try {
+      this.sampler?.triggerAttackRelease(notes, duration);
+    } catch {
+      // silent fail
+    }
   }
 
   stopAllNotes(): void {
-    if (!this.synth || !this.initialized) return;
-    this.synth.releaseAll();
+    if (!this.initialized) return;
+    this.sampler?.releaseAll();
   }
 
   setVolume(value: number): void {
     this.volume = value;
-    if (this.synth) {
-      this.synth.volume.value = Tone.gainToDb(value);
+    if (this.sampler) {
+      this.sampler.volume.value = Tone.gainToDb(value);
     }
   }
 
@@ -82,16 +131,17 @@ class AudioService {
     return this.initialized;
   }
 
+  isSamplesLoaded(): boolean {
+    return this.samplesLoaded;
+  }
+
   dispose(): void {
-    if (this.synth) {
-      this.synth.dispose();
-      this.synth = null;
-    }
-    if (this.reverb) {
-      this.reverb.dispose();
-      this.reverb = null;
-    }
+    this.sampler?.dispose();
+    this.reverb?.dispose();
+    this.sampler = null;
+    this.reverb = null;
     this.initialized = false;
+    this.samplesLoaded = false;
   }
 }
 

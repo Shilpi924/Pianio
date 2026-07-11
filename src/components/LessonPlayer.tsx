@@ -29,6 +29,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [tempo, setTempo] = useState(lesson.tempo);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+  const [samplesLoaded, setSamplesLoaded] = useState(false);
   const [highlightedNotes, setHighlightedNotes] = useState<string[]>([]);
   const [correctNotes, setCorrectNotes] = useState<Set<number>>(new Set());
   const [practiceMode, setPracticeMode] = useState<PracticeMode>('guided');
@@ -68,6 +69,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         try {
           await audioService.initialize();
           setIsAudioInitialized(true);
+          setSamplesLoaded(audioService.isSamplesLoaded());
         } catch {
           setMascotMood('thinking');
           setMascotMessage('Tap a sound button to turn on piano sound.');
@@ -410,6 +412,19 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
             className="fixed right-4 top-4 z-40 rounded-full bg-gradient-to-r from-orange-400 to-red-500 px-6 py-3 text-xl font-bold text-white shadow-lg"
           >
             🔥 {combo}x Combo!
+          </motion.div>
+        )}
+
+        {/* Piano samples loading banner */}
+        {isAudioInitialized && !samplesLoaded && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2 text-sm font-semibold text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+          >
+            <span className="animate-spin">🎹</span>
+            Loading real piano sounds… first note may take a moment.
           </motion.div>
         )}
 
