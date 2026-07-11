@@ -7,22 +7,20 @@ import * as Tone from 'tone';
 const SAMPLE_BASE = 'https://gleitz.github.io/midi-js-soundfonts/MusyngKite/acoustic_grand_piano-mp3/';
 
 const SAMPLE_URLS: Record<string, string> = {
-  A0: 'A0', C1: 'C1', Ds1: 'Ds1', Fs1: 'Fs1',
-  A1: 'A1', C2: 'C2', Ds2: 'Ds2', Fs2: 'Fs2',
-  A2: 'A2', C3: 'C3', Ds3: 'Ds3', Fs3: 'Fs3',
-  A3: 'A3', C4: 'C4', Ds4: 'Ds4', Fs4: 'Fs4',
-  A4: 'A4', C5: 'C5', Ds5: 'Ds5', Fs5: 'Fs5',
-  A5: 'A5', C6: 'C6', Ds6: 'Ds6', Fs6: 'Fs6',
-  A6: 'A6', C7: 'C7', Ds7: 'Ds7', Fs7: 'Fs7',
+  A0: 'A0', C1: 'C1', Eb1: 'Eb1', Gb1: 'Gb1',
+  A1: 'A1', C2: 'C2', Eb2: 'Eb2', Gb2: 'Gb2',
+  A2: 'A2', C3: 'C3', Eb3: 'Eb3', Gb3: 'Gb3',
+  A3: 'A3', C4: 'C4', Eb4: 'Eb4', Gb4: 'Gb4',
+  A4: 'A4', C5: 'C5', Eb5: 'Eb5', Gb5: 'Gb5',
+  A5: 'A5', C6: 'C6', Eb6: 'Eb6', Gb6: 'Gb6',
+  A6: 'A6', C7: 'C7', Eb7: 'Eb7', Gb7: 'Gb7',
   A7: 'A7', C8: 'C8',
 };
 
 
-// Build url map { 'C#4': 'https://...Cs4.mp3' }
 const urls: Record<string, string> = {};
 Object.keys(SAMPLE_URLS).forEach(k => {
-  const note = k.replace(/([A-G])s(\d)/, '$1#$2');
-  urls[note] = `${SAMPLE_BASE}${k}.mp3`;
+  urls[k] = `${SAMPLE_BASE}${k}.mp3`;
 });
 
 class AudioService {
