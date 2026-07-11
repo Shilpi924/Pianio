@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import PianoKey from './PianoKey';
 import { getAllNotesInRange, isBlackKey, noteToMidi } from '../utils/noteUtils';
 import type { KeyState } from '../types';
@@ -63,28 +63,45 @@ export default function PianoKeyboard({
     return 'idle';
   };
 
-  const allNotes = getAllNotesInRange('A0', 'C8');
+  const allNotes = getAllNotesInRange('C3', 'C6');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Calculate key positions for proper black key placement
-  const getKeyPosition = (index: number, isBlack: boolean): { left: number; marginLeft?: string } => {
+  // Pre-calculate positions to properly handle white vs black keys
+  let whiteKeyCount = 0;
+  const notePositions = allNotes.map((note) => {
+    const isBlack = isBlackKey(note);
+    let position;
+    
     if (!isBlack) {
-      return { left: index * 48 }; // White keys are 48px wide
+      position = { left: whiteKeyCount * 48 };
+      whiteKeyCount++;
+    } else {
+      position = {
+        left: (whiteKeyCount - 1) * 48 + 32,
+        marginLeft: '-16px'
+      };
     }
+    
+    return { note, isBlack, position };
+  });
 
-    // Black keys are positioned between white keys
-    const whiteKeyIndex = Math.floor(index / 2);
-    return {
-      left: whiteKeyIndex * 48 + 32, // Offset to center between white keys
-      marginLeft: '-16px', // Half of black key width to center
-    };
-  };
+  const totalWidth = whiteKeyCount * 48;
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      container.scrollLeft = (container.scrollWidth - container.clientWidth) / 2;
+    }
+  }, []);
 
   return (
-    <div className="relative w-full overflow-x-auto bg-gray-800 rounded-xl p-4 shadow-2xl">
-      <div className="relative" style={{ width: `${allNotes.length * 48}px`, height: '160px' }}>
-        {allNotes.map((note, index) => {
-          const isBlack = isBlackKey(note);
-          const position = getKeyPosition(index, isBlack);
+    <div 
+      ref={scrollContainerRef}
+      className="relative w-full overflow-x-auto bg-gray-800 rounded-xl p-4 shadow-2xl hide-scrollbar"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
+      <div className="relative mx-auto" style={{ width: `${totalWidth}px`, height: '160px' }}>
+        {notePositions.map(({ note, isBlack, position }) => {
           const state = getKeyState(note);
 
           return (
