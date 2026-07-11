@@ -42,6 +42,14 @@ type ToggleSetting = {
   type: 'toggle';
 };
 
+type StringSetting = {
+  key: 'geminiApiKey';
+  label: string;
+  type: 'string';
+  placeholder?: string;
+  description?: string;
+};
+
 type SliderSetting = {
   key: 'audioVolume' | 'animationSpeed';
   label: string;
@@ -51,7 +59,7 @@ type SliderSetting = {
   step: number;
 };
 
-type Setting = ToggleSetting | SliderSetting;
+type Setting = ToggleSetting | SliderSetting | StringSetting;
 
 export default function SettingsPage() {
   const { setCurrentView, settings, updateSettings } = useAppStore();
@@ -69,6 +77,10 @@ export default function SettingsPage() {
 
   const handleToggle = (key: ToggleSetting['key']) => {
     updateSettings({ [key]: !settings[key] });
+  };
+
+  const handleStringChange = (key: StringSetting['key'], value: string) => {
+    updateSettings({ [key]: value });
   };
 
   const handleSliderChange = (key: SliderSetting['key'], value: number) => {
@@ -152,6 +164,20 @@ export default function SettingsPage() {
           min: 0.5,
           max: 2,
           step: 0.1,
+        },
+      ] as Setting[],
+    },
+    {
+      title: 'Advanced',
+      icon: Sparkles,
+      color: 'from-slate-700 to-slate-900',
+      settings: [
+        {
+          key: 'geminiApiKey',
+          label: 'Gemini API Key',
+          type: 'string' as const,
+          placeholder: 'AI will not work without it',
+          description: 'Required for the Pianio AI Assistant to work on hosted versions.',
         },
       ] as Setting[],
     },
@@ -431,7 +457,12 @@ export default function SettingsPage() {
                         key={setting.key}
                         className="flex items-center justify-between border-b border-slate-100 pb-6 last:border-0 last:pb-0 dark:border-slate-700"
                       >
-                        <span className="font-bold text-slate-700 dark:text-slate-300">{setting.label}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-700 dark:text-slate-300">{setting.label}</span>
+                          {'description' in setting && setting.description && (
+                            <span className="text-xs text-slate-500 mt-1">{setting.description}</span>
+                          )}
+                        </div>
 
                         {setting.type === 'toggle' ? (
                           <button
@@ -448,8 +479,16 @@ export default function SettingsPage() {
                               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                             />
                           </button>
+                        ) : setting.type === 'string' ? (
+                          <input
+                            type="password"
+                            value={(settings as any)[setting.key] || ''}
+                            onChange={(e) => handleStringChange(setting.key, e.target.value)}
+                            placeholder={setting.placeholder}
+                            className="w-1/2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-violet-400 dark:focus:ring-violet-900"
+                          />
                         ) : (
-                          <div className="flex items-center gap-4">
+                          <div className="flex w-1/2 items-center gap-4">
                             <input
                               type="range"
                               min={setting.min}

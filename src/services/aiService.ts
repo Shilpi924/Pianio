@@ -1,8 +1,9 @@
 import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
+import { useAppStore } from '../store/useAppStore';
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
-
-const genAI = new GoogleGenerativeAI(API_KEY);
+const getApiKey = () => {
+  return useAppStore.getState().settings.geminiApiKey || import.meta.env.VITE_GEMINI_API_KEY || '';
+};
 
 const SYSTEM_INSTRUCTION = `You are Pianio Bot, the incredibly helpful, encouraging, and highly knowledgeable AI assistant built directly into the Pianio app. Your job is twofold:
 1. Act as the ultimate user manual for the Pianio app.
@@ -36,12 +37,14 @@ class AIService {
   private chatSession: ChatSession | null = null;
 
   initializeChat() {
-    if (!API_KEY) {
-      console.error('Gemini API key is missing. Please add VITE_GEMINI_API_KEY to your environment variables.');
+    const key = getApiKey();
+    if (!key) {
+      console.error('Gemini API key is missing. Please add VITE_GEMINI_API_KEY to your environment variables or app settings.');
       return;
     }
 
     try {
+      const genAI = new GoogleGenerativeAI(key);
       const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         systemInstruction: SYSTEM_INSTRUCTION,
@@ -60,7 +63,8 @@ class AIService {
   }
 
   async sendMessage(message: string): Promise<string> {
-    if (!API_KEY) {
+    const key = getApiKey();
+    if (!key) {
       return "I'm sorry, my AI brain isn't connected right now! Ask a grown-up to add the `VITE_GEMINI_API_KEY` to the app settings.";
     }
 

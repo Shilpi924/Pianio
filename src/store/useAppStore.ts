@@ -51,6 +51,7 @@ const defaultSettings: Settings = {
     pinky: '#3b82f6',
   },
   highPerformanceGraphics: true,
+  geminiApiKey: '',
 };
 
 const defaultStatistics: Statistics = {
