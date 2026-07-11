@@ -24,6 +24,7 @@ describe('ProfileSwitcher', () => {
           level: 1,
           experiencePoints: 0,
           achievements: [],
+          badges: [],
           practiceGoals: { dailyMinutes: 15, weeklySongs: 3, monthlyAccuracy: 80 },
           preferences: { showAnimations: true, soundEffects: true, darkMode: false, language: 'en' },
         }

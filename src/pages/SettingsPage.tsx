@@ -59,9 +59,18 @@ type SliderSetting = {
   step: number;
 };
 
-type Setting = ToggleSetting | SliderSetting | StringSetting;
+type SelectSetting = {
+  key: 'language';
+  label: string;
+  type: 'select';
+  options: { value: string; label: string }[];
+};
 
+type Setting = ToggleSetting | SliderSetting | StringSetting | SelectSetting;
+
+import { useTranslation } from 'react-i18next';
 export default function SettingsPage() {
+  const { i18n } = useTranslation();
   const { setCurrentView, settings, updateSettings } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const updatePersonalization = useUserProfileStore((state) => state.updatePersonalization);
@@ -79,8 +88,11 @@ export default function SettingsPage() {
     updateSettings({ [key]: !settings[key] });
   };
 
-  const handleStringChange = (key: StringSetting['key'], value: string) => {
+  const handleStringChange = (key: StringSetting['key'] | SelectSetting['key'], value: string) => {
     updateSettings({ [key]: value });
+    if (key === 'language') {
+      i18n.changeLanguage(value);
+    }
   };
 
   const handleSliderChange = (key: SliderSetting['key'], value: number) => {
@@ -186,6 +198,25 @@ export default function SettingsPage() {
         },
       ] as Setting[],
     },
+    {
+      title: 'Localization',
+      icon: Check, // Using Check instead of Globe for now since it's already imported
+      color: 'from-emerald-500 to-teal-500',
+      settings: [
+        {
+          key: 'language',
+          label: 'Language',
+          type: 'select',
+          options: [
+            { value: 'en', label: 'English' },
+            { value: 'zh', label: '中文 (Mandarin)' },
+            { value: 'ja', label: '日本語 (Japanese)' },
+            { value: 'de', label: 'Deutsch' },
+            { value: 'es', label: 'Español' },
+          ]
+        }
+      ] as Setting[]
+    }
   ];
 
   const OptionGrid = <Value extends string,>({
@@ -492,6 +523,16 @@ export default function SettingsPage() {
                             placeholder={setting.placeholder}
                             className="w-1/2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-violet-400 dark:focus:ring-violet-900"
                           />
+                        ) : setting.type === 'select' ? (
+                          <select
+                            value={(settings as any)[setting.key] || 'en'}
+                            onChange={(e) => handleStringChange(setting.key as any, e.target.value)}
+                            className="w-1/2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-violet-400 dark:focus:ring-violet-900"
+                          >
+                            {setting.options.map(opt => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </select>
                         ) : (
                           <div className="flex w-1/2 items-center gap-4">
                             <input

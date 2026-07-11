@@ -77,6 +77,7 @@ export interface Settings {
   highPerformanceGraphics?: boolean;
   claudeApiKey?: string;
   backgroundMusic?: boolean;
+  language?: string;
 }
 
 export interface MIDIDevice {

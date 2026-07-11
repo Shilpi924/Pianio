@@ -2,7 +2,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import AIChatBot from '../components/AIChatBot';
 import { aiService } from '../services/aiService';
-import { useAppStore } from '../store/useAppStore';
 
 // Mock the useAppStore
 vi.mock('../store/useAppStore', () => ({

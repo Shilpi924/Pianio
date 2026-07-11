@@ -18,6 +18,24 @@ vi.mock('../components/ProfileSwitcher', () => ({
   default: () => <div data-testid="profile-switcher">ProfileSwitcher</div>,
 }));
 
+// Mock react-i18next
+vi.mock('react-i18next', () => ({
+  useTranslation: () => {
+    return {
+      t: (str: string, options?: any) => {
+        if (str === 'home.welcome') return `Hello, ${options?.name}!`;
+        if (str === 'home.freePlay') return 'Free Play';
+        if (str === 'home.library') return 'Song Library';
+        if (str === 'home.tutorials') return 'Tutorials';
+        if (str === 'home.progress') return 'My Progress';
+        if (str === 'home.settings') return 'Settings';
+        if (str === 'home.rhythm') return 'Rhythm Training';
+        return str;
+      },
+    };
+  },
+}));
+
 describe('HomePage Component', () => {
   const setCurrentViewMock = vi.fn();
 

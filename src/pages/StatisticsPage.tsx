@@ -4,6 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { achievements, calculateLevel, getXPForNextLevel } from '../data/achievements';
 import { getEnhancedLessons } from '../services/musicCatalogService';
+import { BADGES } from '../types/userProfile';
 
 const lessons = getEnhancedLessons();
 
@@ -16,6 +17,7 @@ export default function StatisticsPage() {
   const xpForNextLevel = getXPForNextLevel(currentLevel);
   const xpProgress = Math.min(100, Math.round((totalXP / xpForNextLevel) * 100));
   const completedSongs = statistics.songsCompleted.length;
+  const userBadges = userProfile?.badges || [];
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -169,6 +171,36 @@ export default function StatisticsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/50 dark:bg-slate-800 dark:shadow-none p-6 md:p-8">
+              <div className="mb-6 flex items-center gap-4">
+                <div className="rounded-xl bg-purple-100 p-3 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                  <Award className="h-6 w-6" />
+                </div>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white">Trophy Case (Badges)</h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {BADGES.map((badge) => {
+                  const isUnlocked = userBadges.includes(badge.id);
+                  return (
+                    <div
+                      key={badge.id}
+                      className={`relative overflow-hidden rounded-2xl p-5 transition-all text-center ${
+                        isUnlocked
+                          ? `bg-gradient-to-br ${badge.color} text-white shadow-lg shadow-purple-200/50 hover:-translate-y-1`
+                          : 'bg-slate-50 border border-slate-100 dark:border-slate-700/50 dark:bg-slate-900/50 opacity-60 grayscale'
+                      }`}
+                    >
+                      <div className="text-4xl mb-3">{badge.icon}</div>
+                      <div className={`font-bold ${isUnlocked ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{badge.name}</div>
+                      <div className={`mt-1 text-xs font-medium leading-5 ${isUnlocked ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>
+                        {badge.description}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

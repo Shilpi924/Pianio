@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Play, Music, Library, Sparkles, Piano, Settings, Award } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Play, Music, Library, Sparkles, Piano, Settings, Award, Activity } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import ProfileSwitcher from '../components/ProfileSwitcher';
@@ -7,6 +8,7 @@ import ProfileSwitcher from '../components/ProfileSwitcher';
 export default function HomePage() {
   const { setCurrentView } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] md:p-8">
@@ -26,10 +28,10 @@ export default function HomePage() {
               className="mb-2 inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-bold text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
             >
               <Sparkles className="h-4 w-4" />
-              Let's make some music!
+              {t('home.tagline')}
             </motion.div>
             <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white md:text-6xl">
-              Hello, {userProfile?.name || 'Pianist'}! 🎹
+              {t('home.welcome', { name: userProfile?.name || 'Pianist' })}
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -51,9 +53,9 @@ export default function HomePage() {
               <Piano className="h-8 w-8" />
             </div>
             <div className="relative z-10 mt-12 text-white">
-              <h2 className="text-4xl font-black tracking-tight">Free Play</h2>
+              <h2 className="text-4xl font-black tracking-tight">{t('home.freePlay')}</h2>
               <p className="mt-2 text-lg font-medium text-white/80">
-                Just jam! No rules, just you and the piano.
+                {t('home.freePlayDesc')}
               </p>
             </div>
           </button>
@@ -70,34 +72,41 @@ export default function HomePage() {
               <Library className="h-8 w-8" />
             </div>
             <div className="relative z-10 mt-12 text-white">
-              <h2 className="text-4xl font-black tracking-tight">Song Library</h2>
+              <h2 className="text-4xl font-black tracking-tight">{t('home.library')}</h2>
               <p className="mt-2 text-lg font-medium text-white/80">
-                Learn your favorite songs step-by-step.
+                {t('home.libraryDesc')}
               </p>
             </div>
           </button>
         </section>
 
         {/* Secondary Options */}
-        <section className="grid gap-6 sm:grid-cols-3">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SecondaryCard
+            icon={Activity}
+            title={t('home.rhythm')}
+            subtitle={t('home.rhythmDesc')}
+            color="from-pink-400 to-rose-500"
+            onClick={() => setCurrentView('rhythm-training')}
+          />
           <SecondaryCard
             icon={Play}
-            title="Tutorials"
-            subtitle="Learn the basics"
+            title={t('home.tutorials')}
+            subtitle={t('home.tutorialsDesc')}
             color="from-emerald-400 to-teal-500"
             onClick={() => setCurrentView('tutorials')}
           />
           <SecondaryCard
             icon={Award}
-            title="My Progress"
-            subtitle="See your achievements"
+            title={t('home.progress')}
+            subtitle={t('home.progressDesc')}
             color="from-purple-400 to-fuchsia-500"
             onClick={() => setCurrentView('statistics')}
           />
           <SecondaryCard
             icon={Settings}
-            title="Settings"
-            subtitle="Tweak your piano"
+            title={t('home.settings')}
+            subtitle={t('home.settingsDesc')}
             color="from-slate-400 to-slate-600"
             onClick={() => setCurrentView('settings')}
           />

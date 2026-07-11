@@ -42,6 +42,7 @@ const createDefaultProfile = (id: string, name: string = 'Learner'): UserProfile
   level: 1,
   experiencePoints: 0,
   achievements: [],
+  badges: [],
   practiceGoals: {
     dailyMinutes: 15,
     weeklySongs: 3,

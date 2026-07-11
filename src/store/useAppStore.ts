@@ -51,7 +51,6 @@ const defaultSettings: Settings = {
     pinky: '#3b82f6',
   },
   highPerformanceGraphics: true,
-  audioVolume: 70,
   claudeApiKey: '',
   backgroundMusic: true,
 };

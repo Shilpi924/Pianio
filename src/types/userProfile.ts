@@ -19,6 +19,7 @@ export interface UserProfile {
   level: number;
   experiencePoints: number;
   achievements: string[];
+  badges: string[];
   practiceGoals: {
     dailyMinutes: number;
     weeklySongs: number;
@@ -31,6 +32,23 @@ export interface UserProfile {
     language: string;
   };
 }
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  condition: 'first_song' | 'streak_3' | 'streak_7' | 'perfect_pitch' | 'rhythm_master';
+}
+
+export const BADGES: Badge[] = [
+  { id: 'first_song', name: 'First Song', description: 'Complete your first song', icon: '🎵', color: 'from-blue-400 to-blue-600', condition: 'first_song' },
+  { id: 'streak_3', name: '3-Day Streak', description: 'Practice for 3 days in a row', icon: '🔥', color: 'from-orange-400 to-orange-600', condition: 'streak_3' },
+  { id: 'streak_7', name: '7-Day Streak', description: 'Practice for a whole week', icon: '🌟', color: 'from-yellow-400 to-yellow-600', condition: 'streak_7' },
+  { id: 'perfect_pitch', name: 'Perfect Pitch', description: 'Score 100% on a lesson', icon: '🎯', color: 'from-green-400 to-green-600', condition: 'perfect_pitch' },
+  { id: 'rhythm_master', name: 'Rhythm Master', description: 'Complete a rhythm training exercise', icon: '🥁', color: 'from-purple-400 to-purple-600', condition: 'rhythm_master' },
+];
 
 export interface PersonalizationData {
   ageGroup: AgeGroup;

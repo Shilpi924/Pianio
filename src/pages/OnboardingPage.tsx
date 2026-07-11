@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, ArrowLeft, Sparkles, Check } from 'lucide-react';
 import type { AgeGroup, SkillLevel, LearningGoal, PracticeFrequency, PersonalizationData } from '../types/userProfile';
 
@@ -7,38 +8,40 @@ interface OnboardingPageProps {
   onComplete: (data: PersonalizationData) => void;
 }
 
-const AGE_GROUPS: { value: AgeGroup; label: string; description: string; emoji: string }[] = [
-  { value: '5-8', label: '5-8 years', description: 'Fun and playful learning', emoji: '🎈' },
-  { value: '9-12', label: '9-12 years', description: 'Adventure and challenges', emoji: '🎮' },
-  { value: '13-17', label: '13-17 years', description: 'Modern and social', emoji: '🎵' },
-  { value: '18+', label: '18+ years', description: 'Professional approach', emoji: '🎹' },
-];
-
-const SKILL_LEVELS: { value: SkillLevel; label: string; description: string; emoji: string }[] = [
-  { value: 'beginner', label: 'Beginner', description: 'I\'m just starting out', emoji: '🌱' },
-  { value: 'intermediate', label: 'Intermediate', description: 'I can play some songs', emoji: '🌿' },
-  { value: 'advanced', label: 'Advanced', description: 'I\'m experienced', emoji: '🌳' },
-];
-
-const LEARNING_GOALS: { value: LearningGoal; label: string; description: string; emoji: string }[] = [
-  { value: 'fun', label: 'Just for Fun', description: 'Play for enjoyment', emoji: '😊' },
-  { value: 'classical', label: 'Classical', description: 'Learn classical pieces', emoji: '🎻' },
-  { value: 'pop', label: 'Pop Music', description: 'Play popular songs', emoji: '🎤' },
-  { value: 'jazz', label: 'Jazz', description: 'Jazz and improvisation', emoji: '🎷' },
-  { value: 'exams', label: 'Exams', description: 'Prepare for exams', emoji: '📚' },
-  { value: 'professional', label: 'Professional', description: 'Career in music', emoji: '🎯' },
-];
-
-const PRACTICE_FREQUENCY: { value: PracticeFrequency; label: string; description: string; emoji: string }[] = [
-  { value: 'daily', label: 'Daily', description: 'Every day', emoji: '📅' },
-  { value: 'few-times-week', label: 'Few times a week', description: '3-4 times per week', emoji: '📆' },
-  { value: 'weekly', label: 'Weekly', description: 'Once a week', emoji: '🗓️' },
-  { value: 'occasional', label: 'Occasional', description: 'When I have time', emoji: '⏰' },
-];
-
 const GENRES = ['Classical', 'Pop', 'Jazz', 'Rock', 'Country', 'Hip Hop', 'R&B', 'Electronic', 'Film Music', 'Musicals'];
 
 export default function OnboardingPage({ onComplete }: OnboardingPageProps) {
+  const { t } = useTranslation();
+  
+  const AGE_GROUPS: { value: AgeGroup; label: string; description: string; emoji: string }[] = [
+    { value: '5-8', label: t('onboarding.kids') || '5-8 years', description: 'Fun and playful learning', emoji: '🎈' },
+    { value: '9-12', label: t('onboarding.teens') || '9-12 years', description: 'Adventure and challenges', emoji: '🎮' },
+    { value: '13-17', label: '13-17 years', description: 'Modern and social', emoji: '🎵' },
+    { value: '18+', label: t('onboarding.adult') || '18+ years', description: 'Professional approach', emoji: '🎹' },
+  ];
+
+  const SKILL_LEVELS: { value: SkillLevel; label: string; description: string; emoji: string }[] = [
+    { value: 'beginner', label: 'Beginner', description: 'I\'m just starting out', emoji: '🌱' },
+    { value: 'intermediate', label: 'Intermediate', description: 'I can play some songs', emoji: '🌿' },
+    { value: 'advanced', label: 'Advanced', description: 'I\'m experienced', emoji: '🌳' },
+  ];
+
+  const LEARNING_GOALS: { value: LearningGoal; label: string; description: string; emoji: string }[] = [
+    { value: 'fun', label: t('onboarding.fun') || 'Just for Fun', description: 'Play for enjoyment', emoji: '😊' },
+    { value: 'classical', label: 'Classical', description: 'Learn classical pieces', emoji: '🎻' },
+    { value: 'pop', label: 'Pop Music', description: 'Play popular songs', emoji: '🎤' },
+    { value: 'jazz', label: 'Jazz', description: 'Jazz and improvisation', emoji: '🎷' },
+    { value: 'exams', label: 'Exams', description: 'Prepare for exams', emoji: '📚' },
+    { value: 'professional', label: 'Professional', description: 'Career in music', emoji: '🎯' },
+  ];
+
+  const PRACTICE_FREQUENCY: { value: PracticeFrequency; label: string; description: string; emoji: string }[] = [
+    { value: 'daily', label: 'Daily', description: 'Every day', emoji: '📅' },
+    { value: 'few-times-week', label: 'Few times a week', description: '3-4 times per week', emoji: '📆' },
+    { value: 'weekly', label: 'Weekly', description: 'Once a week', emoji: '🗓️' },
+    { value: 'occasional', label: 'Occasional', description: 'When I have time', emoji: '⏰' },
+  ];
+
   const [step, setStep] = useState(0);
   const [data, setData] = useState<PersonalizationData>({
     ageGroup: '9-12',
@@ -49,10 +52,10 @@ export default function OnboardingPage({ onComplete }: OnboardingPageProps) {
   });
 
   const steps = [
-    { title: 'Welcome! 👋', subtitle: 'Let\'s personalize your piano journey' },
-    { title: 'How old are you?', subtitle: 'This helps us customize your experience' },
+    { title: t('onboarding.welcome') || 'Welcome! 👋', subtitle: t('onboarding.subtitle') || 'Let\'s personalize your piano journey' },
+    { title: t('onboarding.ageGroup') || 'How old are you?', subtitle: 'This helps us customize your experience' },
     { title: 'What\'s your skill level?', subtitle: 'So we can recommend the right songs' },
-    { title: 'What\'s your goal?', subtitle: 'We\'ll tailor lessons to your interests' },
+    { title: t('onboarding.goal') || 'What\'s your goal?', subtitle: 'We\'ll tailor lessons to your interests' },
     { title: 'How often will you practice?', subtitle: 'We\'ll set realistic goals' },
     { title: 'What music do you love?', subtitle: 'Select your favorite genres' },
     { title: 'You\'re all set! 🎉', subtitle: 'Let\'s start your piano adventure' },
@@ -394,7 +397,7 @@ export default function OnboardingPage({ onComplete }: OnboardingPageProps) {
                 </>
               ) : (
                 <>
-                  Next
+                  {t('onboarding.next') || 'Next'}
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}

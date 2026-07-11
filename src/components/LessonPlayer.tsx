@@ -48,6 +48,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [fallingNotesSpeed, setFallingNotesSpeed] = useState(1);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [combo, setCombo] = useState(0);
+  const [, setMistakeStreak] = useState(0);
   const [mascotMood, setMascotMood] = useState<'happy' | 'excited' | 'thinking' | 'celebrating'>('happy');
   const [mascotMessage, setMascotMessage] = useState('');
   const [isPreviewingSong, setIsPreviewingSong] = useState(false);
@@ -349,6 +350,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           }
           return nextCombo;
         });
+        
+        setMistakeStreak(0);
 
         setCorrectNotes((prev) => new Set(prev).add(currentNoteIndex));
 
@@ -390,9 +393,19 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       } else {
         recordNotePlayed(false);
         setCombo(0);
-        SoundEffects.playIncorrect();
-        setMascotMood('thinking');
-        setMascotMessage(waitModeEnabled ? 'Close. Try that note again.' : 'Missed it. Reset and listen for the pattern.');
+        
+        setMistakeStreak((prev) => {
+          const nextStreak = prev + 1;
+          if (nextStreak >= 3) {
+            setMascotMood('thinking');
+            setMascotMessage('This part is tricky! Want to try a slower tempo?');
+          } else {
+            SoundEffects.playIncorrect();
+            setMascotMood('thinking');
+            setMascotMessage(waitModeEnabled ? 'Close. Try that note again.' : 'Missed it. Reset and listen for the pattern.');
+          }
+          return nextStreak;
+        });
       }
     },
     [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled]
