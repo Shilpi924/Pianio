@@ -1,9 +1,9 @@
 import { useDeferredValue, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Crown, ExternalLink, Filter, Music2, Search, Sparkles, Star, Upload } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Search, Sparkles, Play } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
-import { catalogSources, getEnhancedLessons } from '../services/musicCatalogService';
+import { getEnhancedLessons } from '../services/musicCatalogService';
 import { getPersonalizedRecommendations } from '../services/recommendationService';
 import type { Lesson } from '../types';
 
@@ -15,8 +15,6 @@ export default function LessonLibraryPage() {
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
-  const [selectedTrack, setSelectedTrack] = useState('All');
-  const [discoveryQuery, setDiscoveryQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
 
   const recommendations = getPersonalizedRecommendations(
@@ -29,7 +27,6 @@ export default function LessonLibraryPage() {
 
   const categories = ['All', ...new Set(allLessons.map((lesson) => lesson.category))];
   const difficulties = ['All', 'beginner', 'intermediate', 'advanced'];
-  const tracks = ['All', ...new Set(allLessons.map((lesson) => lesson.questTrack ?? 'songs'))];
 
   const filteredLessons = allLessons.filter((lesson) => {
     const haystack = [
@@ -44,8 +41,7 @@ export default function LessonLibraryPage() {
     const matchesQuery = deferredQuery.trim().length === 0 || haystack.includes(deferredQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || lesson.category === selectedCategory;
     const matchesDifficulty = selectedDifficulty === 'All' || lesson.difficulty === selectedDifficulty;
-    const matchesTrack = selectedTrack === 'All' || lesson.questTrack === selectedTrack;
-    return matchesQuery && matchesCategory && matchesDifficulty && matchesTrack;
+    return matchesQuery && matchesCategory && matchesDifficulty;
   });
 
   const startLesson = (lesson: Lesson) => {
@@ -53,294 +49,163 @@ export default function LessonLibraryPage() {
     setCurrentView('lesson');
   };
 
-  const encodedDiscoveryQuery = encodeURIComponent(discoveryQuery.trim() || 'teen pop piano');
-  const musicBrainzSearchUrl = `https://musicbrainz.org/search?query=${encodedDiscoveryQuery}&type=recording&method=indexed`;
-  const publicDomainSearchUrl = `https://imslp.org/index.php?search=${encodedDiscoveryQuery}`;
-
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-3 md:p-6 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)]">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 md:p-8 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)]">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mx-auto max-w-7xl space-y-6"
+        className="mx-auto max-w-7xl space-y-8"
       >
-        <section className="rounded-[24px] bg-slate-950 p-5 text-white shadow-2xl md:p-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="space-y-3">
-              <button
-                onClick={() => setCurrentView('home')}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back home
-              </button>
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300">
-                  Song Library
-                </p>
-                <h1 className="mt-2 text-4xl font-black">Pick a song and start playing.</h1>
-              </div>
-              <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-base">
-                Choose a song that looks fun, or ask a grown-up to add a new one with a piano song file.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 md:gap-3 text-center">
-              <LibraryMetric label="Songs" value={`${allLessons.length}`} />
-              <LibraryMetric label="Recommended" value={`${recommendedIds.size}`} />
-              <LibraryMetric label="Sources" value={`${catalogSources.length}`} />
+        {/* Header */}
+        <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <button
+              onClick={() => setCurrentView('home')}
+              className="mb-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back home
+            </button>
+            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-cyan-500">
+              Song Library
+            </h1>
+            <p className="mt-2 text-lg font-medium text-slate-600 dark:text-slate-300">
+              Find your next favorite song to play!
+            </p>
+          </div>
+          
+          <div className="flex gap-4">
+            <div className="rounded-2xl bg-white p-4 shadow-xl shadow-indigo-100 dark:bg-slate-800 dark:shadow-none">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Songs</div>
+              <div className="text-2xl font-black text-slate-900 dark:text-white">{allLessons.length}</div>
             </div>
           </div>
-        </section>
+        </header>
 
-        <section className="grid gap-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
-          <div className="space-y-6">
-            <div className="card !rounded-[24px] !bg-white/90">
-              <div className="mb-5 flex items-center gap-3">
-                <Filter className="h-5 w-5 text-sky-600" />
-                <h2 className="text-2xl font-bold text-slate-900">Find the right song fast</h2>
-              </div>
+        {/* Search & Filters */}
+        <div className="flex flex-col gap-4 rounded-[2rem] bg-white p-4 shadow-2xl shadow-slate-200/50 dark:bg-slate-800/50 dark:shadow-none md:flex-row md:items-center md:p-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-slate-400" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search for a song..."
+              className="h-16 w-full rounded-2xl bg-slate-50 pl-14 pr-6 text-lg font-medium outline-none transition-all focus:bg-white focus:ring-4 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-white"
+            />
+          </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-                <div className="md:col-span-4">
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                    <input
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Search songs, focus skills, moods, or tags"
-                      className="min-h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 outline-none focus:border-sky-400"
-                    />
-                  </div>
-                </div>
+          <div className="flex gap-4">
+            <FilterSelect value={selectedCategory} options={categories} onChange={setSelectedCategory} icon="🎵" />
+            <FilterSelect value={selectedDifficulty} options={difficulties} onChange={setSelectedDifficulty} icon="⭐" />
+          </div>
+        </div>
 
-                <FilterSelect label="Category" value={selectedCategory} options={categories} onChange={setSelectedCategory} />
-                <FilterSelect label="Difficulty" value={selectedDifficulty} options={difficulties} onChange={setSelectedDifficulty} />
-                <FilterSelect label="Quest track" value={selectedTrack} options={tracks} onChange={setSelectedTrack} />
-
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Profile fit</div>
-                  <div className="mt-2 text-sm leading-6 text-slate-700">
-                    {userProfile
-                      ? `${userProfile.ageGroup} • ${userProfile.skillLevel} • ${userProfile.learningGoal}`
-                      : 'Using default learner profile'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="card !rounded-[24px] !bg-white/90">
-              <div className="mb-5 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="h-5 w-5 text-rose-500" />
-                    <h2 className="text-2xl font-bold text-slate-900">Want a different song?</h2>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Search for song ideas, then ask a grown-up to add a piano file so Pianio can
-                    turn it into a lesson.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setCurrentView('song-upload')}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-bold text-white"
-                >
-                  <Upload className="h-4 w-4" />
-                  Add song file
-                </button>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_auto]">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                  <input
-                    value={discoveryQuery}
-                    onChange={(event) => setDiscoveryQuery(event.target.value)}
-                    placeholder="Type a song, artist, or style"
-                    className="min-h-14 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 outline-none focus:border-rose-400"
-                  />
-                </div>
-                <a
-                  href={musicBrainzSearchUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-rose-500 px-4 py-3 font-bold text-white text-sm whitespace-nowrap"
-                >
-                  <ExternalLink className="h-5 w-5" />
-                  Find song ideas
-                </a>
-                <a
-                  href={publicDomainSearchUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 font-bold text-white text-sm whitespace-nowrap"
-                >
-                  <ExternalLink className="h-5 w-5" />
-                  Find free classics
-                </a>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <DiscoveryStep title="1. Pick" text="Search for a song you want to learn." />
-                <DiscoveryStep title="2. Ask" text="A grown-up checks if we can use that song." />
-                <DiscoveryStep title="3. Add" text="Upload a piano file and Pianio makes a lesson." />
-              </div>
-            </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
+        {/* Lesson Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <AnimatePresence mode="popLayout">
             {filteredLessons.map((lesson) => {
-                const progress = lessonProgress[lesson.id];
-                const percent = progress
-                  ? Math.round((progress.currentNoteIndex / lesson.notes.length) * 100)
-                  : 0;
+              const progress = lessonProgress[lesson.id];
+              const percent = progress
+                ? Math.round((progress.currentNoteIndex / lesson.notes.length) * 100)
+                : 0;
+              const isRecommended = recommendedIds.has(lesson.id);
 
-                return (
-                  <motion.button
-                    key={lesson.id}
-                    whileHover={{ y: -2 }}
-                    onClick={() => startLesson(lesson)}
-                    className="w-full rounded-[20px] border border-slate-200 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-md flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
-                          {lesson.questTrack}
-                        </div>
-                        <h3 className="mt-3 text-xl font-bold text-slate-900">{lesson.title}</h3>
-                      </div>
-                      {recommendedIds.has(lesson.id) && <Sparkles className="h-5 w-5 text-amber-500" />}
-                    </div>
+              return (
+                <motion.button
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  key={lesson.id}
+                  onClick={() => startLesson(lesson)}
+                  className="group relative flex h-[280px] w-full flex-col justify-between overflow-hidden rounded-[2rem] bg-white p-6 text-left shadow-lg shadow-slate-200/50 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-fuchsia-200 dark:bg-slate-800 dark:shadow-none"
+                >
+                  {/* Decorative background gradient */}
+                  <div className={`absolute inset-0 opacity-10 transition-opacity group-hover:opacity-20 ${
+                    lesson.difficulty === 'beginner' ? 'bg-gradient-to-br from-emerald-400 to-teal-500' :
+                    lesson.difficulty === 'intermediate' ? 'bg-gradient-to-br from-amber-400 to-orange-500' :
+                    'bg-gradient-to-br from-rose-400 to-red-500'
+                  }`} />
 
-                    <p className="mt-3 text-sm leading-6 text-slate-600">{lesson.synopsis}</p>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  <div className="relative z-10 flex flex-col items-start gap-4">
+                    <div className="flex w-full items-start justify-between">
+                      <span className={`rounded-xl px-3 py-1 text-xs font-bold uppercase tracking-wider ${
+                        lesson.difficulty === 'beginner' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                        lesson.difficulty === 'intermediate' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                        'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                      }`}>
                         {lesson.difficulty}
                       </span>
-                      <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
-                        {lesson.tempo} BPM
-                      </span>
-                      <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                        {lesson.notes.length} notes
-                      </span>
+                      {isRecommended && (
+                        <div className="flex items-center justify-center rounded-full bg-amber-100 p-2 text-amber-500">
+                          <Sparkles className="h-4 w-4" />
+                        </div>
+                      )}
                     </div>
-
-                    <div className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      {(lesson.focus ?? []).slice(0, 3).join(' • ')}
+                    
+                    <div>
+                      <h3 className="text-2xl font-black text-slate-900 dark:text-white line-clamp-2">{lesson.title}</h3>
+                      <p className="mt-1 text-sm font-medium text-slate-500 line-clamp-2">{lesson.synopsis}</p>
                     </div>
+                  </div>
 
+                  <div className="relative z-10 w-full">
                     {progress ? (
-                      <div className="mt-4">
-                        <div className="mb-1 flex items-center justify-between text-xs font-medium text-slate-500">
-                          <span>{progress.completed ? 'Completed' : 'In progress'}</span>
+                      <div>
+                        <div className="mb-2 flex justify-between text-xs font-bold text-slate-500">
+                          <span>{progress.completed ? 'Completed!' : 'Keep going!'}</span>
                           <span>{percent}%</span>
                         </div>
-                        <div className="h-2 rounded-full bg-slate-100">
-                          <div className="h-2 rounded-full bg-emerald-500" style={{ width: `${percent}%` }} />
+                        <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                          <div 
+                            className="h-full bg-gradient-to-r from-fuchsia-500 to-cyan-500 transition-all duration-500" 
+                            style={{ width: `${percent}%` }} 
+                          />
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-4 text-sm font-medium text-slate-500">Tip: {lesson.practiceTip}</div>
-                    )}
-                    </div>
-                  </motion.button>
-                );
-              })}
-              </div>
-            {filteredLessons.length === 0 && (
-              <div className="card !rounded-[24px] !bg-white/90 text-center text-slate-600">
-                No songs match those filters yet. Try another song name or ask a grown-up to add a song file.
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-6">
-            <div className="card !rounded-[24px] !bg-white/90">
-              <div className="mb-4 flex items-center gap-3">
-                <Star className="h-5 w-5 text-amber-500" />
-                <h2 className="text-xl font-bold text-slate-900">Top picks for this learner</h2>
-              </div>
-              <div className="space-y-3">
-                {recommendations.slice(0, 5).map((lesson, index) => (
-                  <button
-                    key={lesson.id}
-                    onClick={() => startLesson(lesson)}
-                    className="flex w-full items-center justify-between rounded-2xl bg-slate-50 px-4 py-4 text-left hover:bg-slate-100"
-                  >
-                    <div>
-                      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                        Pick {index + 1}
+                      <div className="flex items-center gap-2 text-sm font-bold text-fuchsia-500 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Play className="h-5 w-5 fill-current" />
+                        <span>Start Playing</span>
                       </div>
-                      <div className="mt-1 font-semibold text-slate-900">{lesson.title}</div>
-                      <div className="mt-1 text-sm text-slate-600">{lesson.practiceTip}</div>
-                    </div>
-                    <ArrowLeft className="h-4 w-4 rotate-180 text-slate-400" />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="card !rounded-[24px] !bg-white/90">
-              <div className="mb-4 flex items-center gap-3">
-                <Crown className="h-5 w-5 text-violet-600" />
-                <h2 className="text-xl font-bold text-slate-900">For grown-ups</h2>
-              </div>
-              <p className="mb-4 text-sm leading-6 text-slate-600">
-                These are the places Pianio can use to discover songs or import legal piano files.
-              </p>
-              <div className="space-y-3">
-                {catalogSources.map((source) => (
-                  <div key={source.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="font-semibold text-slate-900">{source.name}</div>
-                      <span className="rounded-full bg-white px-2 py-1 text-xs font-semibold uppercase text-slate-600">
-                        {source.type}
-                      </span>
-                    </div>
-                    <div className="mt-2 text-sm leading-6 text-slate-600">{source.description}</div>
-                    <div className="mt-2 text-xs text-slate-500">{source.notes}</div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
+                </motion.button>
+              );
+            })}
+          </AnimatePresence>
 
-            <div className="card !rounded-[24px] !bg-white/90">
-              <div className="mb-4 flex items-center gap-3">
-                <Music2 className="h-5 w-5 text-emerald-600" />
-                <h2 className="text-xl font-bold text-slate-900">Why this helps on iPad</h2>
-              </div>
-              <ul className="space-y-3 text-sm leading-6 text-slate-600">
-                <li>Large cards and filters make browsing finger-friendly in landscape or portrait.</li>
-                <li>Quest grouping helps 9-12 learners pick with confidence instead of scanning giant menus.</li>
-                <li>The external-source layer gives us a clean path to add much more repertoire without rewriting the UI again.</li>
-              </ul>
+          {filteredLessons.length === 0 && (
+            <div className="col-span-full rounded-[2rem] bg-white p-12 text-center shadow-xl dark:bg-slate-800">
+              <div className="text-4xl">🔍</div>
+              <h3 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">No songs found</h3>
+              <p className="mt-2 text-slate-500">Try adjusting your filters or search term.</p>
             </div>
-          </div>
-        </section>
+          )}
+        </div>
       </motion.div>
     </div>
   );
 }
 
 function FilterSelect({
-  label,
   value,
   options,
   onChange,
+  icon
 }: {
-  label: string;
   value: string;
   options: string[];
   onChange: (value: string) => void;
+  icon: string;
 }) {
   return (
-    <label className="block">
-      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</div>
+    <div className="relative h-16 w-40">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2">{icon}</div>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="min-h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 outline-none focus:border-sky-400"
+        className="h-full w-full appearance-none rounded-2xl bg-slate-50 pl-12 pr-10 text-sm font-bold text-slate-700 outline-none transition-all focus:bg-white focus:ring-4 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-white capitalize"
       >
         {options.map((option) => (
           <option key={option} value={option}>
@@ -348,24 +213,9 @@ function FilterSelect({
           </option>
         ))}
       </select>
-    </label>
-  );
-}
-
-function DiscoveryStep({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="rounded-2xl bg-slate-50 p-4">
-      <div className="font-bold text-slate-900">{title}</div>
-      <div className="mt-2 text-sm leading-6 text-slate-600">{text}</div>
-    </div>
-  );
-}
-
-function LibraryMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-white/10 px-4 py-3">
-      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
-      <div className="mt-2 text-xl font-bold text-white">{value}</div>
+      <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+        ▼
+      </div>
     </div>
   );
 }
