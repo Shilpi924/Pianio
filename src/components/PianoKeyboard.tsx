@@ -99,7 +99,7 @@ export default function PianoKeyboard({
   return (
     <div 
       ref={scrollContainerRef}
-      className="relative w-full overflow-x-auto bg-gray-800 rounded-xl p-4 shadow-2xl hide-scrollbar"
+      className="relative w-full overflow-x-auto bg-gray-800 rounded-xl p-4 shadow-2xl hide-scrollbar touch-pan-x select-none"
       style={{ WebkitOverflowScrolling: 'touch' }}
     >
       <div className="relative mx-auto" style={{ width: `${totalWidth}px`, height: '160px' }}>

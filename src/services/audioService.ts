@@ -69,13 +69,27 @@ class AudioService {
     return this.fallbackSynth;
   }
 
-  playNote(note: string, duration: string = '8n'): void {
+  playNote(note: string, duration: string | number = '8n'): void {
     if (!this.initialized) return;
     try {
       this._instrument?.triggerAttackRelease(note, duration);
     } catch {
       // note may be out of sampler range — silent
     }
+  }
+
+  startNote(note: string): void {
+    if (!this.initialized) return;
+    try {
+      this._instrument?.triggerAttack(note);
+    } catch {}
+  }
+
+  stopNote(note: string): void {
+    if (!this.initialized) return;
+    try {
+      this._instrument?.triggerRelease(note);
+    } catch {}
   }
 
   playNotes(notes: string[], duration: string = '8n'): void {

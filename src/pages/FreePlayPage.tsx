@@ -55,7 +55,7 @@ export default function FreePlayPage() {
       recordingService.recordNoteOn(note);
     }
     if (audioEnabled) {
-      audioService.playNote(note);
+      audioService.startNote(note);
     }
   };
 
@@ -67,6 +67,9 @@ export default function FreePlayPage() {
     });
     if (isRecording) {
       recordingService.recordNoteOff(note);
+    }
+    if (audioEnabled) {
+      audioService.stopNote(note);
     }
   };
 

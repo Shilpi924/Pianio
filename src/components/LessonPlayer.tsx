@@ -157,13 +157,28 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       return;
     }
 
+    
     const tick = (timestamp: number) => {
       if (lastFrameTimeRef.current === null) {
         lastFrameTimeRef.current = timestamp;
       }
       const deltaSeconds = Math.min((timestamp - lastFrameTimeRef.current) / 1000, 0.05);
       lastFrameTimeRef.current = timestamp;
-      setCurrentTime((prev) => prev + deltaSeconds);
+      
+      setCurrentTime((prev) => {
+        let newTime = prev + deltaSeconds;
+        if (waitModeEnabled && practiceMode === 'guided') {
+          let targetBeat = 0;
+          for (let i = 0; i < currentNoteIndex; i++) {
+            targetBeat += lesson.notes[i].duration;
+          }
+          const targetTime = (targetBeat * 60) / tempo;
+          if (newTime >= targetTime) {
+            newTime = targetTime;
+          }
+        }
+        return newTime;
+      });
       animationFrameRef.current = requestAnimationFrame(tick);
     };
 
@@ -266,13 +281,22 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     await ensureAudio();
     setIsPlaying((prev) => !prev);
     if (!isPlaying && currentNote) {
-      setCurrentTime(0);
+      // setCurrentTime(0);
       setMascotMood('happy');
       setMascotMessage('Press the glowing key. I will wait for the right note.');
       const durationInSeconds = (60 / tempo) * currentNote.duration;
       audioService.playNote(currentNote.note, durationInSeconds);
     }
   };
+
+  const handleNoteReleased = useCallback(
+    (playedNote: string) => {
+      if (isAudioInitialized) {
+        audioService.stopNote(playedNote);
+      }
+    },
+    [isAudioInitialized]
+  );
 
   const handleNotePlayed = useCallback(
     (playedNote: string) => {
@@ -283,8 +307,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       }
 
       if (isAudioInitialized) {
-        const durationInSeconds = (60 / tempo) * currentNote.duration;
-        audioService.playNote(playedNote, durationInSeconds);
+        audioService.startNote(playedNote);
       }
 
       if (playedNote === currentNote.note) {
@@ -332,7 +355,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         if (currentNoteIndex < lesson.notes.length - 1) {
           const nextNoteIndex = currentNoteIndex + 1;
           setCurrentNoteIndex(nextNoteIndex);
-          setCurrentTime(0);
+          // setCurrentTime(0);
           updateLessonProgress(lesson.id, {
             lessonId: lesson.id,
             currentNoteIndex: nextNoteIndex,
@@ -342,7 +365,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           });
         } else if (loopEnabled) {
           setCurrentNoteIndex(0);
-          setCurrentTime(0);
+          // setCurrentTime(0);
         } else {
           setIsPlaying(false);
           setMascotMood('celebrating');
@@ -384,7 +407,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     setMascotMessage('');
     setTimingFeedback(null);
     setTimingScore(0);
-    setCurrentTime(0);
+    // setCurrentTime(0);
     updateLessonProgress(lesson.id, {
       lessonId: lesson.id,
       currentNoteIndex: 0,
@@ -740,6 +763,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
 
         <PianoKeyboard
           onNoteOn={(note) => handleNotePlayed(note)}
+          onNoteOff={(note) => handleNoteReleased(note)}
           highlightedNotes={highlightedNotes}
           activeFingers={
             showGhostHand && currentNote && currentNote.finger

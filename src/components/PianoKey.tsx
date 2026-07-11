@@ -38,8 +38,8 @@ export default function PianoKey({
   finger,
 }: PianoKeyProps) {
   const baseClasses = isBlack
-    ? 'absolute z-10 w-8 h-24 bg-gray-900 rounded-b-lg shadow-lg hover:bg-gray-800 transition-colors'
-    : 'relative z-0 w-12 h-40 bg-white rounded-b-lg shadow-md hover:bg-gray-50 transition-colors border border-gray-200 dark:bg-gray-100 dark:border-gray-300';
+    ? 'absolute z-10 w-8 h-24 bg-gray-900 rounded-b-lg shadow-lg hover:bg-gray-800 transition-colors touch-none select-none'
+    : 'relative z-0 w-12 h-40 bg-white rounded-b-lg shadow-md hover:bg-gray-50 transition-colors border border-gray-200 dark:bg-gray-100 dark:border-gray-300 touch-none select-none';
 
   const stateClasses = keyStateStyles[state];
 
@@ -67,6 +67,9 @@ export default function PianoKey({
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={(e) => { e.preventDefault(); handleMouseDown(); }}
+      onTouchEnd={(e) => { e.preventDefault(); handleMouseUp(); }}
+      onTouchCancel={handleMouseLeave}
       disabled={disabled}
       whileHover={disabled ? {} : { scale: isBlack ? 1.02 : 1.01 }}
       whileTap={disabled ? {} : { scale: 0.98 }}

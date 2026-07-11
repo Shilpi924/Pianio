@@ -136,6 +136,9 @@ export default function FallingNotes({
 
     const visible: FallingNoteData[] = [];
     let beat = 0;
+    for (let i = 0; i < currentNoteIndex; i++) {
+      beat += notes[i].duration;
+    }
 
     notes.slice(currentNoteIndex, currentNoteIndex + 12).forEach((n, vi) => {
       const idx       = currentNoteIndex + vi;
