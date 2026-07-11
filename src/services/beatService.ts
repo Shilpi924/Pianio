@@ -31,13 +31,13 @@ class BeatService {
     }).toDestination();
 
     this.hihat = new Tone.MetalSynth({
-      frequency: 200,
       envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
       harmonicity: 5.1,
       modulationIndex: 32,
       resonance: 4000,
       octaves: 1.5
     }).toDestination();
+    this.hihat.frequency.value = 200;
     this.hihat.volume.value = -12; // Keep it quiet
 
     this.synth = new Tone.PolySynth(Tone.Synth, {
