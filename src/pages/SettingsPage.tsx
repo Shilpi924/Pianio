@@ -150,6 +150,11 @@ export default function SettingsPage() {
           max: 2,
           step: 0.1,
         },
+        {
+          key: 'highPerformanceGraphics',
+          label: '3D High Performance Graphics (Bloom)',
+          type: 'boolean' as const,
+        },
       ] as Setting[],
     },
   ];

@@ -7,6 +7,7 @@ import type { UserProfile } from '../types/userProfile';
 const lessons = getEnhancedLessons();
 
 const baseProfile: UserProfile = {
+  id: 'test-profile-1',
   name: 'Ava',
   age: 10,
   ageGroup: '9-12',

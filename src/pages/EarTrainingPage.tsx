@@ -101,6 +101,7 @@ export default function EarTrainingPage() {
 
   useEffect(() => {
     generateNewInterval();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty]);
 
   const accuracy = totalAttempts > 0 ? Math.round((score / totalAttempts) * 100) : 0;

@@ -90,7 +90,7 @@ export default function LessonCreatorPage() {
         const importedLesson = JSON.parse(e.target?.result as string);
         setLesson(importedLesson);
         alert('Lesson imported successfully!');
-      } catch (error) {
+      } catch (_error) {
         alert('Error importing lesson. Please check the file format.');
       }
     };

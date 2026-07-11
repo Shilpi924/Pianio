@@ -101,7 +101,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     return () => {
       pitchDetectionService.stop();
     };
-  }, [isPlaying, useMicrophone, handleNotePlayed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, useMicrophone]);
 
   useEffect(() => {
     return () => {
@@ -550,12 +551,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
                   currentTime={currentTime}
                   currentNoteIndex={currentNoteIndex}
                   speed={fallingNotesSpeed}
-                  onNoteHit={(note) => {
-                    if (note === currentNote?.note) {
-                      handleNotePlayed(note);
-                    }
-                  }}
-                  onNoteMiss={() => {}}
+                  activeNotes={highlightedNotes}
                 />
               </>
             )}
@@ -812,6 +808,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -74,6 +74,7 @@ export interface Settings {
     ring: string;
     pinky: string;
   };
+  highPerformanceGraphics?: boolean;
 }
 
 export interface MIDIDevice {

@@ -68,7 +68,6 @@ describe('useUserProfileStore', () => {
     });
 
     let currentState = useUserProfileStore.getState();
-    const newProfileId = currentState.activeProfileId;
 
     expect(currentState.getActiveProfile()?.name).toBe('Bob');
 

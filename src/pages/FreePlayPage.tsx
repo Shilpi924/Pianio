@@ -39,6 +39,7 @@ export default function FreePlayPage() {
     return () => {
       midiService.removeListener(handleMIDIMessage);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAudioInitialized, audioEnabled]);
 
   const handleMIDIMessage = (message: MIDIMessage) => {

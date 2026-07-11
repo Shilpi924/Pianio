@@ -50,6 +50,7 @@ const defaultSettings: Settings = {
     ring: '#22c55e',
     pinky: '#3b82f6',
   },
+  highPerformanceGraphics: true,
 };
 
 const defaultStatistics: Statistics = {

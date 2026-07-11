@@ -12,7 +12,7 @@ class PitchDetectionService {
   private animationFrameId: number | null = null;
   private callback: PitchCallback | null = null;
   private bufferSize: number = 2048;
-  private buffer: Float32Array = new Float32Array(2048);
+  private buffer: Float32Array<ArrayBuffer> = new Float32Array(2048);
   private sampleRate: number = 44100;
   
   // Note frequency data

@@ -45,6 +45,7 @@ export default function IntervalTrainingPage() {
 
   useEffect(() => {
     generateNewInterval();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty]);
 
   const generateNewInterval = () => {
