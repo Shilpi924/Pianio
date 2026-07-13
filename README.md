@@ -1,65 +1,55 @@
 <div align="center">
   
-# 🎹 Pianio: The Piano App Kids Want to Open Every Day
+# 🎹 Pianio: The Premium Piano Learning App
 
-**[Try the Live Demo](https://pianio-demo.vercel.app)** (Example link) • **[Watch the Video](https://youtube.com)**
+**[Try the Live Demo](https://pianio-demo.vercel.app)** 
 
 ![Pianio Banner](https://images.unsplash.com/photo-1552422535-c45813c61732?auto=format&fit=crop&q=80&w=1200&h=400)
 
-*Pianio makes learning piano as fun as playing a game, replacing abstract theory with immediate, magical musical moments.*
+*Pianio makes learning piano interactive, intelligent, and highly accessible across all age groups.*
 </div>
 
 ---
 
-## 🌟 Why Kids Love Pianio
+## 🌟 The Learning Experience
 
-Most beginner piano apps quickly become too abstract for kids: too many modes, too many stats, and not enough obvious cause-and-effect. 
+Pianio bridges the gap between professional music theory and accessible, gamified learning. Inspired by industry leaders like Skoove and Flowkey, the app provides a premium interactive experience right in your browser.
 
-Pianio keeps the first loop magical and simple:
-1. **Choose a song they know.**
-2. **Hear it play.**
-3. **Press the glowing key on the screen.**
-4. **The app waits patiently until they play the right note.**
-
-No stress, no penalties. Just building confidence, one note at a time.
-
-### ✨ What Makes It Special?
-
-*   **🎮 3D WebGL Falling Notes:** A buttery-smooth, 60fps practice lane. Notes fall like glowing stars (powered by React Three Fiber), making practice visually rewarding.
-*   **🏆 Trophy Case Gamification:** Earning badges for "First Song" or "3-Day Streaks" keeps learners coming back.
-*   **🧠 Adaptive Teaching:** If they miss a few notes in a row, Pianio kindly steps in: *"This part is tricky! Want to try a slower tempo?"*
-*   **🌍 Multi-Language Support:** Play in English, Mandarin, Japanese, German, or Spanish.
-*   **🎹 Authentic Sound Engine:** It actually sounds like a piano, complete with room reverb and octave-aware decay, rather than a robotic beep.
+### ✨ Core Features
+*   **🎼 Professional Sheet Music Rendering:** Powered by VexFlow, Pianio renders real-time, scrolling sheet music for an authentic classical learning experience.
+*   **🧠 Adaptive "Smart Tutor" Algorithm:** If a student struggles and misses the same note repeatedly, the Smart Tutor automatically activates. It drops the tempo, isolates the tricky section, and guides the student to play it perfectly 3 times before seamlessly continuing the song.
+*   **🎨 Skoove-Inspired UI:** A beautiful, card-based library UI allowing users to easily filter by skill level (Beginner 1, 2, 3) and mood/category (Pop, Classical, Kids, etc.).
+*   **🎤 Acoustic Microphone Pitch Detection:** No MIDI keyboard? No problem. Pianio uses an advanced auto-correlation algorithm via the device microphone to hear the notes you play on a real acoustic piano!
+*   **🎧 DJ Remix Free Play:** A built-in studio where users can trigger drum beats, backing tracks, and record their own multi-track masterpieces using Tone.js.
 
 ---
 
-## 👩‍👦 For Parents
+## 👨‍👩‍👧 Built for Families
 
-Pianio is built for families, keeping the learning environment safe and transparent.
-
-*   **Parent Dashboard:** Track real progress, practice time, and completed songs in the Progress Center without interrupting the child's play.
-*   **Multiple Profiles:** Create unlimited local profiles for everyone in the family. No subscription required.
-*   **Curated Content:** Built-in starter songs (like *Ode to Joy* and *Twinkle Twinkle*) with the ability to safely discover and import classical masterpieces.
+*   **Multi-Profile Support:** Switch between unlimited local profiles for everyone in the family.
+*   **Google Sign-In:** Seamlessly back up profiles and learning progress using Firebase authentication.
+*   **Infinite Library Expandability:** Users can search the **MusicBrainz** database for pop songs, or import raw **Public Domain** scores on the fly to practice.
 
 ---
 
 ## 🛠 For Developers
 
-While it looks like a playful product, Pianio is an engineering powerhouse under the hood.
+Pianio is a robust Progressive Web App (PWA) demonstrating complex browser APIs.
 
 ### Tech Stack
 | Layer | Technology |
 |---|---|
-| **Framework** | React 19 + TypeScript |
+| **Framework** | React 19 + TypeScript + Vite |
 | **Styling** | Tailwind CSS + Framer Motion |
-| **3D Engine** | React Three Fiber + Three.js |
-| **Audio** | Tone.js (custom harmonic synth) |
-| **State** | Zustand |
-| **Internationalization** | i18next |
+| **Sheet Music** | VexFlow |
+| **Audio Engine** | Tone.js (PolySynth & Sampler) |
+| **State Management**| Zustand (Persisted) |
+| **Database/Auth** | Firebase |
 
-### Hardware Integration
-*   **MIDI Keyboard Support:** Plug in a digital piano via USB; Pianio reads it instantly using the Web MIDI API.
-*   **Acoustic Pitch Detection:** No digital piano? Pianio uses your device microphone and an auto-correlate algorithm to hear notes from a real acoustic piano.
+### Hardware & Web APIs
+*   **Web MIDI API:** Plug-and-play support for digital pianos via USB.
+*   **Web Audio API:** High-fidelity soundfonts, real-time microphone analysis, and dynamic tempo adjustment.
+*   **PWA (Offline Ready):** Installable on mobile and desktop. Practice built-in lessons without an internet connection!
 
 ### Getting Started
 
@@ -72,7 +62,19 @@ npm install
 # Start the local server
 npm run dev
 ```
-The app will run at `http://localhost:5173`.
+The app will run locally at `http://localhost:5173`.
+
+### Testing
+
+Pianio ships with over 90+ unit tests with near-perfect business logic coverage.
+
+```bash
+# Run tests
+npm run test
+
+# Run tests with coverage
+npm run test -- --coverage
+```
 
 ---
 

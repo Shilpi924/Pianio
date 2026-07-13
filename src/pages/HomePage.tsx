@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Music, Library, Sparkles, Piano, Settings, Award, Activity, Globe } from 'lucide-react';
+import { Play, Music, Library, Sparkles, Piano, Settings, Award, Activity, Globe, Map } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import ProfileSwitcher from '../components/ProfileSwitcher';
@@ -60,7 +60,25 @@ export default function HomePage() {
         </header>
 
         {/* Big Action Grid */}
-        <section className="grid gap-6 md:grid-cols-2">
+        <section className="grid gap-6 md:grid-cols-3">
+          {/* Learning Path Action */}
+          <button
+            onClick={() => setCurrentView('curriculum')}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-400 to-teal-500 p-8 text-left shadow-xl shadow-teal-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[280px]"
+          >
+            <div className="absolute right-0 top-0 -mr-8 -mt-8 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
+              <Map className="h-64 w-64 text-white" />
+            </div>
+            <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
+              <Map className="h-8 w-8" />
+            </div>
+            <div className="relative z-10 mt-12 text-white">
+              <h2 className="text-4xl font-black tracking-tight">Path</h2>
+              <p className="mt-2 text-lg font-medium text-white/80">
+                Follow the guided learning roadmap.
+              </p>
+            </div>
+          </button>
           {/* Main Play Action */}
           <button
             onClick={() => setCurrentView('free-play')}
