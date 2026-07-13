@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import HandGuide from '../components/HandGuide';
-import type { FingerNumber, Hand } from '../types';
+
 
 describe('HandGuide Component', () => {
   it('renders both left and right hand containers', () => {

@@ -16,9 +16,11 @@
 Pianio bridges the gap between professional music theory and accessible, gamified learning. Inspired by industry leaders like Skoove and Flowkey, the app provides a premium interactive experience right in your browser.
 
 ### ✨ Core Features
+*   **🎮 Gamified Learning Curriculum:** A structured, level-based path that tracks experience points (XP), unlocking harder songs as students master their skills.
+*   **✋ Typing-Style Finger Guide:** Real-time visual hand graphics that illuminate the exact finger needed for upcoming notes, eliminating guesswork and rapidly building muscle memory.
 *   **🎼 Professional Sheet Music Rendering:** Powered by VexFlow, Pianio renders real-time, scrolling sheet music for an authentic classical learning experience.
 *   **🧠 Adaptive "Smart Tutor" Algorithm:** If a student struggles and misses the same note repeatedly, the Smart Tutor automatically activates. It drops the tempo, isolates the tricky section, and guides the student to play it perfectly 3 times before seamlessly continuing the song.
-*   **🎨 Skoove-Inspired UI:** A beautiful, card-based library UI allowing users to easily filter by skill level (Beginner 1, 2, 3) and mood/category (Pop, Classical, Kids, etc.).
+*   **🎨 Skoove-Inspired UI:** A beautiful, card-based library UI allowing users to easily filter by skill level (Beginner, Intermediate, Advanced) and mood/category.
 *   **🎤 Acoustic Microphone Pitch Detection:** No MIDI keyboard? No problem. Pianio uses an advanced auto-correlation algorithm via the device microphone to hear the notes you play on a real acoustic piano!
 *   **🎧 DJ Remix Free Play:** A built-in studio where users can trigger drum beats, backing tracks, and record their own multi-track masterpieces using Tone.js.
 
