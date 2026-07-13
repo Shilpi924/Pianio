@@ -7,6 +7,8 @@ import FallingNotes from './FallingNotes';
 import SheetMusic from './SheetMusic';
 import LevelUpAnimation from './LevelUpAnimation';
 import Mascot from './Mascot';
+
+import HandGuide from './HandGuide';
 import type { Lesson, PracticeMode } from '../types';
 import { audioService } from '../services/audioService';
 import { midiToNote } from '../utils/noteUtils';
@@ -827,6 +829,16 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               : []
           }
           disabled={!isPlaying}
+        />
+      </div>
+
+      <div className="mt-8 flex justify-center w-full">
+        <HandGuide 
+          activeFinger={
+            showGhostHand && currentNote && currentNote.finger
+              ? { finger: currentNote.finger, hand: currentNote.hand }
+              : null
+          } 
         />
       </div>
 
