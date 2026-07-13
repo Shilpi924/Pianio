@@ -261,7 +261,7 @@ export default function TutorialsPage() {
                     <iframe 
                       width="100%" 
                       height="100%" 
-                      src={`https://www.youtube.com/embed/${selectedTutorial.videoId}?controls=1&autoplay=1`} 
+                      src={`https://www.youtube-nocookie.com/embed/${selectedTutorial.videoId}?controls=1&autoplay=1&mute=1`} 
                       title="YouTube video player" 
                       frameBorder="0" 
                       allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 

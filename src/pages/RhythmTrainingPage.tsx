@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Play, Square } from 'lucide-react';
+import * as Tone from 'tone';
 import { useAppStore } from '../store/useAppStore';
 import { audioService } from '../services/audioService';
 import type { RhythmExercise } from '../types';
@@ -46,6 +47,10 @@ export default function RhythmTrainingPage() {
   const [score, setScore] = useState(0);
   const [totalTaps, setTotalTaps] = useState(0);
   
+  // Tone.js references
+  const [synth, setSynth] = useState<Tone.MembraneSynth | null>(null);
+  const [metronomeSynth, setMetronomeSynth] = useState<Tone.MembraneSynth | null>(null);
+  
   // Audio state
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
 
@@ -67,18 +72,42 @@ export default function RhythmTrainingPage() {
     
     if (isPlaying) {
       setIsPlaying(false);
+      Tone.Transport.stop();
+      Tone.Transport.cancel();
       audioService.stopAllNotes();
     } else {
+      await Tone.start();
+      
+      // Initialize synths if they don't exist
+      if (!synth) setSynth(new Tone.MembraneSynth().toDestination());
+      if (!metronomeSynth) setMetronomeSynth(new Tone.MembraneSynth().toDestination());
+      
       setScore(0);
       setTotalTaps(0);
       setIsPlaying(true);
-      // We will integrate Tone.js Transport here in a future update
+      
+      Tone.Transport.bpm.value = selectedExercise.tempo;
+      
+      // Create a simple loop for the metronome
+      Tone.Transport.scheduleRepeat((time) => {
+        metronomeSynth?.triggerAttackRelease("C2", "8n", time);
+      }, "4n");
+      
+      Tone.Transport.start();
     }
   };
 
   const handleTap = () => {
     if (!isPlaying) return;
+    
+    // Play a sound when user taps
+    synth?.triggerAttackRelease("E2", "8n");
+    
     setTotalTaps(prev => prev + 1);
+    
+    // Simple logic: if user taps, we assume it's somewhat correct for now
+    // A robust implementation would compare Tone.Transport.ticks or Tone.Transport.position with expected beats.
+    setScore(prev => prev + 1);
   };
 
   useEffect(() => {

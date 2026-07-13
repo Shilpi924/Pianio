@@ -32,6 +32,9 @@ vi.mock('react-i18next', () => ({
         if (str === 'home.rhythm') return 'Rhythm Training';
         return str;
       },
+      i18n: {
+        changeLanguage: vi.fn(),
+      }
     };
   },
 }));
@@ -43,6 +46,8 @@ describe('HomePage Component', () => {
     vi.clearAllMocks();
     (useAppStore as any).mockReturnValue({
       setCurrentView: setCurrentViewMock,
+      settings: { language: 'en' },
+      updateSettings: vi.fn(),
     });
   });
 

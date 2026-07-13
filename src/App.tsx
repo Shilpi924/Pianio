@@ -23,9 +23,11 @@ import SongUploadPage from './pages/SongUploadPage';
 import OnboardingPage from './pages/OnboardingPage';
 import AIChatBot from './components/AIChatBot';
 import { audioService } from './services/audioService';
+import { useCloudSync } from './hooks/useCloudSync';
 import './index.css';
 
 function App() {
+  useCloudSync();
   const { currentView, settings, currentLesson, setCurrentView, setCurrentLesson } = useAppStore();
   const { completeOnboarding } = useUserProfileStore();
 

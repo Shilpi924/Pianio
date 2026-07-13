@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { midiToNote, getNoteIndex, isBlackKey, getAllNotesInRange } from '../utils/noteUtils';
+import { midiToNote, noteToMidi, getNoteIndex, isBlackKey, getAllNotesInRange } from '../utils/noteUtils';
 
 describe('noteUtils', () => {
   // ----- midiToNote -----
@@ -29,6 +29,31 @@ describe('noteUtils', () => {
       for (let i = 0; i < 12; i++) {
         expect(midiToNote(60 + i)).toBe(expected[i]);
       }
+    });
+  });
+
+  // ----- noteToMidi -----
+  describe('noteToMidi', () => {
+    it('converts C4 to MIDI 60', () => {
+      expect(noteToMidi('C4')).toBe(60);
+    });
+
+    it('converts D4 to MIDI 62', () => {
+      expect(noteToMidi('D4')).toBe(62);
+    });
+
+    it('handles sharp notes like C#4', () => {
+      expect(noteToMidi('C#4')).toBe(61);
+    });
+
+    it('handles different octaves correctly', () => {
+      expect(noteToMidi('C5')).toBe(72);
+      expect(noteToMidi('C3')).toBe(48);
+    });
+
+    it('should handle invalid note names gracefully', () => {
+      expect(isNaN(noteToMidi('INVALID'))).toBe(true);
+      expect(isNaN(noteToMidi(''))).toBe(true);
     });
   });
 

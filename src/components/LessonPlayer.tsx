@@ -52,6 +52,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [mascotMood, setMascotMood] = useState<'happy' | 'excited' | 'thinking' | 'celebrating'>('happy');
   const [mascotMessage, setMascotMessage] = useState('');
   const [isPreviewingSong, setIsPreviewingSong] = useState(false);
+  const [isAdaptiveTraining, setIsAdaptiveTraining] = useState(false);
+  const [adaptiveTargetNotes, setAdaptiveTargetNotes] = useState<number[]>([]);
+  const [adaptiveSuccessCount, setAdaptiveSuccessCount] = useState(0);
+  const [originalTempo, setOriginalTempo] = useState(lesson.tempo);
   const metronomeRef = useRef<number | null>(null);
   const practiceStartedAtRef = useRef<number | null>(null);
   const previewTimersRef = useRef<number[]>([]);
@@ -355,7 +359,27 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
 
         setCorrectNotes((prev) => new Set(prev).add(currentNoteIndex));
 
-        if (currentNoteIndex < lesson.notes.length - 1) {
+        if (isAdaptiveTraining) {
+          if (currentNoteIndex === adaptiveTargetNotes[adaptiveTargetNotes.length - 1]) {
+            const newSuccessCount = adaptiveSuccessCount + 1;
+            setAdaptiveSuccessCount(newSuccessCount);
+            
+            if (newSuccessCount >= 3) {
+              setIsAdaptiveTraining(false);
+              setTempo(originalTempo);
+              setMascotMood('celebrating');
+              setMascotMessage('You mastered it! Tempo restored. Let\'s continue the song.');
+              SoundEffects.playLevelUp();
+              setCurrentNoteIndex(adaptiveTargetNotes[adaptiveTargetNotes.length - 1] + 1 < lesson.notes.length ? adaptiveTargetNotes[adaptiveTargetNotes.length - 1] + 1 : adaptiveTargetNotes[adaptiveTargetNotes.length - 1]);
+            } else {
+              setMascotMood('happy');
+              setMascotMessage(`Great! ${newSuccessCount}/3 times. Let's do it again.`);
+              setCurrentNoteIndex(adaptiveTargetNotes[0]);
+            }
+          } else {
+            setCurrentNoteIndex(currentNoteIndex + 1);
+          }
+        } else if (currentNoteIndex < lesson.notes.length - 1) {
           const nextNoteIndex = currentNoteIndex + 1;
           setCurrentNoteIndex(nextNoteIndex);
           // setCurrentTime(0);
@@ -396,9 +420,28 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         
         setMistakeStreak((prev) => {
           const nextStreak = prev + 1;
-          if (nextStreak >= 3) {
+          if (nextStreak >= 3 && !isAdaptiveTraining) {
+            setIsAdaptiveTraining(true);
+            setOriginalTempo(tempo);
+            setTempo(Math.max(40, Math.round(tempo * 0.7))); // Slow down by 30%
+            
+            // Isolate current note and neighbors
+            const start = Math.max(0, currentNoteIndex - 2);
+            const end = Math.min(lesson.notes.length - 1, currentNoteIndex + 2);
+            const targetIndices = [];
+            for (let i = start; i <= end; i++) targetIndices.push(i);
+            
+            setAdaptiveTargetNotes(targetIndices);
+            setAdaptiveSuccessCount(0);
+            setCurrentNoteIndex(start);
+            
+            setMascotMood('excited');
+            setMascotMessage('Smart Tutor activated! Let\'s slow down and practice just this small part until you master it.');
+            SoundEffects.playLevelUp(); 
+            return 0; // Reset streak
+          } else if (nextStreak >= 3) {
             setMascotMood('thinking');
-            setMascotMessage('This part is tricky! Want to try a slower tempo?');
+            setMascotMessage('Keep trying this section. You can do it!');
           } else {
             SoundEffects.playIncorrect();
             setMascotMood('thinking');
@@ -408,7 +451,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         });
       }
     },
-    [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled]
+    [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo]
   );
 
   const resetLesson = () => {

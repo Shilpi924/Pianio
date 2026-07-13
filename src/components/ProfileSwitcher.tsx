@@ -1,14 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Plus, Trash2, User } from 'lucide-react';
+import { ChevronDown, Plus, Trash2, User, LogIn, LogOut } from 'lucide-react';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import type { PersonalizationData } from '../types/userProfile';
+import { signInWithGoogle, logOut, auth } from '../services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import type { User as FirebaseUser } from 'firebase/auth';
 
 export default function ProfileSwitcher() {
   const { profiles, activeProfileId, switchProfile, createProfile, deleteProfile } = useUserProfileStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+
+  // Listen to auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const activeProfile = profiles[activeProfileId];
   const allProfiles = Object.values(profiles);
@@ -117,6 +129,39 @@ export default function ProfileSwitcher() {
                 >
                   <Plus className="h-4 w-4" />
                   Add New Learner
+                </button>
+              )}
+            </div>
+            
+            {/* Firebase Auth Section */}
+            <div className="border-t border-slate-100 bg-slate-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+              {user ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 px-2 py-1 text-xs text-slate-500 dark:text-gray-400">
+                    <img src={user.photoURL || ''} alt="avatar" className="h-6 w-6 rounded-full" />
+                    <span className="truncate">{user.email}</span>
+                  </div>
+                  <button
+                    onClick={() => logOut()}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={async () => {
+                    try {
+                      await signInWithGoogle();
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Sign in with Google
                 </button>
               )}
             </div>

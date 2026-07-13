@@ -1,14 +1,20 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Music, Library, Sparkles, Piano, Settings, Award, Activity } from 'lucide-react';
+import { Play, Music, Library, Sparkles, Piano, Settings, Award, Activity, Globe } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import ProfileSwitcher from '../components/ProfileSwitcher';
 
 export default function HomePage() {
-  const { setCurrentView } = useAppStore();
+  const { setCurrentView, settings, updateSettings } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const lang = e.target.value;
+    i18n.changeLanguage(lang);
+    updateSettings({ language: lang });
+  };
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] md:p-8">
@@ -35,6 +41,20 @@ export default function HomePage() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
+            <div className="relative">
+              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <select 
+                value={settings.language || 'en'} 
+                onChange={handleLanguageChange}
+                className="appearance-none rounded-full bg-white/80 backdrop-blur-md pl-9 pr-8 py-2 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-gray-800/80 dark:text-gray-200 dark:ring-gray-700 dark:hover:bg-gray-800"
+              >
+                <option value="en">EN</option>
+                <option value="zh">ZH</option>
+                <option value="ja">JA</option>
+                <option value="de">DE</option>
+                <option value="es">ES</option>
+              </select>
+            </div>
             <ProfileSwitcher />
           </div>
         </header>

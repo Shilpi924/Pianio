@@ -8,6 +8,8 @@ interface AppStore extends AppState {
   setCurrentLesson: (lesson: Lesson | null) => void;
   setIsPlaying: (playing: boolean) => void;
   setTempo: (tempo: number) => void;
+  customLessons: Lesson[];
+  addCustomLesson: (lesson: Lesson) => void;
 
   // Settings
   settings: Settings;
@@ -53,6 +55,7 @@ const defaultSettings: Settings = {
   highPerformanceGraphics: true,
   claudeApiKey: '',
   backgroundMusic: true,
+  language: 'en',
 };
 
 const defaultStatistics: Statistics = {
@@ -80,6 +83,12 @@ export const useAppStore = create<AppStore>()(
       setCurrentLesson: (lesson) => set({ currentLesson: lesson }),
       setIsPlaying: (playing) => set({ isPlaying: playing }),
       setTempo: (tempo) => set({ tempo }),
+      
+      // Custom Lessons
+      customLessons: [],
+      addCustomLesson: (lesson) => set((state) => ({
+        customLessons: [...state.customLessons, lesson]
+      })),
 
       // Settings
       settings: defaultSettings,
@@ -164,6 +173,7 @@ export const useAppStore = create<AppStore>()(
         settings: state.settings,
         statistics: state.statistics,
         lessonProgress: state.lessonProgress,
+        customLessons: state.customLessons,
       }),
     }
   )
