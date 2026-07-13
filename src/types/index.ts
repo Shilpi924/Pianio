@@ -116,7 +116,7 @@ export interface RecommendedTrack {
 }
 
 export interface AppState {
-  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator' | 'rhythm-training';
+  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'lesson-creator' | 'rhythm-training' | 'vr-piano';
   currentLesson: Lesson | null;
   isPlaying: boolean;
   tempo: number;

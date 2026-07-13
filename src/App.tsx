@@ -18,6 +18,7 @@ import HandPositioningPage from './pages/HandPositioningPage';
 import PerformanceModePage from './pages/PerformanceModePage';
 import IntervalTrainingPage from './pages/IntervalTrainingPage';
 import RhythmTrainingPage from './pages/RhythmTrainingPage';
+import VRPianoPage from './pages/VRPianoPage';
 import TutorialsPage from './pages/TutorialsPage';
 import SongUploadPage from './pages/SongUploadPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -93,6 +94,8 @@ function App() {
         return <IntervalTrainingPage />;
       case 'rhythm-training':
         return <RhythmTrainingPage />;
+      case 'vr-piano':
+        return <VRPianoPage />;
       case 'tutorials':
         return <TutorialsPage />;
       case 'song-upload':

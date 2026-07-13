@@ -16,6 +16,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@react-three/postprocessing": "^3.0.4",
+    "@react-three/xr": "^6.6.30",
     "@tonejs/midi": "^2.0.28",
     "@types/three": "^0.185.1",
     "firebase": "^12.16.0",
