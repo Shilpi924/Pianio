@@ -36,5 +36,17 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'framer-motion', 'zustand', 'i18next'],
+          three: ['three', '@react-three/fiber', '@react-three/drei'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/database'],
+          tone: ['tone'],
+          vexflow: ['vexflow']
+        }
+      }
+    }
   },
 });
