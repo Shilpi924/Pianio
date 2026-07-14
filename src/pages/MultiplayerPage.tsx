@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { ArrowLeft, Users, PlusCircle, LogIn, Wifi, WifiOff } from 'lucide-react';
-import { webrtcService, ConnectionStatus } from '../services/webrtcService';
+import { webrtcService, type ConnectionStatus } from '../services/webrtcService';
 import DuetKeyboard from '../components/DuetKeyboard';
 import { audioService } from '../services/audioService';
-import { noteToMidi } from '../utils/noteUtils';
+import { midiService, type MIDIMessage } from '../services/midiService';
+import { midiToNote } from '../utils/noteUtils';
 
 export default function MultiplayerPage() {
   const { setCurrentView } = useAppStore();
@@ -40,23 +41,21 @@ export default function MultiplayerPage() {
     };
 
     // Listen to actual physical MIDI keyboard
-    const handleMidiMessage = (msg: any) => {
-      const type = msg.messageType;
-      const noteStr = msg.noteName;
-      const velocity = msg.velocity || 0.8;
+    const handleMidiMessage = (msg: MIDIMessage) => {
+      const noteStr = midiToNote(msg.note);
       
-      if (type === 'noteon') {
-        handleLocalNoteOn(noteStr, velocity);
-      } else if (type === 'noteoff') {
+      if (msg.velocity > 0) {
+        handleLocalNoteOn(noteStr, msg.velocity / 127);
+      } else {
         handleLocalNoteOff(noteStr);
       }
     };
     
-    audioService.addMidiListener(handleMidiMessage);
+    midiService.addListener(handleMidiMessage);
 
     return () => {
       webrtcService.disconnect();
-      audioService.removeMidiListener(handleMidiMessage);
+      midiService.removeListener(handleMidiMessage);
     };
   }, []);
 

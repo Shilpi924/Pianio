@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { getAllNotesInRange, isBlackKey, noteToMidi } from '../utils/noteUtils';
+import { useRef, useEffect } from 'react';
+import { getAllNotesInRange, isBlackKey } from '../utils/noteUtils';
 
 interface DuetKeyProps {
   note: string;

@@ -31,7 +31,7 @@ export const contentDatabaseService = {
   /**
    * Save or update a lesson in Firestore (Admin Only)
    */
-  async saveLesson(lesson: Partial<Lesson> & { id: string, isPublished: boolean }): Promise<void> {
+  async saveLesson(lesson: Partial<Lesson> & { id: string, isPublished: boolean, createdAt?: string }): Promise<void> {
     try {
       const lessonRef = doc(db, 'lessons', lesson.id);
       
