@@ -4,6 +4,7 @@ import { ArrowLeft, Check, ChevronDown, Gauge, Keyboard, SlidersHorizontal, Spar
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import type { AgeGroup, LearningGoal, PersonalizationData, PracticeFrequency, SkillLevel } from '../types/userProfile';
+import ProfileSwitcher from '../components/ProfileSwitcher';
 
 const AGE_GROUPS: { value: AgeGroup; label: string; description: string }[] = [
   { value: '5-8', label: '5-8 years', description: 'Big targets, playful rewards, short lessons' },
@@ -279,6 +280,9 @@ export default function SettingsPage() {
             <p className="mt-2 text-lg font-medium text-slate-600 dark:text-slate-300">
               Customize your learning experience
             </p>
+          </div>
+          <div className="flex items-center justify-end">
+            <ProfileSwitcher />
           </div>
         </header>
 

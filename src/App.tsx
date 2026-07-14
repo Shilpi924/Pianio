@@ -19,9 +19,11 @@ import PerformanceModePage from './pages/PerformanceModePage';
 import IntervalTrainingPage from './pages/IntervalTrainingPage';
 import RhythmTrainingPage from './pages/RhythmTrainingPage';
 import VRPianoPage from './pages/VRPianoPage';
+import MultiplayerPage from './pages/MultiplayerPage';
 import TutorialsPage from './pages/TutorialsPage';
 import SongUploadPage from './pages/SongUploadPage';
 import OnboardingPage from './pages/OnboardingPage';
+import ContentAdminPage from './pages/ContentAdminPage';
 import AIChatBot from './components/AIChatBot';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
@@ -96,6 +98,8 @@ function App() {
         return <RhythmTrainingPage />;
       case 'vr-piano':
         return <VRPianoPage />;
+      case 'multiplayer':
+        return <MultiplayerPage />;
       case 'tutorials':
         return <TutorialsPage />;
       case 'song-upload':
@@ -113,6 +117,8 @@ function App() {
         return <SettingsPage />;
       case 'lesson-creator':
         return <LessonCreatorPage />;
+      case 'admin':
+        return <ContentAdminPage />;
       default:
         return <HomePage />;
     }

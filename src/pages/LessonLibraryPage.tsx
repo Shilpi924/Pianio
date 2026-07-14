@@ -1,4 +1,4 @@
-import { useDeferredValue, useState } from 'react';
+import { useDeferredValue, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Search, Play } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
@@ -14,7 +14,7 @@ import type { Lesson } from '../types';
 const allBuiltinLessons = getEnhancedLessons();
 
 export default function LessonLibraryPage() {
-  const { setCurrentView, setCurrentLesson, lessonProgress, statistics, customLessons, addCustomLesson } = useAppStore();
+  const { setCurrentView, setCurrentLesson, lessonProgress, statistics, customLessons, cloudLessons, fetchCloudLessons, addCustomLesson } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   
   // Library State
@@ -32,7 +32,13 @@ export default function LessonLibraryPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isImporting, setIsImporting] = useState<string | null>(null);
 
-  const allLessons = [...allBuiltinLessons, ...customLessons];
+  useEffect(() => {
+    fetchCloudLessons();
+  }, [fetchCloudLessons]);
+
+  const allLessonsMap = new Map<string, Lesson>();
+  [...allBuiltinLessons, ...cloudLessons, ...customLessons].forEach(l => allLessonsMap.set(l.id, l));
+  const allLessons = Array.from(allLessonsMap.values());
 
   const recommendations = getPersonalizedRecommendations(
     allLessons,

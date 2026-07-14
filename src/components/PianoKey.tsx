@@ -20,7 +20,7 @@ interface PianoKeyProps {
 const keyStateStyles: Record<KeyState, string> = {
   idle: '',
   highlighted: 'bg-blue-200 dark:bg-blue-800',
-  pressed: 'bg-blue-300 dark:bg-blue-700 scale-95',
+  pressed: 'bg-blue-300 dark:bg-blue-700 brightness-90',
   correct: 'bg-green-300 dark:bg-green-700 shadow-glow',
   incorrect: 'bg-red-300 dark:bg-red-700 animate-shake',
   disabled: 'opacity-50 cursor-not-allowed',
@@ -75,8 +75,6 @@ export default function PianoKey({
       onTouchEnd={(e) => { e.preventDefault(); handleMouseUp(); }}
       onTouchCancel={handleMouseLeave}
       disabled={disabled}
-      whileHover={disabled ? {} : { scale: isBlack ? 1.02 : 1.01 }}
-      whileTap={disabled ? {} : { scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
       {showNoteName && (

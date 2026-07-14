@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AppState, Lesson, Settings, Statistics, MIDIDevice, LessonProgress } from '../types';
+import { contentDatabaseService } from '../services/contentDatabaseService';
 
 interface AppStore extends AppState {
   // App state
@@ -10,6 +11,10 @@ interface AppStore extends AppState {
   setTempo: (tempo: number) => void;
   customLessons: Lesson[];
   addCustomLesson: (lesson: Lesson) => void;
+
+  // Cloud Lessons
+  cloudLessons: Lesson[];
+  fetchCloudLessons: () => Promise<void>;
 
   // Settings
   settings: Settings;
@@ -89,6 +94,17 @@ export const useAppStore = create<AppStore>()(
       addCustomLesson: (lesson) => set((state) => ({
         customLessons: [...state.customLessons, lesson]
       })),
+
+      // Cloud Lessons
+      cloudLessons: [],
+      fetchCloudLessons: async () => {
+        try {
+          const lessons = await contentDatabaseService.getLessons();
+          set({ cloudLessons: lessons });
+        } catch (error) {
+          console.error('Failed to fetch cloud lessons:', error);
+        }
+      },
 
       // Settings
       settings: defaultSettings,
@@ -174,6 +190,7 @@ export const useAppStore = create<AppStore>()(
         statistics: state.statistics,
         lessonProgress: state.lessonProgress,
         customLessons: state.customLessons,
+        cloudLessons: state.cloudLessons,
       }),
     }
   )

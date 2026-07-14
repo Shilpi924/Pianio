@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Hand, Layers, Music, Pause, Play, Repeat, RotateCcw, Turtle, Volume2, Zap } from 'lucide-react';
+import { Clock, Hand, Layers, Music, Pause, Play, Repeat, RotateCcw, Turtle, Volume2, Zap, Mic, MicOff } from 'lucide-react';
 import PianoKeyboard from './PianoKeyboard';
 import FingerHint from './FingerHint';
 import FallingNotes from './FallingNotes';
@@ -43,7 +43,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [waitModeEnabled, setWaitModeEnabled] = useState(true);
   const [showGhostHand, setShowGhostHand] = useState(true);
   const [useMicrophone, setUseMicrophone] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(-2);
   const [noteStartTime, setNoteStartTime] = useState(0);
   const [timingFeedback, setTimingFeedback] = useState<'perfect' | 'good' | 'early' | 'late' | null>(null);
   const [timingScore, setTimingScore] = useState(0);
@@ -465,7 +465,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     setMascotMessage('');
     setTimingFeedback(null);
     setTimingScore(0);
-    // setCurrentTime(0);
+    setCurrentTime(-2);
     updateLessonProgress(lesson.id, {
       lessonId: lesson.id,
       currentNoteIndex: 0,
@@ -492,9 +492,26 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     setTempo(mode === 'slow-practice' ? Math.round(lesson.tempo * 0.5) : lesson.tempo);
   };
 
+  if (lesson.notes.length === 0) {
+    return (
+      <div className="flex min-h-[50vh] flex-col items-center justify-center rounded-[2rem] bg-white p-8 text-center shadow-2xl dark:bg-slate-800">
+        <div className="mb-4 text-6xl">🪹</div>
+        <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Empty Shell</h2>
+        <p className="text-slate-500 max-w-md">
+          This is an imported song shell. There is no sheet music available yet. You can upload a MIDI file or use the AI to generate an arrangement in the future.
+        </p>
+        {onExit && (
+          <button onClick={onExit} className="mt-6 rounded-xl bg-slate-200 px-6 py-3 font-bold text-slate-700 transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600">
+            Go Back
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className={isPlaying ? "fixed inset-0 z-50 bg-[#f8fbff] dark:bg-gray-900 p-4 md:p-8 overflow-y-auto" : "grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px]"}>
-      <div className={`space-y-4 ${isPlaying ? 'max-w-5xl mx-auto flex flex-col justify-center min-h-full' : ''}`}>
+    <div className={isPlaying ? "fixed inset-0 z-50 bg-[#f8fbff] dark:bg-gray-900 p-2 md:p-4 overflow-hidden flex flex-col" : "grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px]"}>
+      <div className={`space-y-2 ${isPlaying ? 'max-w-5xl mx-auto flex flex-col justify-between w-full h-full' : ''}`}>
         <div className="hidden justify-end lg:flex">
           <Mascot mood={mascotMood} message={mascotMessage} />
         </div>
@@ -508,6 +525,21 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
             🔥 {combo}x Combo!
           </motion.div>
         )}
+
+        {/* Smart Tutor Mode Alert */}
+        <AnimatePresence>
+          {isAdaptiveTraining && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-2 rounded-xl bg-purple-50 border border-purple-200 px-4 py-3 text-sm font-semibold text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800"
+            >
+              <Zap className="h-5 w-5 text-purple-500" />
+              <span>Smart Tutor Active: Mastering this tricky section. {adaptiveSuccessCount}/3 perfect tries needed.</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Piano samples loading banner */}
         {isAudioInitialized && !samplesLoaded && (
@@ -607,8 +639,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         </div>
 
         {(useFallingNotes || showSheetMusic) && (
-          <div className="card !p-4">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className={`card !p-3 ${isPlaying ? 'flex-1 min-h-0 flex flex-col' : ''}`}>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-3 shrink-0">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Practice Stage</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -628,14 +660,22 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
                   className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-sky-100 px-4 py-2 font-bold text-sky-800 transition-colors hover:bg-sky-200 dark:bg-sky-900/40 dark:text-sky-200"
                 >
                   <Volume2 className="h-5 w-5" />
-                  <span>Hear note</span>
+                  <span className="hidden sm:inline">Hear note</span>
                 </button>
+                {isPlaying && onExit && (
+                  <button
+                    onClick={onExit}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-gray-200 px-4 py-2 font-bold text-gray-700 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  >
+                    <span>Exit</span>
+                  </button>
+                )}
               </div>
             </div>
 
             {useFallingNotes && (
-              <>
-                <div className="mb-3 flex items-center justify-between rounded-2xl bg-slate-50 p-3 dark:bg-slate-900/50">
+              <div className={`relative w-full flex flex-col ${isPlaying ? 'flex-1 min-h-0' : ''}`}>
+                <div className="mb-3 flex shrink-0 items-center justify-between rounded-2xl bg-slate-50 p-3 dark:bg-slate-900/50">
                   <span className="font-semibold text-gray-900 dark:text-gray-100">Falling notes speed</span>
                   <div className="flex items-center gap-2">
                     <button
@@ -653,16 +693,19 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
                     </button>
                   </div>
                 </div>
-                <FallingNotes
-                  notes={lesson.notes}
-                  tempo={tempo}
-                  isPlaying={isPlaying}
-                  currentTime={currentTime}
-                  currentNoteIndex={currentNoteIndex}
-                  speed={fallingNotesSpeed}
-                  activeNotes={highlightedNotes}
-                />
-              </>
+                
+                <div className={isPlaying ? 'flex-1 min-h-0 relative' : ''}>
+                  <FallingNotes
+                    notes={lesson.notes}
+                    tempo={tempo}
+                    isPlaying={isPlaying}
+                    currentTime={currentTime}
+                    currentNoteIndex={currentNoteIndex}
+                    speed={fallingNotesSpeed}
+                    activeNotes={highlightedNotes}
+                  />
+                </div>
+              </div>
             )}
 
             {showSheetMusic && (
@@ -740,6 +783,18 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               title="Sheet Music"
             >
               <Music className="h-5 w-5" />
+            </button>
+
+            <button
+              onClick={() => setUseMicrophone(!useMicrophone)}
+              className={`rounded-xl p-3 transition-colors ${
+                useMicrophone
+                  ? 'bg-rose-500 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
+              }`}
+              title="Acoustic Mic Pitch Detection"
+            >
+              {useMicrophone ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
             </button>
           </div>
 
@@ -832,15 +887,17 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         />
       </div>
 
-      <div className="mt-8 flex justify-center w-full">
-        <HandGuide 
-          activeFinger={
-            showGhostHand && currentNote && currentNote.finger
-              ? { finger: currentNote.finger, hand: currentNote.hand }
-              : null
-          } 
-        />
-      </div>
+      {!isPlaying && (
+        <div className="mt-4 flex justify-center w-full">
+          <HandGuide 
+            activeFinger={
+              showGhostHand && currentNote && currentNote.finger
+                ? { finger: currentNote.finger, hand: currentNote.hand }
+                : null
+            } 
+          />
+        </div>
+      )}
 
       {!isPlaying && (
         <div className="space-y-4">

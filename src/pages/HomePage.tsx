@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Music, Library, Sparkles, Piano, Settings, Award, Activity, Globe, Map, Glasses } from 'lucide-react';
+import { Play, Music, Library, Sparkles, Piano, Settings, Award, Activity, Globe, Map, Glasses, Users } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import ProfileSwitcher from '../components/ProfileSwitcher';
@@ -140,6 +140,13 @@ export default function HomePage() {
             subtitle="Virtual reality mode"
             color="from-cyan-400 to-blue-500"
             onClick={() => setCurrentView('vr-piano')}
+          />
+          <SecondaryCard
+            icon={Users}
+            title="Duet Mode"
+            subtitle="Real-time multiplayer"
+            color="from-indigo-400 to-violet-500"
+            onClick={() => setCurrentView('multiplayer')}
           />
           <SecondaryCard
             icon={Award}

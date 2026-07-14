@@ -144,7 +144,7 @@ export default function FallingNotes({
       const idx       = currentNoteIndex + vi;
       const noteSecs  = beat * spb;
       const secsLeft  = noteSecs - (isPlaying ? currentTime : 0);
-      const heightPx  = Math.max(24, n.duration * spb * pxPerSec * 0.9);
+      const heightPx  = Math.max(40, n.duration * spb * pxPerSec * 0.9);
       const bottomY   = TRAVEL - secsLeft * pxPerSec;
       const topPx     = bottomY - heightPx;
 
@@ -234,9 +234,9 @@ export default function FallingNotes({
                   {fn.note}
                 </span>
               )}
-              {fn.heightPx > 50 && (
-                <span className="text-[9px] leading-none opacity-70 mt-0.5">
-                  {fn.hand === 'right' ? 'R' : 'L'}{fn.finger}
+              {fn.heightPx >= 40 && (
+                <span className="text-[11px] font-black leading-none opacity-90 mt-0.5">
+                  {fn.finger}
                 </span>
               )}
             </motion.div>

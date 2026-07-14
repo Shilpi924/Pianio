@@ -4,13 +4,13 @@ import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import type { UserProfile } from "../types/userProfile";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDesSx5Fpn2PUnCTAUyMGUGD8Myt2-o1-8",
-  authDomain: "pianio-ca9ff.firebaseapp.com",
-  projectId: "pianio-ca9ff",
-  storageBucket: "pianio-ca9ff.firebasestorage.app",
-  messagingSenderId: "582601487615",
-  appId: "1:582601487615:web:7d65154771a722cfba48ca",
-  measurementId: "G-MY6HLCP088"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
