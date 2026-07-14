@@ -39,12 +39,14 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'framer-motion', 'zustand', 'i18next'],
-          three: ['three', '@react-three/fiber', '@react-three/drei'],
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/database'],
-          tone: ['tone'],
-          vexflow: ['vexflow']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('three') || id.includes('@react-three')) return 'three';
+            if (id.includes('firebase')) return 'firebase';
+            if (id.includes('tone')) return 'tone';
+            if (id.includes('vexflow')) return 'vexflow';
+            if (id.includes('react') || id.includes('framer-motion') || id.includes('zustand') || id.includes('i18next')) return 'vendor';
+          }
         }
       }
     }
