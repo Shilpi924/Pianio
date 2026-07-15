@@ -7,6 +7,7 @@ import FallingNotes from './FallingNotes';
 import SheetMusic from './SheetMusic';
 import LevelUpAnimation from './LevelUpAnimation';
 import Mascot from './Mascot';
+import confetti from 'canvas-confetti';
 
 import HandGuide from './HandGuide';
 import type { Lesson, PracticeMode } from '../types';
@@ -26,7 +27,7 @@ interface LessonPlayerProps {
 
 export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) {
   const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress } = useAppStore();
-  const { addCompletedLesson, addExperience, addPracticeTime, updateStreak } = useUserProfileStore();
+  const { addCompletedLesson, addExperience, addPracticeTime, addPracticeSession, updateStreak } = useUserProfileStore();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [tempo, setTempo] = useState(lesson.tempo);
@@ -207,11 +208,15 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       const elapsedSeconds = Math.max(0, Math.round((Date.now() - practiceStartedAtRef.current) / 1000));
       if (elapsedSeconds > 0) {
         incrementPracticeTime(elapsedSeconds);
-        addPracticeTime(Math.floor(elapsedSeconds / 60));
+        const durationMins = Math.floor(elapsedSeconds / 60);
+        addPracticeTime(durationMins);
+        if (durationMins > 0) {
+          addPracticeSession({ lessonId: lesson.id, duration: durationMins, score: accuracy });
+        }
       }
       practiceStartedAtRef.current = null;
     }
-  }, [addPracticeTime, incrementPracticeTime, isPlaying]);
+  }, [addPracticeTime, addPracticeSession, incrementPracticeTime, isPlaying, lesson.id, accuracy]);
 
   useEffect(() => {
     if (isPlaying && currentNote) {
@@ -347,6 +352,23 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         setCombo((prev) => {
           const nextCombo = prev + 1;
           if (nextCombo > 5) {
+            if (nextCombo % 5 === 0) {
+              // Shoot some confetti from the sides for big combos
+              confetti({
+                particleCount: 50,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#3b82f6', '#8b5cf6', '#ec4899']
+              });
+              confetti({
+                particleCount: 50,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#3b82f6', '#8b5cf6', '#ec4899']
+              });
+            }
             SoundEffects.playCombo(nextCombo);
             setMascotMood('excited');
             setMascotMessage(`Amazing! ${nextCombo} in a row!`);
@@ -400,6 +422,33 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           setMascotMood('celebrating');
           setMascotMessage('Quest complete. Strong finish.');
           SoundEffects.playLevelUp();
+          
+          // Massive confetti explosion!
+          const duration = 3000;
+          const end = Date.now() + duration;
+
+          const frame = () => {
+            confetti({
+              particleCount: 5,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0 },
+              colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
+            });
+            confetti({
+              particleCount: 5,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1 },
+              colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
+            });
+
+            if (Date.now() < end) {
+              requestAnimationFrame(frame);
+            }
+          };
+          frame();
+
           setShowLevelUp(true);
           updateLessonProgress(lesson.id, {
             lessonId: lesson.id,

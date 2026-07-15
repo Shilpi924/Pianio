@@ -3,6 +3,14 @@ export type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
 export type LearningGoal = 'fun' | 'classical' | 'pop' | 'jazz' | 'exams' | 'professional';
 export type PracticeFrequency = 'daily' | 'few-times-week' | 'weekly' | 'occasional';
 
+export interface PracticeSession {
+  id: string;
+  date: string;
+  lessonId: string;
+  duration: number;
+  score?: number;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -14,6 +22,7 @@ export interface UserProfile {
   favoriteGenres: string[];
   completedLessons: string[];
   totalPracticeTime: number; // in minutes
+  practiceHistory: PracticeSession[];
   currentStreak: number;
   longestStreak: number;
   level: number;

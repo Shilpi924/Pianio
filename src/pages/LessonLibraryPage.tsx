@@ -95,8 +95,8 @@ export default function LessonLibraryPage() {
       category: 'Imported',
       source: 'public-domain',
       sourceName: recording.artist,
-      synopsis: `Imported from MusicBrainz. Release: ${recording.releaseDate || 'Unknown'}`,
-      tags: ['imported'],
+      synopsis: `Song idea saved. Ask a grown-up to add a piano file before playing.`,
+      tags: ['song idea'],
     };
     addCustomLesson(newLesson);
     setActiveTab('library');
@@ -114,7 +114,7 @@ export default function LessonLibraryPage() {
       category: 'Classical',
       source: 'public-domain',
       sourceName: score.composer,
-      synopsis: `Imported Public Domain score by ${score.composer}.`,
+      synopsis: `Playable classic song by ${score.composer}.`,
       tags: ['imported', 'classical'],
     };
     addCustomLesson(newLesson);
@@ -137,99 +137,70 @@ export default function LessonLibraryPage() {
               className="mb-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back home
+              Back
             </button>
-            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-cyan-500">
-              Song Library
-            </h1>
-            <p className="mt-2 text-lg font-medium text-slate-600 dark:text-slate-300">
-              Find your next favorite song to play!
-            </p>
+            <div className="flex items-center gap-4">
+              <h1 className="text-4xl font-black text-slate-900 dark:text-white">
+                Library
+              </h1>
+              <span className="rounded-full bg-fuchsia-100 px-3 py-1 text-sm font-bold text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400">
+                {allLessons.length} Songs
+              </span>
+            </div>
           </div>
           
           <div className="flex gap-4">
-            <div className="flex bg-white/50 dark:bg-slate-800/50 rounded-2xl p-1 shadow-sm backdrop-blur-md">
+            <div className="flex bg-white shadow-sm dark:bg-slate-800 rounded-full p-1 border border-slate-100 dark:border-slate-700">
               <button 
                 onClick={() => setActiveTab('library')}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'library' ? 'bg-white shadow text-fuchsia-600 dark:bg-slate-700 dark:text-fuchsia-400' : 'text-slate-600 hover:bg-white/50 dark:text-slate-400'}`}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'library' ? 'bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
               >
-                My Library
+                My Music
               </button>
               <button 
                 onClick={() => setActiveTab('discover')}
-                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'discover' ? 'bg-white shadow text-fuchsia-600 dark:bg-slate-700 dark:text-fuchsia-400' : 'text-slate-600 hover:bg-white/50 dark:text-slate-400'}`}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'discover' ? 'bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
               >
-                Discover Songs
+                Discover
               </button>
-            </div>
-            <div className="rounded-2xl bg-white p-4 shadow-xl shadow-indigo-100 dark:bg-slate-800 dark:shadow-none hidden md:block">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Songs</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-white">{allLessons.length}</div>
             </div>
           </div>
         </header>
 
         {activeTab === 'library' ? (
           <>
-            {/* Search & Categories */}
-            <div className="flex flex-col gap-8 rounded-[2rem] bg-white p-6 shadow-2xl shadow-slate-200/50 dark:bg-slate-800/50 dark:shadow-none md:p-8">
-              <div className="relative w-full max-w-2xl mx-auto">
-                <Search className="absolute left-6 top-1/2 h-6 w-6 -translate-y-1/2 text-slate-400" />
+            {/* Unified Search & Filters */}
+            <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-2xl shadow-sm dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+              <div className="relative w-full flex-1">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search for a song or course..."
-                  className="h-16 w-full rounded-full bg-slate-50 pl-16 pr-6 text-lg font-medium outline-none transition-all focus:bg-white focus:ring-4 focus:ring-emerald-500/20 dark:bg-slate-900/50 dark:text-white"
+                  placeholder="Search songs..."
+                  className="h-12 w-full rounded-xl bg-slate-50 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:bg-white focus:ring-2 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-white"
                 />
               </div>
-
-              {/* Levels Filter */}
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Filter Courses by level</h3>
-                <p className="text-slate-500 mb-6">Your current level: {userProfile?.skillLevel === 'beginner' ? 'Beginner 1' : 'Intermediate 1'}</p>
+              
+              <div className="flex w-full md:w-auto gap-3">
+                <select
+                  value={selectedDifficulty}
+                  onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  className="h-12 flex-1 md:flex-none cursor-pointer rounded-xl bg-slate-50 px-4 text-sm font-bold text-slate-700 outline-none hover:bg-slate-100 focus:ring-2 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                  {difficulties.map(diff => (
+                    <option key={diff} value={diff}>{diff === 'All' ? 'All Levels' : diff}</option>
+                  ))}
+                </select>
                 
-                <div className="flex flex-wrap justify-center gap-3">
-                  {difficulties.map((diff) => (
-                    <button
-                      key={diff}
-                      onClick={() => setSelectedDifficulty(diff)}
-                      className={`flex items-center gap-2 rounded-lg px-6 py-3 font-bold capitalize transition-all ${
-                        selectedDifficulty === diff
-                          ? 'bg-emerald-600 text-white shadow-md'
-                          : 'bg-white text-slate-700 shadow ring-1 ring-slate-100 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700'
-                      }`}
-                    >
-                      {diff !== 'All' && (
-                        <div className={`h-3 w-3 ${
-                          diff === 'beginner' ? 'rounded-full bg-emerald-300' :
-                          diff === 'intermediate' ? 'bg-amber-300 rounded-sm' :
-                          'rotate-45 bg-sky-400'
-                        }`} />
-                      )}
-                      {diff === 'All' ? 'All Levels' : diff}
-                    </button>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="h-12 flex-1 md:flex-none cursor-pointer rounded-xl bg-slate-50 px-4 text-sm font-bold text-slate-700 outline-none hover:bg-slate-100 focus:ring-2 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat === 'All' ? 'All Genres' : cat}</option>
                   ))}
-                </div>
-              </div>
-
-              {/* Categories Grid */}
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 text-center">What do you feel like playing today?</h3>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`rounded-lg px-6 py-3 font-semibold transition-all ${
-                        selectedCategory === cat
-                          ? 'bg-emerald-600 text-white shadow-md'
-                          : 'bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
+                </select>
               </div>
             </div>
 
@@ -253,7 +224,7 @@ export default function LessonLibraryPage() {
                   onClick={() => startLesson(lesson)}
                   className="group relative flex w-full flex-col overflow-hidden rounded-xl bg-white text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800"
                 >
-                  <div className={`h-32 w-full p-4 flex items-center justify-center relative ${
+                  <div className={`h-24 w-full p-4 flex items-center justify-center relative ${
                     lesson.difficulty === 'beginner' ? 'bg-emerald-100 dark:bg-emerald-900/30' :
                     lesson.difficulty === 'intermediate' ? 'bg-amber-100 dark:bg-amber-900/30' :
                     'bg-sky-100 dark:bg-sky-900/30'
@@ -263,7 +234,7 @@ export default function LessonLibraryPage() {
                         RECOMMENDED
                       </div>
                     )}
-                    <span className="text-6xl group-hover:scale-110 transition-transform duration-300">
+                    <span className="text-5xl group-hover:scale-110 transition-transform duration-300">
                       {lesson.difficulty === 'beginner' ? '🎹' : lesson.difficulty === 'intermediate' ? '🎼' : '🎻'}
                     </span>
                   </div>
@@ -310,39 +281,35 @@ export default function LessonLibraryPage() {
         </div>
           </>
         ) : (
-          <div className="space-y-8">
-            <div className="flex gap-4 mb-4">
-              <button 
-                onClick={() => setDiscoverSource('musicbrainz')}
-                className={`flex-1 py-2 rounded-xl font-bold transition-all ${discoverSource === 'musicbrainz' ? 'bg-fuchsia-100 text-fuchsia-600 border-2 border-fuchsia-500' : 'bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100'}`}
+          <div className="space-y-6">
+            {/* Unified Search & Source */}
+            <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl shadow-sm dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+              <select
+                value={discoverSource}
+                onChange={(e) => setDiscoverSource(e.target.value as any)}
+                className="h-12 cursor-pointer rounded-xl bg-slate-50 px-4 text-sm font-bold text-slate-700 outline-none hover:bg-slate-100 focus:ring-2 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-slate-300"
               >
-                Search Pop/Modern (MusicBrainz)
-              </button>
-              <button 
-                onClick={() => setDiscoverSource('publicdomain')}
-                className={`flex-1 py-2 rounded-xl font-bold transition-all ${discoverSource === 'publicdomain' ? 'bg-emerald-100 text-emerald-600 border-2 border-emerald-500' : 'bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100'}`}
-              >
-                Search Classical Scores (Public Domain)
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4 rounded-[2rem] bg-white p-4 shadow-2xl shadow-slate-200/50 dark:bg-slate-800/50 dark:shadow-none md:flex-row md:items-center md:p-6">
+                <option value="musicbrainz">Pop Song Ideas</option>
+                <option value="publicdomain">Free Classics</option>
+              </select>
+              
               <div className="relative flex-1">
-                <Search className="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-slate-400" />
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                 <input
                   value={discoverQuery}
                   onChange={(e) => setDiscoverQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleDiscoverSearch()}
-                  placeholder={discoverSource === 'musicbrainz' ? "Search MusicBrainz (e.g., 'Wellerman')..." : "Search Public Domain (e.g., 'Bach')..."}
-                  className="h-16 w-full rounded-2xl bg-slate-50 pl-14 pr-6 text-lg font-medium outline-none transition-all focus:bg-white focus:ring-4 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-white"
+                  placeholder={discoverSource === 'musicbrainz' ? "Search artist or song..." : "Search composer or piece..."}
+                  className="h-12 w-full rounded-xl bg-slate-50 pl-12 pr-4 text-sm font-medium outline-none transition-all focus:bg-white focus:ring-2 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-white"
                 />
               </div>
+              
               <button 
                 onClick={handleDiscoverSearch}
                 disabled={isSearching}
-                className="h-16 rounded-2xl bg-fuchsia-500 px-8 font-bold text-white shadow-lg shadow-fuchsia-200 hover:bg-fuchsia-600 disabled:opacity-50"
+                className="h-12 rounded-xl bg-fuchsia-500 px-8 text-sm font-bold text-white shadow-sm hover:bg-fuchsia-600 disabled:opacity-50"
               >
-                {isSearching ? 'Searching...' : 'Search'}
+                {isSearching ? '...' : 'Search'}
               </button>
             </div>
 
@@ -354,13 +321,16 @@ export default function LessonLibraryPage() {
                       <div>
                         <h4 className="text-xl font-bold text-slate-900 dark:text-white">{recording.title}</h4>
                         <p className="mt-1 font-medium text-slate-500">{recording.artist}</p>
-                        {recording.releaseDate && <p className="text-xs text-slate-400">Release: {recording.releaseDate}</p>}
+                        {recording.releaseDate && <p className="text-xs text-slate-400">Found song idea from {recording.releaseDate}</p>}
+                        <p className="mt-3 rounded-xl bg-fuchsia-50 p-3 text-sm font-medium text-fuchsia-800">
+                          Ask a grown-up to add a piano file before this becomes playable.
+                        </p>
                       </div>
                       <button 
                         onClick={() => importLesson(recording)}
                         className="mt-4 rounded-xl bg-slate-100 py-2 font-bold text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
                       >
-                        Import Empty Shell
+                        Save song idea
                       </button>
                     </div>
                   ))}
@@ -388,13 +358,13 @@ export default function LessonLibraryPage() {
                         disabled={isImporting === score.id}
                         className="mt-4 rounded-xl bg-emerald-500 py-2 font-bold text-white shadow-md shadow-emerald-200 hover:bg-emerald-600 disabled:opacity-50"
                       >
-                        {isImporting === score.id ? 'Downloading...' : 'Import Playable Score'}
+                        {isImporting === score.id ? 'Adding...' : 'Add playable song'}
                       </button>
                     </div>
                   ))}
                 </div>
                 {pdResults.length === 0 && !isSearching && discoverQuery && (
-                  <div className="text-center p-12 text-slate-500">No public domain scores found for "{discoverQuery}".</div>
+                  <div className="text-center p-12 text-slate-500">No free classic songs found for "{discoverQuery}".</div>
                 )}
               </>
             )}
@@ -404,4 +374,3 @@ export default function LessonLibraryPage() {
     </div>
   );
 }
-

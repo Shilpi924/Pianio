@@ -17,16 +17,16 @@ describe('musicCatalogService', () => {
       expect(catalogSources[0].access).toBe('ready');
     });
 
-    it('includes the renamed MusicBrainz source "Discover Songs (MusicBrainz)"', () => {
+    it('includes the renamed MusicBrainz source "Pop Song Ideas"', () => {
       const mb = catalogSources.find(s => s.id === 'musicbrainz');
       expect(mb).toBeDefined();
-      expect(mb?.name).toBe('Discover Songs (MusicBrainz)');
+      expect(mb?.name).toBe('Pop Song Ideas');
     });
 
-    it('includes the renamed IMSLP source "Classical Masterpieces (IMSLP)"', () => {
+    it('includes the renamed IMSLP source "Free Classic Songs"', () => {
       const imslp = catalogSources.find(s => s.id === 'imslp');
       expect(imslp).toBeDefined();
-      expect(imslp?.name).toBe('Classical Masterpieces (IMSLP)');
+      expect(imslp?.name).toBe('Free Classic Songs');
       expect(imslp?.type).toBe('public-domain');
     });
 
@@ -43,14 +43,14 @@ describe('musicCatalogService', () => {
       });
     });
 
-    it('IMSLP notes contain user instructions on how to import', () => {
+    it('IMSLP notes contain user instructions mentioning a grown-up', () => {
       const imslp = catalogSources.find(s => s.id === 'imslp');
-      expect(imslp?.notes.toLowerCase()).toContain('how to use');
+      expect(imslp?.notes.toLowerCase()).toContain('a grown-up');
     });
 
-    it('MusicBrainz notes contain user instructions on how to use', () => {
+    it('MusicBrainz notes contain user instructions mentioning a grown-up', () => {
       const mb = catalogSources.find(s => s.id === 'musicbrainz');
-      expect(mb?.notes.toLowerCase()).toContain('how to use');
+      expect(mb?.notes.toLowerCase()).toContain('a grown-up');
     });
   });
 

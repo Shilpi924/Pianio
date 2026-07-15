@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Music, Library, Sparkles, Piano, Settings, Award, Activity, Globe, Map, Glasses, Users } from 'lucide-react';
+import { Play, Music, Library, Sparkles, Piano, Settings, Award, Globe, Map, Glasses, Users, Gamepad2, ShoppingBag } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import ProfileSwitcher from '../components/ProfileSwitcher';
+import Mascot from '../components/Mascot';
 
 export default function HomePage() {
   const { setCurrentView, settings, updateSettings } = useAppStore();
@@ -121,11 +122,18 @@ export default function HomePage() {
         {/* Secondary Options */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <SecondaryCard
-            icon={Activity}
-            title={t('home.rhythm')}
-            subtitle={t('home.rhythmDesc')}
+            icon={Gamepad2}
+            title="Arcade"
+            subtitle="Play fun mini-games"
             color="from-pink-400 to-rose-500"
-            onClick={() => setCurrentView('rhythm-training')}
+            onClick={() => setCurrentView('arcade')}
+          />
+          <SecondaryCard
+            icon={ShoppingBag}
+            title="Rewards Shop"
+            subtitle="Spend your XP!"
+            color="from-amber-400 to-orange-500"
+            onClick={() => setCurrentView('rewards-shop')}
           />
           <SecondaryCard
             icon={Play}
@@ -164,6 +172,11 @@ export default function HomePage() {
           />
         </section>
       </motion.main>
+
+      {/* Mascot at the bottom right */}
+      <div className="fixed bottom-8 right-8 z-50 hidden md:block">
+        <Mascot mood="happy" message="Click me for a fun tip!" interactive={true} />
+      </div>
     </div>
   );
 }

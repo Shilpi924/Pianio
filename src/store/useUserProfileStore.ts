@@ -23,6 +23,7 @@ interface UserProfileState {
   addExperience: (points: number) => void;
   addCompletedLesson: (lessonId: string) => void;
   addPracticeTime: (minutes: number) => void;
+  addPracticeSession: (session: { lessonId: string; duration: number; score?: number }) => void;
   updateStreak: () => void;
 }
 
@@ -37,6 +38,7 @@ const createDefaultProfile = (id: string, name: string = 'Learner'): UserProfile
   favoriteGenres: [],
   completedLessons: [],
   totalPracticeTime: 0,
+  practiceHistory: [],
   currentStreak: 0,
   longestStreak: 0,
   level: 1,
@@ -184,6 +186,28 @@ export const useUserProfileStore = create<UserProfileState>()(
               [state.activeProfileId]: {
                 ...active,
                 totalPracticeTime: active.totalPracticeTime + minutes,
+              }
+            }
+          };
+        });
+      },
+      
+      addPracticeSession: (session) => {
+        set((state) => {
+          const active = state.profiles[state.activeProfileId];
+          const newSession = {
+            id: `session_${Date.now()}`,
+            date: new Date().toISOString(),
+            ...session,
+          };
+          
+          return {
+            profiles: {
+              ...state.profiles,
+              [state.activeProfileId]: {
+                ...active,
+                practiceHistory: [...(active.practiceHistory || []), newSession],
+                totalPracticeTime: active.totalPracticeTime + session.duration,
               }
             }
           };

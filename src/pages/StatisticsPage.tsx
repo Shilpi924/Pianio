@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Award, Clock, ShieldCheck, Star, TrendingUp, Trophy } from 'lucide-react';
+import { ArrowLeft, Award, Clock, ShieldCheck, Star, TrendingUp, Trophy, Calendar } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { achievements, calculateLevel, getXPForNextLevel } from '../data/achievements';
@@ -230,6 +230,38 @@ export default function StatisticsPage() {
               ) : (
                 <div className="rounded-2xl bg-slate-50 p-6 text-center text-sm font-medium text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
                   No finished songs yet. The next best move is a short confidence song from Launch Pad.
+                </div>
+              )}
+            </div>
+            <div className="overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/50 dark:bg-slate-800 dark:shadow-none p-6 md:p-8">
+              <h2 className="mb-6 text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Calendar className="h-6 w-6 text-fuchsia-500" />
+                Recent Practice
+              </h2>
+              {userProfile?.practiceHistory && userProfile.practiceHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {[...userProfile.practiceHistory].reverse().slice(0, 5).map((session) => {
+                    const songName = lessons.find(l => l.id === session.lessonId)?.title ?? session.lessonId;
+                    const dateStr = new Date(session.date).toLocaleDateString();
+                    return (
+                      <div key={session.id} className="flex flex-col gap-1 rounded-2xl bg-slate-50 px-5 py-4 dark:bg-slate-900/50">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-slate-800 dark:text-slate-200">{songName}</span>
+                          <span className="text-xs font-bold text-slate-400">{dateStr}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-slate-500">{session.duration} mins</span>
+                          {session.score !== undefined && (
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400">Score: {session.score}%</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-2xl bg-slate-50 p-6 text-center text-sm font-medium text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                  No practice sessions recorded yet. Keep playing to build your history!
                 </div>
               )}
             </div>

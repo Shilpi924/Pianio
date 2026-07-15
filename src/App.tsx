@@ -24,6 +24,8 @@ import TutorialsPage from './pages/TutorialsPage';
 import SongUploadPage from './pages/SongUploadPage';
 import OnboardingPage from './pages/OnboardingPage';
 import ContentAdminPage from './pages/ContentAdminPage';
+import RewardsShopPage from './pages/RewardsShopPage';
+import ArcadePage from './pages/ArcadePage';
 import AIChatBot from './components/AIChatBot';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
@@ -119,6 +121,10 @@ function App() {
         return <LessonCreatorPage />;
       case 'admin':
         return <ContentAdminPage />;
+      case 'rewards-shop':
+        return <RewardsShopPage />;
+      case 'arcade':
+        return <ArcadePage />;
       default:
         return <HomePage />;
     }
