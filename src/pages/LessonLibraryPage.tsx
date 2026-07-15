@@ -95,8 +95,8 @@ export default function LessonLibraryPage() {
       category: 'Imported',
       source: 'public-domain',
       sourceName: recording.artist,
-      synopsis: `Imported from MusicBrainz. Release: ${recording.releaseDate || 'Unknown'}`,
-      tags: ['imported'],
+      synopsis: `Song idea saved. Ask a grown-up to add a piano file before playing.`,
+      tags: ['song idea'],
     };
     addCustomLesson(newLesson);
     setActiveTab('library');
@@ -114,7 +114,7 @@ export default function LessonLibraryPage() {
       category: 'Classical',
       source: 'public-domain',
       sourceName: score.composer,
-      synopsis: `Imported Public Domain score by ${score.composer}.`,
+      synopsis: `Playable classic song by ${score.composer}.`,
       tags: ['imported', 'classical'],
     };
     addCustomLesson(newLesson);
@@ -316,14 +316,22 @@ export default function LessonLibraryPage() {
                 onClick={() => setDiscoverSource('musicbrainz')}
                 className={`flex-1 py-2 rounded-xl font-bold transition-all ${discoverSource === 'musicbrainz' ? 'bg-fuchsia-100 text-fuchsia-600 border-2 border-fuchsia-500' : 'bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100'}`}
               >
-                Search Pop/Modern (MusicBrainz)
+                Pop song ideas
               </button>
               <button 
                 onClick={() => setDiscoverSource('publicdomain')}
                 className={`flex-1 py-2 rounded-xl font-bold transition-all ${discoverSource === 'publicdomain' ? 'bg-emerald-100 text-emerald-600 border-2 border-emerald-500' : 'bg-slate-50 text-slate-500 border-2 border-transparent hover:bg-slate-100'}`}
               >
-                Search Classical Scores (Public Domain)
+                Free classics
               </button>
+            </div>
+
+            <div className="rounded-[2rem] bg-white p-5 shadow-lg shadow-slate-200/50 dark:bg-slate-800/50 dark:shadow-none">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white">Find a song to learn</h2>
+              <p className="mt-2 text-base leading-7 text-slate-600 dark:text-slate-300">
+                Kids can search for song ideas here. To actually play a new song in Pianio, a grown-up
+                needs to add a piano file or choose a free classic that already has notes.
+              </p>
             </div>
 
             <div className="flex flex-col gap-4 rounded-[2rem] bg-white p-4 shadow-2xl shadow-slate-200/50 dark:bg-slate-800/50 dark:shadow-none md:flex-row md:items-center md:p-6">
@@ -333,7 +341,7 @@ export default function LessonLibraryPage() {
                   value={discoverQuery}
                   onChange={(e) => setDiscoverQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleDiscoverSearch()}
-                  placeholder={discoverSource === 'musicbrainz' ? "Search MusicBrainz (e.g., 'Wellerman')..." : "Search Public Domain (e.g., 'Bach')..."}
+                  placeholder={discoverSource === 'musicbrainz' ? "Search a song or artist..." : "Search a composer or classic song..."}
                   className="h-16 w-full rounded-2xl bg-slate-50 pl-14 pr-6 text-lg font-medium outline-none transition-all focus:bg-white focus:ring-4 focus:ring-fuchsia-500/20 dark:bg-slate-900/50 dark:text-white"
                 />
               </div>
@@ -354,13 +362,16 @@ export default function LessonLibraryPage() {
                       <div>
                         <h4 className="text-xl font-bold text-slate-900 dark:text-white">{recording.title}</h4>
                         <p className="mt-1 font-medium text-slate-500">{recording.artist}</p>
-                        {recording.releaseDate && <p className="text-xs text-slate-400">Release: {recording.releaseDate}</p>}
+                        {recording.releaseDate && <p className="text-xs text-slate-400">Found song idea from {recording.releaseDate}</p>}
+                        <p className="mt-3 rounded-xl bg-fuchsia-50 p-3 text-sm font-medium text-fuchsia-800">
+                          Ask a grown-up to add a piano file before this becomes playable.
+                        </p>
                       </div>
                       <button 
                         onClick={() => importLesson(recording)}
                         className="mt-4 rounded-xl bg-slate-100 py-2 font-bold text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
                       >
-                        Import Empty Shell
+                        Save song idea
                       </button>
                     </div>
                   ))}
@@ -388,13 +399,13 @@ export default function LessonLibraryPage() {
                         disabled={isImporting === score.id}
                         className="mt-4 rounded-xl bg-emerald-500 py-2 font-bold text-white shadow-md shadow-emerald-200 hover:bg-emerald-600 disabled:opacity-50"
                       >
-                        {isImporting === score.id ? 'Downloading...' : 'Import Playable Score'}
+                        {isImporting === score.id ? 'Adding...' : 'Add playable song'}
                       </button>
                     </div>
                   ))}
                 </div>
                 {pdResults.length === 0 && !isSearching && discoverQuery && (
-                  <div className="text-center p-12 text-slate-500">No public domain scores found for "{discoverQuery}".</div>
+                  <div className="text-center p-12 text-slate-500">No free classic songs found for "{discoverQuery}".</div>
                 )}
               </>
             )}
@@ -404,4 +415,3 @@ export default function LessonLibraryPage() {
     </div>
   );
 }
-
