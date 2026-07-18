@@ -48,6 +48,60 @@ const resources = {
       },
       settings: {
         language: "Language"
+      },
+      settingsPage: {
+        back: "Back",
+        title: "Settings",
+        subtitle: "Customize your learning experience",
+        tabs: {
+          account: "Account Profile",
+          preferences: "App Preferences",
+        },
+        profile: {
+          level: "Level",
+          xp: "XP",
+          streak: "Streak",
+          minutesPerDay: "Min/day",
+        },
+        personalization: {
+          title: "Personalization",
+          subtitle: "Tune recommendations whenever you want.",
+          ageGroup: "What is your age group?",
+          skillLevel: "What is your skill level?",
+          learningGoal: "What is your main learning goal?",
+          practiceFrequency: "How often do you plan to practice?",
+          favoriteGenres: "Favorite genres",
+        },
+        groups: {
+          display: "Display",
+          audio: "Audio",
+          animation: "Animation",
+          localization: "Localization",
+        },
+        settings: {
+          showKeyboardLabels: "Show Keyboard Labels",
+          showNoteNames: "Show Note Names",
+          useSharps: "Use Sharps (instead of Flats)",
+          darkMode: "Dark Mode",
+          backgroundMusic: "Background Music",
+          audioVolume: "Audio Volume",
+          inputMode: "Lesson Input",
+          animationSpeed: "Animation Speed",
+          language: "Language",
+        },
+        inputMode: {
+          midi: "MIDI Keyboard",
+          microphone: "Microphone",
+          auto: "Auto",
+        },
+        languageOptions: {
+          en: "English",
+          zh: "中文 (Mandarin)",
+          ja: "日本語 (Japanese)",
+          de: "Deutsch",
+          es: "Español",
+        },
+        reset: "Reset to Defaults"
       }
     }
   },
@@ -96,6 +150,60 @@ const resources = {
       },
       settings: {
         language: "语言 (Language)"
+      },
+      settingsPage: {
+        back: "返回",
+        title: "设置",
+        subtitle: "自定义你的学习体验",
+        tabs: {
+          account: "账户资料",
+          preferences: "应用偏好",
+        },
+        profile: {
+          level: "等级",
+          xp: "经验值",
+          streak: "连续天数",
+          minutesPerDay: "分钟/天",
+        },
+        personalization: {
+          title: "个性化",
+          subtitle: "随时调整推荐内容。",
+          ageGroup: "你的年龄段是？",
+          skillLevel: "你的水平是？",
+          learningGoal: "你的主要学习目标是什么？",
+          practiceFrequency: "你打算多久练习一次？",
+          favoriteGenres: "喜欢的风格",
+        },
+        groups: {
+          display: "显示",
+          audio: "音频",
+          animation: "动画",
+          localization: "语言",
+        },
+        settings: {
+          showKeyboardLabels: "显示键盘标签",
+          showNoteNames: "显示音符名称",
+          useSharps: "使用升号（而不是降号）",
+          darkMode: "深色模式",
+          backgroundMusic: "背景音乐",
+          audioVolume: "音量",
+          inputMode: "课程输入",
+          animationSpeed: "动画速度",
+          language: "语言",
+        },
+        inputMode: {
+          midi: "MIDI 键盘",
+          microphone: "麦克风",
+          auto: "自动",
+        },
+        languageOptions: {
+          en: "English",
+          zh: "中文（普通话）",
+          ja: "日本語（Japanese）",
+          de: "Deutsch",
+          es: "Español",
+        },
+        reset: "恢复默认"
       }
     }
   },
@@ -144,6 +252,60 @@ const resources = {
       },
       settings: {
         language: "言語 (Language)"
+      },
+      settingsPage: {
+        back: "戻る",
+        title: "設定",
+        subtitle: "学習体験をカスタマイズしましょう",
+        tabs: {
+          account: "アカウント",
+          preferences: "アプリ設定",
+        },
+        profile: {
+          level: "レベル",
+          xp: "XP",
+          streak: "連続",
+          minutesPerDay: "分/日",
+        },
+        personalization: {
+          title: "パーソナライズ",
+          subtitle: "おすすめはいつでも調整できます。",
+          ageGroup: "年齢層は？",
+          skillLevel: "スキルレベルは？",
+          learningGoal: "主な学習目標は？",
+          practiceFrequency: "どのくらいの頻度で練習しますか？",
+          favoriteGenres: "好きなジャンル",
+        },
+        groups: {
+          display: "表示",
+          audio: "音声",
+          animation: "アニメーション",
+          localization: "言語",
+        },
+        settings: {
+          showKeyboardLabels: "鍵盤ラベルを表示",
+          showNoteNames: "音名を表示",
+          useSharps: "シャープを使う（フラットの代わりに）",
+          darkMode: "ダークモード",
+          backgroundMusic: "BGM",
+          audioVolume: "音量",
+          inputMode: "レッスン入力",
+          animationSpeed: "アニメーション速度",
+          language: "言語",
+        },
+        inputMode: {
+          midi: "MIDI キーボード",
+          microphone: "マイク",
+          auto: "自動",
+        },
+        languageOptions: {
+          en: "English",
+          zh: "中文 (Mandarin)",
+          ja: "日本語",
+          de: "Deutsch",
+          es: "Español",
+        },
+        reset: "デフォルトに戻す"
       }
     }
   },
@@ -192,6 +354,60 @@ const resources = {
       },
       settings: {
         language: "Sprache (Language)"
+      },
+      settingsPage: {
+        back: "Zurück",
+        title: "Einstellungen",
+        subtitle: "Passe dein Lernerlebnis an",
+        tabs: {
+          account: "Profil",
+          preferences: "App-Einstellungen",
+        },
+        profile: {
+          level: "Level",
+          xp: "XP",
+          streak: "Serie",
+          minutesPerDay: "Min./Tag",
+        },
+        personalization: {
+          title: "Personalisierung",
+          subtitle: "Empfehlungen kannst du jederzeit anpassen.",
+          ageGroup: "Wie alt bist du?",
+          skillLevel: "Wie ist dein Können?",
+          learningGoal: "Was ist dein Hauptziel?",
+          practiceFrequency: "Wie oft möchtest du üben?",
+          favoriteGenres: "Lieblingsgenres",
+        },
+        groups: {
+          display: "Anzeige",
+          audio: "Audio",
+          animation: "Animation",
+          localization: "Sprache",
+        },
+        settings: {
+          showKeyboardLabels: "Tastaturlabels anzeigen",
+          showNoteNames: "Notennamen anzeigen",
+          useSharps: "Vorzeichen als Kreuze statt Bs",
+          darkMode: "Dunkelmodus",
+          backgroundMusic: "Hintergrundmusik",
+          audioVolume: "Lautstärke",
+          inputMode: "Lerneingabe",
+          animationSpeed: "Animationsgeschwindigkeit",
+          language: "Sprache",
+        },
+        inputMode: {
+          midi: "MIDI-Tastatur",
+          microphone: "Mikrofon",
+          auto: "Auto",
+        },
+        languageOptions: {
+          en: "English",
+          zh: "中文 (Mandarin)",
+          ja: "日本語",
+          de: "Deutsch",
+          es: "Español",
+        },
+        reset: "Auf Standard zurücksetzen"
       }
     }
   },
@@ -240,6 +456,60 @@ const resources = {
       },
       settings: {
         language: "Idioma (Language)"
+      },
+      settingsPage: {
+        back: "Volver",
+        title: "Ajustes",
+        subtitle: "Personaliza tu experiencia de aprendizaje",
+        tabs: {
+          account: "Perfil",
+          preferences: "Preferencias",
+        },
+        profile: {
+          level: "Nivel",
+          xp: "XP",
+          streak: "Racha",
+          minutesPerDay: "Min/día",
+        },
+        personalization: {
+          title: "Personalización",
+          subtitle: "Ajusta las recomendaciones cuando quieras.",
+          ageGroup: "¿Cuál es tu grupo de edad?",
+          skillLevel: "¿Cuál es tu nivel?",
+          learningGoal: "¿Cuál es tu objetivo principal?",
+          practiceFrequency: "¿Con qué frecuencia practicarás?",
+          favoriteGenres: "Géneros favoritos",
+        },
+        groups: {
+          display: "Pantalla",
+          audio: "Audio",
+          animation: "Animación",
+          localization: "Idioma",
+        },
+        settings: {
+          showKeyboardLabels: "Mostrar etiquetas del teclado",
+          showNoteNames: "Mostrar nombres de notas",
+          useSharps: "Usar sostenidos (en lugar de bemoles)",
+          darkMode: "Modo oscuro",
+          backgroundMusic: "Música de fondo",
+          audioVolume: "Volumen",
+          inputMode: "Entrada de lección",
+          animationSpeed: "Velocidad de animación",
+          language: "Idioma",
+        },
+        inputMode: {
+          midi: "Teclado MIDI",
+          microphone: "Micrófono",
+          auto: "Auto",
+        },
+        languageOptions: {
+          en: "English",
+          zh: "中文 (Mandarin)",
+          ja: "日本語 (Japanese)",
+          de: "Deutsch",
+          es: "Español",
+        },
+        reset: "Restablecer valores"
       }
     }
   }

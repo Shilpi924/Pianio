@@ -63,7 +63,7 @@ type Setting = ToggleSetting | SliderSetting | SelectSetting;
 
 import { useTranslation } from 'react-i18next';
 export default function SettingsPage() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { settings, updateSettings, goBack } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const updatePersonalization = useUserProfileStore((state) => state.updatePersonalization);
@@ -116,45 +116,45 @@ export default function SettingsPage() {
 
   const settingsGroups = [
     {
-      title: 'Display',
+      title: t('settingsPage.groups.display'),
       icon: Keyboard,
       color: 'from-fuchsia-500 to-pink-500',
       settings: [
         {
           key: 'showKeyboardLabels',
-          label: 'Show Keyboard Labels',
+          label: t('settingsPage.settings.showKeyboardLabels'),
           type: 'toggle' as const,
         },
         {
           key: 'showNoteNames',
-          label: 'Show Note Names',
+          label: t('settingsPage.settings.showNoteNames'),
           type: 'toggle' as const,
         },
         {
           key: 'useSharps',
-          label: 'Use Sharps (instead of Flats)',
+          label: t('settingsPage.settings.useSharps'),
           type: 'toggle' as const,
         },
         {
           key: 'darkMode',
-          label: 'Dark Mode',
+          label: t('settingsPage.settings.darkMode'),
           type: 'toggle' as const,
         },
       ] as Setting[],
     },
     {
-      title: 'Audio',
+      title: t('settingsPage.groups.audio'),
       icon: Volume2,
       color: 'from-blue-500 to-indigo-500',
       settings: [
         {
           key: 'backgroundMusic',
-          label: 'Background Music',
+          label: t('settingsPage.settings.backgroundMusic'),
           type: 'toggle' as const,
         },
         {
           key: 'audioVolume',
-          label: 'Audio Volume',
+          label: t('settingsPage.settings.audioVolume'),
           type: 'slider' as const,
           min: 0,
           max: 100,
@@ -162,24 +162,24 @@ export default function SettingsPage() {
         },
         {
           key: 'inputMode',
-          label: 'Lesson Input',
+          label: t('settingsPage.settings.inputMode'),
           type: 'select' as const,
           options: [
-            { value: 'midi', label: 'MIDI Keyboard' },
-            { value: 'microphone', label: 'Microphone' },
-            { value: 'auto', label: 'Auto' },
+            { value: 'midi', label: t('settingsPage.inputMode.midi') },
+            { value: 'microphone', label: t('settingsPage.inputMode.microphone') },
+            { value: 'auto', label: t('settingsPage.inputMode.auto') },
           ],
         },
       ] as Setting[],
     },
     {
-      title: 'Animation',
+      title: t('settingsPage.groups.animation'),
       icon: Gauge,
       color: 'from-amber-500 to-orange-500',
       settings: [
         {
           key: 'animationSpeed',
-          label: 'Animation Speed',
+          label: t('settingsPage.settings.animationSpeed'),
           type: 'slider' as const,
           min: 0.5,
           max: 2,
@@ -188,20 +188,20 @@ export default function SettingsPage() {
       ] as Setting[],
     },
     {
-      title: 'Localization',
+      title: t('settingsPage.groups.localization'),
       icon: Check, // Using Check instead of Globe for now since it's already imported
       color: 'from-emerald-500 to-teal-500',
       settings: [
         {
           key: 'language',
-          label: 'Language',
+          label: t('settingsPage.settings.language'),
           type: 'select',
           options: [
-            { value: 'en', label: 'English' },
-            { value: 'zh', label: '中文 (Mandarin)' },
-            { value: 'ja', label: '日本語 (Japanese)' },
-            { value: 'de', label: 'Deutsch' },
-            { value: 'es', label: 'Español' },
+            { value: 'en', label: t('settingsPage.languageOptions.en') },
+            { value: 'zh', label: t('settingsPage.languageOptions.zh') },
+            { value: 'ja', label: t('settingsPage.languageOptions.ja') },
+            { value: 'de', label: t('settingsPage.languageOptions.de') },
+            { value: 'es', label: t('settingsPage.languageOptions.es') },
           ]
         }
       ] as Setting[]
@@ -260,13 +260,13 @@ export default function SettingsPage() {
               className="mb-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back
+              {t('settingsPage.back')}
             </button>
             <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">
-              Settings
+              {t('settingsPage.title')}
             </h1>
             <p className="mt-2 text-lg font-medium text-slate-600 dark:text-slate-300">
-              Customize your learning experience
+              {t('settingsPage.subtitle')}
             </p>
           </div>
           <div className="flex items-center justify-end">
@@ -277,8 +277,8 @@ export default function SettingsPage() {
         {/* Custom Tabs */}
         <div className="flex p-1 gap-2 bg-white/50 dark:bg-slate-800/50 rounded-2xl shadow-sm backdrop-blur-md">
           {[
-            { id: 'account' as const, label: 'Account Profile', icon: User },
-            { id: 'preferences' as const, label: 'App Preferences', icon: SlidersHorizontal },
+            { id: 'account' as const, label: t('settingsPage.tabs.account'), icon: User },
+            { id: 'preferences' as const, label: t('settingsPage.tabs.preferences'), icon: SlidersHorizontal },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -317,7 +317,7 @@ export default function SettingsPage() {
                       {userProfile?.name || 'Piano Player'}
                     </h2>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="rounded-lg bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Level {userProfile?.level ?? 1}</span>
+                      <span className="rounded-lg bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{t('settingsPage.profile.level')} {userProfile?.level ?? 1}</span>
                       <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-300 capitalize">{personalization.skillLevel}</span>
                       <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-300 capitalize">{personalization.learningGoal}</span>
                     </div>
@@ -327,15 +327,15 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="flex flex-col items-center justify-center rounded-2xl bg-violet-50 p-4 dark:bg-violet-900/20">
                     <div className="text-2xl font-black text-violet-600 dark:text-violet-400">{userProfile?.experiencePoints ?? 0}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-violet-400">XP</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-violet-400">{t('settingsPage.profile.xp')}</div>
                   </div>
                   <div className="flex flex-col items-center justify-center rounded-2xl bg-pink-50 p-4 dark:bg-pink-900/20">
                     <div className="text-2xl font-black text-pink-600 dark:text-pink-400">{userProfile?.currentStreak ?? 0}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-pink-400">Streak</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-pink-400">{t('settingsPage.profile.streak')}</div>
                   </div>
                   <div className="flex flex-col items-center justify-center rounded-2xl bg-sky-50 p-4 dark:bg-sky-900/20">
                     <div className="text-2xl font-black text-sky-600 dark:text-sky-400">{userProfile?.practiceGoals.dailyMinutes ?? 15}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-sky-400">Min/day</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-sky-400">{t('settingsPage.profile.minutesPerDay')}</div>
                   </div>
                 </div>
               </div>
@@ -358,9 +358,9 @@ export default function SettingsPage() {
                       <Sparkles className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-black text-slate-900 dark:text-white">Personalization</h2>
+                      <h2 className="text-2xl font-black text-slate-900 dark:text-white">{t('settingsPage.personalization.title')}</h2>
                       <p className="mt-1 text-sm font-medium text-slate-500">
-                        Tune recommendations whenever you want.
+                        {t('settingsPage.personalization.subtitle')}
                       </p>
                     </div>
                   </div>
@@ -383,7 +383,7 @@ export default function SettingsPage() {
                       <section className="space-y-4">
                         <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                           <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs">1</span>
-                          What is your age group?
+                          {t('settingsPage.personalization.ageGroup')}
                         </h3>
                         <OptionGrid
                           options={AGE_GROUPS}
@@ -395,7 +395,7 @@ export default function SettingsPage() {
                       <section className="space-y-4">
                         <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                           <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs">2</span>
-                          What is your skill level?
+                          {t('settingsPage.personalization.skillLevel')}
                         </h3>
                         <OptionGrid
                           options={SKILL_LEVELS}
@@ -407,7 +407,7 @@ export default function SettingsPage() {
                       <section className="space-y-4">
                         <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                           <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs">3</span>
-                          What is your main learning goal?
+                          {t('settingsPage.personalization.learningGoal')}
                         </h3>
                         <OptionGrid
                           options={LEARNING_GOALS}
@@ -419,7 +419,7 @@ export default function SettingsPage() {
                       <section className="space-y-4">
                         <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                           <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs">4</span>
-                          How often do you plan to practice?
+                          {t('settingsPage.personalization.practiceFrequency')}
                         </h3>
                         <OptionGrid
                           options={PRACTICE_FREQUENCY}
@@ -431,7 +431,7 @@ export default function SettingsPage() {
                       <section className="space-y-4">
                         <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                           <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs">5</span>
-                          Favorite genres
+                          {t('settingsPage.personalization.favoriteGenres')}
                         </h3>
                         <div className="flex flex-wrap gap-3">
                           {GENRES.map((genre) => {
@@ -570,7 +570,7 @@ export default function SettingsPage() {
                 className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-rose-50 px-6 py-4 font-bold text-rose-600 transition-all hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-900/20 dark:hover:bg-rose-900/40"
               >
                 <RotateCcw className="h-5 w-5 transition-transform group-hover:-rotate-180" />
-                Reset to Defaults
+                {t('settingsPage.reset')}
               </button>
             </motion.div>
           </div>
