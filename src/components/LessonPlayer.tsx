@@ -84,6 +84,17 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     });
   }, [lesson.notes, tempo]);
   const previewDuration = previewTimeline.at(-1)?.end ?? 0;
+  const sectionMarkers = useMemo(() => {
+    if (lesson.id !== 'wellerman' || lesson.notes.length < 65) return [];
+    const markers: Array<{ index: number; label: string }> = [{ index: 0, label: 'Verse 1' }];
+    for (let verse = 1; verse < 6; verse += 1) {
+      markers.push({ index: verse * 65, label: `Verse ${verse + 1}` });
+    }
+    for (let chorus = 0; chorus < 6; chorus += 1) {
+      markers.push({ index: chorus * 65 + 35, label: `Chorus ${chorus + 1}` });
+    }
+    return markers.filter((marker) => marker.index < lesson.notes.length);
+  }, [lesson.id, lesson.notes.length]);
 
   useEffect(() => {
     const initAudio = async () => {
@@ -699,6 +710,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
                   currentNoteIndex={currentNoteIndex}
                   speed={fallingNotesSpeed}
                   activeNotes={highlightedNotes}
+                  sectionMarkers={sectionMarkers}
                 />
               </div>
             )}

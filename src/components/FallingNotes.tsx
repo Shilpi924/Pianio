@@ -15,6 +15,7 @@ interface FallingNoteData {
   holdProgress: number;
   secondsRemaining: number;
   isHolding: boolean;
+  isShort: boolean;
 }
 
 interface FallingNotesProps {
@@ -25,6 +26,7 @@ interface FallingNotesProps {
   currentNoteIndex: number;
   speed: number;
   activeNotes?: string[];
+  sectionMarkers?: Array<{ index: number; label: string }>;
 }
 
 // ── Note helpers ──────────────────────────────────────────────────────────────
@@ -116,6 +118,7 @@ export default function FallingNotes({
   currentNoteIndex,
   speed = 1,
   activeNotes = [],
+  sectionMarkers = [],
 }: FallingNotesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerH, setContainerH] = useState(360);
@@ -177,6 +180,7 @@ export default function FallingNotes({
         if (layout) {
           const isHolding = playhead >= start && playhead < end;
           const holdProgress = Math.min(100, Math.max(0, ((playhead - start) / duration) * 100));
+          const isShort = heightPx < 28;
           visible.push({
             id: `${n.note}-${index}`,
             index,
@@ -191,6 +195,7 @@ export default function FallingNotes({
             holdProgress,
             secondsRemaining: Math.max(0, end - playhead),
             isHolding,
+            isShort,
           });
         }
       }
@@ -224,6 +229,29 @@ export default function FallingNotes({
         />
       ))}
 
+      {sectionMarkers.map((marker) => {
+        const entry = timeline[marker.index];
+        if (!entry) return null;
+
+        const secsLeft = entry.start - (isPlaying ? currentTime : 0);
+        const bottomY = (containerH - 60) - secsLeft * ((containerH - 60) / (5.5 / speed));
+        return (
+          <div
+            key={`${marker.label}-${marker.index}`}
+            className="absolute left-0 right-0 z-10 pointer-events-none"
+            style={{ transform: `translate3d(0, ${bottomY}px, 0)` }}
+          >
+            <div className="mx-2 flex items-center gap-2">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
+              <span className="rounded-full border border-cyan-200/40 bg-slate-950/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-100 shadow-[0_0_12px_rgba(34,211,238,0.25)]">
+                {marker.label}
+              </span>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent" />
+            </div>
+          </div>
+        );
+      })}
+
       {/* Thin luminous timing line: the bottom of a bar starts the note; its
           glowing top cap reaching this line means release. */}
       <div
@@ -251,12 +279,14 @@ export default function FallingNotes({
               key={fn.id}
               data-note-index={fn.index}
               data-hold-progress={Math.round(fn.holdProgress)}
-              className="absolute flex flex-col items-center justify-center overflow-hidden rounded-[10px] border font-bold"
+              className="absolute flex flex-col items-center justify-center overflow-hidden border font-bold"
               style={{
                 left:   `calc(${fn.leftPct}% + 1px)`,
                 width:  `calc(${fn.widthPct}% - 2px)`,
                 top:    0,
                 height: fn.heightPx,
+                minHeight: fn.isShort ? 18 : 0,
+                borderRadius: fn.isShort ? 999 : 10,
                 background:   fn.isHolding
                   ? 'linear-gradient(145deg, #06b6d4 0%, #6366f1 52%, #d946ef 100%)'
                   : isHit
@@ -268,6 +298,8 @@ export default function FallingNotes({
                   ? '0 0 14px 3px rgba(34,211,238,0.72)'
                   : isHit
                   ? '0 0 22px 6px rgba(251,191,36,0.65)'
+                  : fn.isShort
+                  ? `0 0 12px 3px ${colors.glow}, inset 0 1px 0 rgba(255,255,255,0.32)`
                   : `0 0 10px 2px ${colors.glow}, inset 0 1px 0 rgba(255,255,255,0.36)`,
                 transform: `translate3d(0, ${fn.topPx}px, 0)`,
                 willChange: 'transform',
@@ -281,8 +313,11 @@ export default function FallingNotes({
                   Release when the moving beam meets the white top cap. */}
               {fn.holdProgress > 0 && (
                 <div
-                  className="absolute bottom-0 left-0 right-0 bg-white/30"
-                  style={{ height: `${fn.holdProgress}%` }}
+                  className="absolute bottom-0 left-0 right-0 bg-white/25"
+                  style={{
+                    height: fn.isShort ? '100%' : `${fn.holdProgress}%`,
+                    opacity: fn.isShort ? 0.45 : 1,
+                  }}
                 />
               )}
               {fn.isHolding && (
@@ -290,21 +325,26 @@ export default function FallingNotes({
                   data-testid="note-hold-beam"
                   className="absolute left-0 right-0 z-20 h-px bg-white"
                   style={{
-                    bottom: `calc(${fn.holdProgress}% - 1px)`,
+                    bottom: fn.isShort ? 0 : `calc(${fn.holdProgress}% - 1px)`,
                     boxShadow: '0 0 4px 1px #ffffff, 0 0 10px 3px #22d3ee, 0 0 15px 4px rgba(217,70,239,0.7)',
                     transition: 'bottom 45ms linear',
                   }}
                 />
               )}
               <div className="absolute left-0 right-0 top-0 z-20 h-0.5 bg-white shadow-[0_0_6px_2px_rgba(103,232,249,0.95)]" />
-              {fn.heightPx >= 28 && (
+              {!fn.isShort && (
                 <span style={{ fontSize: fn.heightPx > 48 ? 10 : 8 }} className="relative z-10 leading-none drop-shadow">
                   {fn.note}
                 </span>
               )}
-              {fn.heightPx >= 40 && (
+              {!fn.isShort && fn.heightPx >= 40 && (
                 <span className="relative z-10 mt-0.5 text-[9px] font-black leading-none opacity-90">
                   {fn.finger}
+                </span>
+              )}
+              {fn.isShort && (
+                <span className="relative z-10 text-[8px] font-black leading-none opacity-85">
+                  {fn.note}
                 </span>
               )}
             </div>
