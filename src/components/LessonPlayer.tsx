@@ -23,6 +23,8 @@ interface LessonPlayerProps {
 }
 
 const PREVIEW_LEAD_IN_SECONDS = 2.5;
+const PREVIEW_TEMPO_BPM = 90;
+const PREVIEW_FALLING_NOTE_SPEED = 1.5;
 
 export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) {
   const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress } = useAppStore();
@@ -295,6 +297,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     previewStartedAtRef.current = null;
     previewLastPlayedIndexRef.current = -1;
     setIsPreviewingSong(false);
+    setTempo(lesson.tempo);
+    setFallingNotesSpeed(1);
     setCurrentTime(-2);
     setCurrentNoteIndex(0);
   };
@@ -302,6 +306,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const previewSong = async () => {
     stopSongPreview();
     await ensureAudio();
+    setTempo(PREVIEW_TEMPO_BPM);
+    setFallingNotesSpeed(PREVIEW_FALLING_NOTE_SPEED);
     setCurrentTime(-PREVIEW_LEAD_IN_SECONDS);
     setCurrentNoteIndex(0);
     previewStartedAtRef.current = null;

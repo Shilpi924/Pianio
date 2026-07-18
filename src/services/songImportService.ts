@@ -8,6 +8,8 @@ function buildLesson(notes: Note[], title: string, tempo: number, format: Import
 
   const totalBeats = notes.reduce((sum, note) => sum + Math.max(note.duration, 0), 0);
   const averageDensity = notes.length / Math.max(totalBeats, 1);
+  const tempoConfidence: NonNullable<Lesson['importMetadata']>['tempoConfidence'] =
+    format === 'musicxml' ? 'high' : averageDensity > 3 ? 'medium' : 'low';
   const difficulty: Lesson['difficulty'] =
     notes.length > 160 || averageDensity > 4 ? 'advanced' : notes.length > 70 ? 'intermediate' : 'beginner';
 
@@ -21,6 +23,11 @@ function buildLesson(notes: Note[], title: string, tempo: number, format: Import
     sourceName: format === 'musicxml' ? 'MusicXML Import' : 'MIDI Import',
     synopsis: `Imported ${format.toUpperCase()} song with ${notes.length} notes.`,
     tags: ['imported', format],
+    importMetadata: {
+      sourceType: format === 'musicxml' ? 'MusicXML' : 'MIDI',
+      tempoConfidence,
+      savedToLibrary: true,
+    },
     notes,
   };
 }

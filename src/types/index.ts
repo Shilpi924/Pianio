@@ -44,6 +44,11 @@ export interface Lesson {
   synopsis?: string;
   practiceTip?: string;
   ageBand?: 'kids' | 'teens' | 'all';
+  importMetadata?: {
+    sourceType?: 'MusicXML' | 'MIDI';
+    tempoConfidence?: 'high' | 'medium' | 'low';
+    savedToLibrary?: boolean;
+  };
 }
 
 export type PracticeMode = 'guided' | 'performance' | 'slow-practice' | 'hands-separate' | 'loop';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileText, CheckCircle, XCircle, ArrowLeft, Play } from 'lucide-react';
+import { Upload, FileText, CheckCircle, XCircle, ArrowLeft, Play, Library, BadgeCheck } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { SongImportService } from '../services/songImportService';
 import type { Lesson } from '../types';
@@ -213,6 +213,18 @@ export default function SongUploadPage() {
               <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
                 {parsedLesson.title}
               </h3>
+              <div className="mb-5 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                  <Library className="h-3.5 w-3.5" />
+                  Saved to library
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
+                  {parsedLesson.importMetadata?.sourceType ?? 'Imported'}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                  Tempo confidence: {parsedLesson.importMetadata?.tempoConfidence ?? 'medium'}
+                </span>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -238,6 +250,16 @@ export default function SongUploadPage() {
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">Category</div>
                 </div>
+              </div>
+
+              <div className="mb-6 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 dark:bg-slate-900/50 dark:text-slate-300">
+                <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
+                  <BadgeCheck className="h-4 w-4 text-emerald-500" />
+                  Import summary
+                </div>
+                <p className="mt-2">
+                  {parsedLesson.sourceName || 'Imported file'} was added to your local song library and is ready to play or edit later.
+                </p>
               </div>
 
               {/* Note Preview */}
