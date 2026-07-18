@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Layers, Pause, Play, Volume2, X, Settings, ArrowLeft } from 'lucide-react';
+import { Layers, Pause, Play, Volume2, X, Settings, ArrowLeft, Mic, MicOff } from 'lucide-react';
 import PianoKeyboard from './PianoKeyboard';
 import FingerHint from './FingerHint';
 import FallingNotes from './FallingNotes';
@@ -85,6 +85,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const previewDuration = previewTimeline.at(-1)?.end ?? 0;
   const inputMode = settings.inputMode ?? 'midi';
   const useMicrophone = inputMode === 'microphone' || (inputMode === 'auto' && !midiService.isSupported());
+  const microphoneVisible = inputMode === 'microphone' || useMicrophone;
   const sectionMarkers = useMemo(() => {
     if (lesson.id !== 'wellerman' || lesson.notes.length < 65) return [];
     const markers: Array<{ index: number; label: string }> = [{ index: 0, label: 'Verse 1' }];
@@ -577,8 +578,18 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       {/* Top Header / Progress (Always visible) */}
       <div className="z-10 mx-auto w-full max-w-6xl flex-none shrink-0 mb-4 rounded-3xl bg-white/70 p-4 shadow-sm backdrop-blur-xl dark:bg-gray-800/70 border border-white/20 dark:border-gray-700/30">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-4">
-          <div>
+          <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 md:text-2xl">{lesson.title}</h2>
+            {microphoneVisible && (
+              <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-rose-600 shadow-sm dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-300">
+                {useMicrophone ? <Mic className="h-3.5 w-3.5 animate-pulse" /> : <MicOff className="h-3.5 w-3.5" />}
+                <span>
+                  {useMicrophone
+                    ? 'Mic listening'
+                    : 'Mic selected'}
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {!isPlaying ? (
@@ -796,20 +807,26 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
                 <CoachRow label="Wait for me" description="Song pauses until right key is pressed." enabled={waitModeEnabled} onToggle={() => setWaitModeEnabled(!waitModeEnabled)} />
                 <CoachRow label="Metronome" description="Play a tick sound on the beat." enabled={metronomeEnabled} onToggle={() => setMetronomeEnabled(!metronomeEnabled)} />
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50">
-                  <div className="font-semibold text-gray-900 dark:text-gray-100">Lesson Input</div>
-                  <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    {inputMode === 'midi'
-                      ? 'MIDI keyboard mode is active.'
-                      : inputMode === 'microphone'
+                <div className="font-semibold text-gray-900 dark:text-gray-100">Lesson Input</div>
+                <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                  {inputMode === 'midi'
+                    ? 'MIDI keyboard mode is active.'
+                    : inputMode === 'microphone'
                       ? 'Microphone pitch detection is active.'
                       : useMicrophone
                       ? 'Auto mode is using the microphone fallback.'
-                      : 'Auto mode is using MIDI input.'}
-                  </div>
-                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    Change this in Settings if the input you want is not working.
-                  </div>
+                  : 'Auto mode is using MIDI input.'}
                 </div>
+                {microphoneVisible && (
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">
+                    {useMicrophone ? <Mic className="h-3.5 w-3.5 animate-pulse" /> : <MicOff className="h-3.5 w-3.5" />}
+                    {useMicrophone ? 'Microphone active' : 'Microphone selected'}
+                  </div>
+                )}
+                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Change this in Settings if the input you want is not working.
+                </div>
+              </div>
                 <CoachRow label="Show Finger Guide" description="Shows finger numbers next to target." enabled={showGhostHand} onToggle={() => setShowGhostHand(!showGhostHand)} />
                 <CoachRow label="Show Sheet Music" description="Display standard notation." enabled={showSheetMusic} onToggle={() => setShowSheetMusic(!showSheetMusic)} />
               </div>
