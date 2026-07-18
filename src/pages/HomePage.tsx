@@ -74,10 +74,8 @@ export default function HomePage() {
               <Map className="h-8 w-8" />
             </div>
             <div className="relative z-10 mt-12 text-white">
-              <h2 className="text-4xl font-black tracking-tight">Path</h2>
-              <p className="mt-2 text-lg font-medium text-white/80">
-                Follow the guided learning roadmap.
-              </p>
+              <h2 className="text-4xl font-black tracking-tight">{t('home.path')}</h2>
+              <p className="mt-2 text-lg font-medium text-white/80">{t('home.pathDesc')}</p>
             </div>
           </button>
           {/* Main Play Action */}
@@ -123,15 +121,15 @@ export default function HomePage() {
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <SecondaryCard
             icon={Gamepad2}
-            title="Arcade"
-            subtitle="Play fun mini-games"
+            title={t('home.arcade')}
+            subtitle={t('home.arcadeDesc')}
             color="from-pink-400 to-rose-500"
             onClick={() => setCurrentView('arcade')}
           />
           <SecondaryCard
             icon={ShoppingBag}
-            title="Rewards Shop"
-            subtitle="Spend your XP!"
+            title={t('home.rewards')}
+            subtitle={t('home.rewardsDesc')}
             color="from-amber-400 to-orange-500"
             onClick={() => setCurrentView('rewards-shop')}
           />
@@ -144,15 +142,15 @@ export default function HomePage() {
           />
           <SecondaryCard
             icon={Glasses}
-            title="WebXR Piano"
-            subtitle="Virtual reality mode"
+            title={t('home.webxr')}
+            subtitle={t('home.webxrDesc')}
             color="from-cyan-400 to-blue-500"
             onClick={() => setCurrentView('vr-piano')}
           />
           <SecondaryCard
             icon={Users}
-            title="Duet Mode"
-            subtitle="Real-time multiplayer"
+            title={t('home.duet')}
+            subtitle={t('home.duetDesc')}
             color="from-indigo-400 to-violet-500"
             onClick={() => setCurrentView('multiplayer')}
           />

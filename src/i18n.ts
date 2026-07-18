@@ -8,6 +8,8 @@ const resources = {
       home: {
         welcome: "Hello, {{name}}! 🎹",
         tagline: "Let's make some music!",
+        path: "Path",
+        pathDesc: "Follow the guided learning roadmap.",
         freePlay: "Free Play",
         freePlayDesc: "Just jam! No rules, just you and the piano.",
         library: "Song Library",
@@ -19,7 +21,15 @@ const resources = {
         progress: "My Progress",
         progressDesc: "See your achievements",
         settings: "Settings",
-        settingsDesc: "Tweak your piano"
+        settingsDesc: "Tweak your piano",
+        arcade: "Arcade",
+        arcadeDesc: "Play fun mini-games",
+        rewards: "Rewards Shop",
+        rewardsDesc: "Spend your XP!",
+        webxr: "WebXR Piano",
+        webxrDesc: "Virtual reality mode",
+        duet: "Duet Mode",
+        duetDesc: "Real-time multiplayer"
       },
       onboarding: {
         welcome: "Welcome to Pianio! 🎹",
@@ -46,6 +56,8 @@ const resources = {
       home: {
         welcome: "你好，{{name}}！🎹",
         tagline: "让我们创作一些音乐吧！",
+        path: "学习路径",
+        pathDesc: "跟随引导式学习路线图。",
         freePlay: "自由演奏",
         freePlayDesc: "随心所欲，没有规则，只有你和钢琴。",
         library: "曲库",
@@ -57,7 +69,15 @@ const resources = {
         progress: "我的进度",
         progressDesc: "查看你的成就",
         settings: "设置",
-        settingsDesc: "调整你的钢琴"
+        settingsDesc: "调整你的钢琴",
+        arcade: "街机",
+        arcadeDesc: "玩有趣的小游戏",
+        rewards: "奖励商店",
+        rewardsDesc: "花掉你的经验值！",
+        webxr: "WebXR 钢琴",
+        webxrDesc: "虚拟现实模式",
+        duet: "二重奏模式",
+        duetDesc: "实时多人互动"
       },
       onboarding: {
         welcome: "欢迎来到 Pianio！🎹",
@@ -84,6 +104,8 @@ const resources = {
       home: {
         welcome: "こんにちは、{{name}}さん！🎹",
         tagline: "音楽を作りましょう！",
+        path: "学習パス",
+        pathDesc: "ガイド付きの学習ロードマップに従いましょう。",
         freePlay: "フリープレイ",
         freePlayDesc: "ルールなしで、あなたとピアノだけ。",
         library: "曲のライブラリ",
@@ -95,7 +117,15 @@ const resources = {
         progress: "マイプログレス",
         progressDesc: "達成を確認する",
         settings: "設定",
-        settingsDesc: "ピアノを調整する"
+        settingsDesc: "ピアノを調整する",
+        arcade: "アーケード",
+        arcadeDesc: "楽しいミニゲームを遊ぶ",
+        rewards: "報酬ショップ",
+        rewardsDesc: "XP を使おう！",
+        webxr: "WebXR ピアノ",
+        webxrDesc: "バーチャルリアリティモード",
+        duet: "デュエットモード",
+        duetDesc: "リアルタイム対戦"
       },
       onboarding: {
         welcome: "Pianioへようこそ！🎹",
@@ -122,6 +152,8 @@ const resources = {
       home: {
         welcome: "Hallo, {{name}}! 🎹",
         tagline: "Lass uns Musik machen!",
+        path: "Pfad",
+        pathDesc: "Folge der geführten Lern-Roadmap.",
         freePlay: "Freies Spiel",
         freePlayDesc: "Einfach jammen! Keine Regeln.",
         library: "Musikbibliothek",
@@ -133,7 +165,15 @@ const resources = {
         progress: "Mein Fortschritt",
         progressDesc: "Sieh dir deine Erfolge an",
         settings: "Einstellungen",
-        settingsDesc: "Klavier anpassen"
+        settingsDesc: "Klavier anpassen",
+        arcade: "Arcade",
+        arcadeDesc: "Spiele lustige Mini-Spiele",
+        rewards: "Belohnungs-Shop",
+        rewardsDesc: "Gib deine XP aus!",
+        webxr: "WebXR Piano",
+        webxrDesc: "Virtueller Realitätmodus",
+        duet: "Duett-Modus",
+        duetDesc: "Echtzeit-Multiplayer"
       },
       onboarding: {
         welcome: "Willkommen bei Pianio! 🎹",
@@ -160,6 +200,8 @@ const resources = {
       home: {
         welcome: "¡Hola, {{name}}! 🎹",
         tagline: "¡Hagamos algo de música!",
+        path: "Ruta",
+        pathDesc: "Sigue la ruta guiada de aprendizaje.",
         freePlay: "Juego Libre",
         freePlayDesc: "¡Solo toca! Sin reglas, solo tú y el piano.",
         library: "Biblioteca",
@@ -171,7 +213,15 @@ const resources = {
         progress: "Mi Progreso",
         progressDesc: "Mira tus logros",
         settings: "Configuración",
-        settingsDesc: "Ajusta tu piano"
+        settingsDesc: "Ajusta tu piano",
+        arcade: "Arcade",
+        arcadeDesc: "Juega minijuegos divertidos",
+        rewards: "Tienda de recompensas",
+        rewardsDesc: "¡Gasta tus XP!",
+        webxr: "Piano WebXR",
+        webxrDesc: "Modo de realidad virtual",
+        duet: "Modo dúo",
+        duetDesc: "Multijugador en tiempo real"
       },
       onboarding: {
         welcome: "¡Bienvenido a Pianio! 🎹",

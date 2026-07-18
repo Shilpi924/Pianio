@@ -363,7 +363,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         return;
       }
 
-      if (isAudioInitialized) {
+      if (isAudioInitialized && !useMicrophone) {
         audioService.startNote(playedNote);
       }
 

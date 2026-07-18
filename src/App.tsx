@@ -30,6 +30,7 @@ import AIChatBot from './components/AIChatBot';
 import PwaBanner from './components/PwaBanner';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
+import i18n from './i18n';
 import './index.css';
 
 type BeforeInstallPromptEvent = Event & {
@@ -52,6 +53,14 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [settings.darkMode]);
+
+  useEffect(() => {
+    const language = settings.language || 'en';
+    if (i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+    document.documentElement.lang = language;
+  }, [settings.language]);
 
   useEffect(() => {
     // Sync audio volume
