@@ -12,6 +12,7 @@ import {
   Send,
   Sparkles,
   WandSparkles,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
@@ -43,6 +44,7 @@ export default function LessonLibraryPage() {
     cloudLessons,
     fetchCloudLessons,
     addCustomLesson,
+    goBack,
   } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
 
@@ -113,6 +115,29 @@ export default function LessonLibraryPage() {
     playable: allLessons.filter((lesson) => lesson.notes.length > 40).length,
     imported: customLessons.length,
     requests: requestSaved ? 1 : 0,
+  };
+
+  const getRightsBadge = (lesson: Lesson) => {
+    const rightsStatus = lesson.importMetadata?.rightsStatus;
+    if (rightsStatus === 'public-domain' || lesson.source === 'public-domain') {
+      return { label: 'Public domain', tone: 'emerald' as const };
+    }
+    if (rightsStatus === 'licensed') {
+      return { label: 'Licensed', tone: 'sky' as const };
+    }
+    if (rightsStatus === 'user-owned') {
+      return { label: 'User-owned', tone: 'violet' as const };
+    }
+    if (rightsStatus === 'needs-clearance') {
+      return { label: 'Needs clearance', tone: 'amber' as const };
+    }
+    if (rightsStatus === 'requested') {
+      return { label: 'Requested', tone: 'fuchsia' as const };
+    }
+    if (lesson.notes.length === 0) {
+      return { label: 'Song idea', tone: 'slate' as const };
+    }
+    return { label: 'Playable', tone: 'emerald' as const };
   };
 
   const startLesson = (lesson: Lesson) => {
@@ -207,7 +232,7 @@ export default function LessonLibraryPage() {
           <div className="relative flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <div className="max-w-2xl">
               <button
-                onClick={() => setCurrentView('home')}
+                onClick={goBack}
                 className="mb-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -396,6 +421,7 @@ export default function LessonLibraryPage() {
                   const percent = progress ? Math.round((progress.currentNoteIndex / lesson.notes.length) * 100) : 0;
                   const isRecommended = recommendedIds.has(lesson.id);
                   const isFullSong = lesson.notes.length > 40;
+                  const rightsBadge = getRightsBadge(lesson);
 
                   return (
                     <motion.button
@@ -435,6 +461,24 @@ export default function LessonLibraryPage() {
                               Full song
                             </span>
                           )}
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
+                              rightsBadge.tone === 'emerald'
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                : rightsBadge.tone === 'sky'
+                                  ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300'
+                                  : rightsBadge.tone === 'violet'
+                                    ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
+                                    : rightsBadge.tone === 'amber'
+                                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                      : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                            }`}
+                          >
+                            <ShieldCheck className="h-3 w-3" />
+                            {rightsBadge.label}
+                          </span>
                         </div>
                         <p className="mt-2 h-10 line-clamp-2 text-sm text-slate-500">{lesson.synopsis}</p>
 

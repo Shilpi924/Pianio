@@ -48,6 +48,8 @@ export interface Lesson {
     sourceType?: 'MusicXML' | 'MIDI';
     tempoConfidence?: 'high' | 'medium' | 'low';
     savedToLibrary?: boolean;
+    rightsStatus?: 'public-domain' | 'licensed' | 'user-owned' | 'needs-clearance' | 'requested';
+    rightsNote?: string;
   };
 }
 

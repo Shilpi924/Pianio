@@ -16,6 +16,8 @@ interface FallingNoteData {
   secondsRemaining: number;
   isHolding: boolean;
   isShort: boolean;
+  displayLabel: string;
+  displayHand: string;
 }
 
 interface FallingNotesProps {
@@ -45,6 +47,12 @@ function parseNote(n: string) {
   const idx = CHROMATIC.indexOf(name);
   if (idx === -1) return null;
   return { name, oct, idx, midi: (oct + 1) * 12 + idx };
+}
+
+function formatDisplayLabel(note: string) {
+  const parsed = parseNote(note);
+  if (!parsed) return note || 'Note';
+  return `${parsed.name}${parsed.oct}`;
 }
 
 function buildKeyboard(notes: Note[]) {
@@ -181,6 +189,7 @@ export default function FallingNotes({
           const isHolding = playhead >= start && playhead < end;
           const holdProgress = Math.min(100, Math.max(0, ((playhead - start) / duration) * 100));
           const isShort = heightPx < 28;
+          const displayLabel = formatDisplayLabel(n.note);
           visible.push({
             id: `${n.note}-${index}`,
             index,
@@ -196,6 +205,8 @@ export default function FallingNotes({
             secondsRemaining: Math.max(0, end - playhead),
             isHolding,
             isShort,
+            displayLabel,
+            displayHand: n.hand === 'left' ? 'L' : 'R',
           });
         }
       }
@@ -285,7 +296,7 @@ export default function FallingNotes({
                 width:  `calc(${fn.widthPct}% - 2px)`,
                 top:    0,
                 height: fn.heightPx,
-                minHeight: fn.isShort ? 18 : 0,
+                minHeight: fn.isShort ? 24 : 0,
                 borderRadius: fn.isShort ? 999 : 10,
                 background:   fn.isHolding
                   ? 'linear-gradient(145deg, #06b6d4 0%, #6366f1 52%, #d946ef 100%)'
@@ -306,17 +317,17 @@ export default function FallingNotes({
                 backfaceVisibility: 'hidden',
                 zIndex: fn.isBlack ? 10 : 5,
               }}
-            >
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,transparent_20%,rgba(255,255,255,0.28)_45%,transparent_68%)]" />
+              >
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,transparent_20%,rgba(255,255,255,0.28)_45%,transparent_68%)]" />
 
               {/* The fill and its luminous leading edge travel upward together.
                   Release when the moving beam meets the white top cap. */}
               {fn.holdProgress > 0 && (
                 <div
-                  className="absolute bottom-0 left-0 right-0 bg-white/25"
+                  className={`absolute bottom-0 left-0 right-0 ${fn.isShort ? 'bg-white/35' : 'bg-white/25'}`}
                   style={{
                     height: fn.isShort ? '100%' : `${fn.holdProgress}%`,
-                    opacity: fn.isShort ? 0.45 : 1,
+                    opacity: fn.isShort ? 0.68 : 1,
                   }}
                 />
               )}
@@ -332,21 +343,33 @@ export default function FallingNotes({
                 />
               )}
               <div className="absolute left-0 right-0 top-0 z-20 h-0.5 bg-white shadow-[0_0_6px_2px_rgba(103,232,249,0.95)]" />
-              {!fn.isShort && (
-                <span style={{ fontSize: fn.heightPx > 48 ? 10 : 8 }} className="relative z-10 leading-none drop-shadow">
-                  {fn.note}
+              <div className="relative z-10 flex flex-col items-center justify-center px-1 text-center">
+                <span
+                  className="leading-none drop-shadow"
+                  style={{ fontSize: fn.isShort ? 9 : fn.heightPx > 48 ? 11 : 8 }}
+                >
+                  {fn.displayLabel}
                 </span>
-              )}
-              {!fn.isShort && fn.heightPx >= 40 && (
-                <span className="relative z-10 mt-0.5 text-[9px] font-black leading-none opacity-90">
-                  {fn.finger}
+                <span className="mt-0.5 inline-flex items-center gap-1">
+                  <span className="rounded-full bg-black/20 px-1.5 py-0.5 text-[7px] font-black leading-none text-white/90">
+                    {fn.displayHand}
+                  </span>
+                  {fn.isShort ? (
+                    <span className="rounded-full bg-black/20 px-1.5 py-0.5 text-[7px] font-black leading-none text-white/90">
+                      {fn.secondsRemaining.toFixed(1)}s
+                    </span>
+                  ) : fn.heightPx >= 40 ? (
+                    <span className="rounded-full bg-black/20 px-1.5 py-0.5 text-[7px] font-black leading-none text-white/90">
+                      hold
+                    </span>
+                  ) : null}
                 </span>
-              )}
-              {fn.isShort && (
-                <span className="relative z-10 text-[8px] font-black leading-none opacity-85">
-                  {fn.note}
-                </span>
-              )}
+                {!fn.isShort && fn.heightPx >= 40 && (
+                  <span className="mt-1 text-[9px] font-black leading-none opacity-90">
+                    finger {fn.finger}
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}

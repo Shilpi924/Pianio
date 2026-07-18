@@ -13,7 +13,7 @@ import { beatService, type BeatType } from '../services/beatService';
 import { useKeyboardPiano } from '../hooks/useKeyboardPiano';
 
 export default function FreePlayPage() {
-  const { setCurrentView, audioEnabled, setAudioEnabled } = useAppStore();
+  const { audioEnabled, setAudioEnabled, goBack } = useAppStore();
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
   const [activeNotes, setActiveNotes] = useState<Set<string>>(new Set());
   const [isRecording, setIsRecording] = useState(false);
@@ -165,7 +165,7 @@ export default function FreePlayPage() {
         <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
             <button
-              onClick={() => setCurrentView('home')}
+              onClick={goBack}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
               <ArrowLeft className="h-4 w-4" />

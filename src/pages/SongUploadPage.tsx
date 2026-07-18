@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileText, CheckCircle, XCircle, ArrowLeft, Play, Library, BadgeCheck } from 'lucide-react';
+import { Upload, FileText, CheckCircle, XCircle, ArrowLeft, Play, Library, BadgeCheck, ShieldCheck, PencilLine } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { SongImportService } from '../services/songImportService';
 import type { Lesson } from '../types';
@@ -277,6 +277,10 @@ export default function SongUploadPage() {
                   <Library className="h-3.5 w-3.5" />
                   Saved to library
                 </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  {parsedLesson.importMetadata?.rightsStatus ?? 'needs-clearance'}
+                </span>
                 <span className="inline-flex items-center gap-2 rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
                   {parsedLesson.importMetadata?.sourceType ?? 'Imported'}
                 </span>
@@ -309,6 +313,15 @@ export default function SongUploadPage() {
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">Category</div>
                 </div>
+              </div>
+              <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-100">
+                <div className="flex items-center gap-2 font-bold">
+                  <PencilLine className="h-4 w-4" />
+                  Rights note
+                </div>
+                <p className="mt-2">
+                  {parsedLesson.importMetadata?.rightsNote ?? 'This file was parsed locally. Confirm you have the rights to share or publish it before making it public.'}
+                </p>
               </div>
 
               <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300">

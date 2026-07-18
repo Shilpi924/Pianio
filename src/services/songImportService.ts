@@ -27,6 +27,8 @@ function buildLesson(notes: Note[], title: string, tempo: number, format: Import
       sourceType: format === 'musicxml' ? 'MusicXML' : 'MIDI',
       tempoConfidence,
       savedToLibrary: true,
+      rightsStatus: 'needs-clearance',
+      rightsNote: 'Import confirms file format, not publishing rights. Verify license before making public.',
     },
     notes,
   };

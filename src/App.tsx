@@ -39,7 +39,7 @@ type BeforeInstallPromptEvent = Event & {
 
 function App() {
   useCloudSync();
-  const { currentView, settings, currentLesson, setCurrentView, setCurrentLesson } = useAppStore();
+  const { currentView, settings, currentLesson, setCurrentView, setCurrentLesson, goBack } = useAppStore();
   const { completeOnboarding } = useUserProfileStore();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -101,11 +101,11 @@ function App() {
                 lesson={currentLesson}
                 onExit={() => {
                   setCurrentLesson(null);
-                  setCurrentView('lesson');
+                  goBack();
                 }}
                 onComplete={() => {
-                  setCurrentView('lesson');
                   setCurrentLesson(null);
+                  goBack();
                 }}
               />
             </div>

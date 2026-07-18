@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Layers, Pause, Play, Volume2, X, Home, Settings } from 'lucide-react';
+import { Layers, Pause, Play, Volume2, X, Settings, ArrowLeft } from 'lucide-react';
 import PianoKeyboard from './PianoKeyboard';
 import FingerHint from './FingerHint';
 import FallingNotes from './FallingNotes';
@@ -27,7 +27,7 @@ const PREVIEW_TEMPO_BPM = 90;
 const PREVIEW_FALLING_NOTE_SPEED = 1.5;
 
 export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) {
-  const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress, settings } = useAppStore();
+  const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress, settings, goBack } = useAppStore();
   const { addCompletedLesson, addExperience, addPracticeTime, addPracticeSession, updateStreak } = useUserProfileStore();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
@@ -639,12 +639,12 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={onExit}
+                onClick={goBack}
                 className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rose-100 px-4 py-2 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300"
-                title="Home"
+                title="Back"
               >
-                <Home className="h-5 w-5" />
-                <span className="hidden sm:inline">Home</span>
+                <ArrowLeft className="h-5 w-5" />
+                <span className="hidden sm:inline">Back</span>
               </motion.button>
             )}
           </div>

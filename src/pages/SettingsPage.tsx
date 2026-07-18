@@ -64,7 +64,7 @@ type Setting = ToggleSetting | SliderSetting | SelectSetting;
 import { useTranslation } from 'react-i18next';
 export default function SettingsPage() {
   const { i18n } = useTranslation();
-  const { setCurrentView, settings, updateSettings } = useAppStore();
+  const { settings, updateSettings, goBack } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const updatePersonalization = useUserProfileStore((state) => state.updatePersonalization);
   const [activeTab, setActiveTab] = useState<'account' | 'preferences'>('account');
@@ -256,11 +256,11 @@ export default function SettingsPage() {
         <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <button
-              onClick={() => setCurrentView('home')}
+              onClick={goBack}
               className="mb-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back home
+              Back
             </button>
             <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">
               Settings

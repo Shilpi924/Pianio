@@ -4,8 +4,10 @@ import type { AppState, Lesson, Settings, Statistics, MIDIDevice, LessonProgress
 import { contentDatabaseService } from '../services/contentDatabaseService';
 
 interface AppStore extends AppState {
+  viewHistory: AppState['currentView'][];
   // App state
   setCurrentView: (view: AppState['currentView']) => void;
+  goBack: () => void;
   setCurrentLesson: (lesson: Lesson | null) => void;
   setIsPlaying: (playing: boolean) => void;
   setTempo: (tempo: number) => void;
@@ -80,12 +82,32 @@ export const useAppStore = create<AppStore>()(
     (set) => ({
       // Initial app state
       currentView: 'home',
+      viewHistory: [],
       currentLesson: null,
       isPlaying: false,
       tempo: 80,
 
       // App state setters
-      setCurrentView: (view) => set({ currentView: view }),
+      setCurrentView: (view) =>
+        set((state) => ({
+          currentView: view,
+          viewHistory:
+            state.currentView === view
+              ? state.viewHistory
+              : [...state.viewHistory, state.currentView].filter((item) => item !== view).slice(-8),
+        })),
+      goBack: () =>
+        set((state) => {
+          const nextHistory = [...state.viewHistory];
+          const previousView = nextHistory.pop();
+          if (!previousView) {
+            return { currentView: 'home', viewHistory: [] };
+          }
+          return {
+            currentView: previousView,
+            viewHistory: nextHistory,
+          };
+        }),
       setCurrentLesson: (lesson) => set({ currentLesson: lesson }),
       setIsPlaying: (playing) => set({ isPlaying: playing }),
       setTempo: (tempo) => set({ tempo }),
@@ -187,6 +209,7 @@ export const useAppStore = create<AppStore>()(
     {
       name: 'pianio-storage',
       partialize: (state) => ({
+        viewHistory: [],
         settings: state.settings,
         statistics: state.statistics,
         lessonProgress: state.lessonProgress,
