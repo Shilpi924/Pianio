@@ -288,10 +288,6 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     if ((isPlaying || isPreviewingSong) && currentNote) {
       setHighlightedNotes([currentNote.note]);
       setNoteStartTime(Date.now());
-      if (isPlaying && isAudioInitialized && practiceMode === 'guided' && waitModeEnabled) {
-        const durationInSeconds = (60 / tempo) * currentNote.duration;
-        audioService.playNote(currentNote.note, durationInSeconds);
-      }
     } else {
       setHighlightedNotes([]);
     }
