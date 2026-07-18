@@ -358,6 +358,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const handleNotePlayed = useCallback(
     (playedNote: string) => {
       if (!isPlaying || !currentNote) return;
+      const isQuietMicPractice = useMicrophone;
 
       if (practiceMode === 'hands-separate' && selectedHand !== 'both' && currentNote.hand !== selectedHand) {
         return;
@@ -397,7 +398,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         setCombo((prev) => {
           const nextCombo = prev + 1;
           if (nextCombo > 5) {
-            if (nextCombo % 5 === 0) {
+            if (!isQuietMicPractice && nextCombo % 5 === 0) {
               // Shoot some confetti from the sides for big combos
               confetti({
                 particleCount: 50,
@@ -414,7 +415,9 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
                 colors: ['#3b82f6', '#8b5cf6', '#ec4899']
               });
             }
-            SoundEffects.playCombo(nextCombo);
+            if (!isQuietMicPractice) {
+              SoundEffects.playCombo(nextCombo);
+            }
             setMascotMood('excited');
             setMascotMessage(`Amazing! ${nextCombo} in a row!`);
           } else {
@@ -466,33 +469,37 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           setIsPlaying(false);
           setMascotMood('celebrating');
           setMascotMessage('Quest complete. Strong finish.');
-          SoundEffects.playLevelUp();
+          if (!isQuietMicPractice) {
+            SoundEffects.playLevelUp();
+          }
           
           // Massive confetti explosion!
-          const duration = 3000;
-          const end = Date.now() + duration;
+          if (!isQuietMicPractice) {
+            const duration = 3000;
+            const end = Date.now() + duration;
 
-          const frame = () => {
-            confetti({
-              particleCount: 5,
-              angle: 60,
-              spread: 55,
-              origin: { x: 0 },
-              colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
-            });
-            confetti({
-              particleCount: 5,
-              angle: 120,
-              spread: 55,
-              origin: { x: 1 },
-              colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
-            });
+            const frame = () => {
+              confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
+              });
+              confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
+              });
 
-            if (Date.now() < end) {
-              requestAnimationFrame(frame);
-            }
-          };
-          frame();
+              if (Date.now() < end) {
+                requestAnimationFrame(frame);
+              }
+            };
+            frame();
+          }
 
           setShowLevelUp(true);
           updateLessonProgress(lesson.id, {
@@ -516,7 +523,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         
         setMistakeStreak((prev) => {
           const nextStreak = prev + 1;
-          if (nextStreak >= 3 && !isAdaptiveTraining) {
+          if (!isQuietMicPractice && nextStreak >= 3 && !isAdaptiveTraining) {
             setIsAdaptiveTraining(true);
             setOriginalTempo(tempo);
             setTempo(Math.max(40, Math.round(tempo * 0.7))); // Slow down by 30%
@@ -535,11 +542,13 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
             setMascotMessage('Smart Tutor activated! Let\'s slow down and practice just this small part until you master it.');
             SoundEffects.playLevelUp(); 
             return 0; // Reset streak
-          } else if (nextStreak >= 3) {
+          } else if (!isQuietMicPractice && nextStreak >= 3) {
             setMascotMood('thinking');
             setMascotMessage('Keep trying this section. You can do it!');
           } else {
-            SoundEffects.playIncorrect();
+            if (!isQuietMicPractice) {
+              SoundEffects.playIncorrect();
+            }
             setMascotMood('thinking');
             setMascotMessage(waitModeEnabled ? 'Close. Try that note again.' : 'Missed it. Reset and listen for the pattern.');
           }
@@ -547,7 +556,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         });
       }
     },
-    [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, isPreviewingSong, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo]
+    [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, isPreviewingSong, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo, useMicrophone]
   );
 
   const adjustTempo = (delta: number) => {

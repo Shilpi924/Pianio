@@ -26,10 +26,11 @@ export default function ProfileSwitcher() {
 
   const activeProfile = profiles[activeProfileId];
   const allProfiles = Object.values(profiles);
+  const isDefaultProfile = activeProfileId === 'default';
   const displayName =
-    activeProfile?.name && activeProfile.name !== 'Learner'
-      ? activeProfile.name
-      : t('profileSwitcher.learner');
+    isDefaultProfile
+      ? t('profileSwitcher.learner')
+      : activeProfile?.name || t('profileSwitcher.learner');
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +72,7 @@ export default function ProfileSwitcher() {
               <div className="mb-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-500">
                 {t('profileSwitcher.switchProfile')}
               </div>
-              <div className="space-y-1">
+                  <div className="space-y-1">
                 {allProfiles.map((p) => (
                   <div key={p.id} className="flex items-center justify-between gap-2">
                     <button
@@ -85,7 +86,7 @@ export default function ProfileSwitcher() {
                           : 'text-slate-700 hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-gray-700'
                       }`}
                     >
-                      {p.name}
+                      {p.id === 'default' ? t('profileSwitcher.learner') : p.name}
                     </button>
                     {allProfiles.length > 1 && (
                       <button
