@@ -66,6 +66,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const lastFrameTimeRef = useRef<number | null>(null);
   const previewStartedAtRef = useRef<number | null>(null);
   const previewLastPlayedIndexRef = useRef(-1);
+  const currentNoteIndexRef = useRef(0);
 
   const currentNote = lesson.notes[currentNoteIndex];
   const progress = ((currentNoteIndex + 1) / lesson.notes.length) * 100;
@@ -86,6 +87,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const inputMode = settings.inputMode ?? 'midi';
   const useMicrophone = inputMode === 'microphone' || (inputMode === 'auto' && !midiService.isSupported());
   const microphoneVisible = inputMode === 'microphone' || useMicrophone;
+
+  useEffect(() => {
+    currentNoteIndexRef.current = currentNoteIndex;
+  }, [currentNoteIndex]);
   const sectionMarkers = useMemo(() => {
     if (lesson.id !== 'wellerman' || lesson.notes.length < 65) return [];
     const markers: Array<{ index: number; label: string }> = [{ index: 0, label: 'Verse 1' }];
@@ -238,7 +243,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         let newTime = prev + deltaSeconds;
         if (!isPreviewingSong && waitModeEnabled && practiceMode === 'guided') {
           let targetBeat = 0;
-          for (let i = 0; i < currentNoteIndex; i++) {
+          for (let i = 0; i < currentNoteIndexRef.current; i++) {
             targetBeat += lesson.notes[i].duration;
           }
           const targetTime = (targetBeat * 60) / tempo;
@@ -259,7 +264,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       }
       lastFrameTimeRef.current = null;
     };
-  }, [currentNoteIndex, isPlaying, isPreviewingSong, lesson.notes, practiceMode, previewDuration, previewTimeline, tempo, useFallingNotes, waitModeEnabled]);
+  }, [isPlaying, isPreviewingSong, lesson.notes, practiceMode, previewDuration, previewTimeline, tempo, useFallingNotes, waitModeEnabled]);
 
   useEffect(() => {
     if (isPlaying && practiceStartedAtRef.current === null) {
