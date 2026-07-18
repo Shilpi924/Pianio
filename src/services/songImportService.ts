@@ -6,14 +6,21 @@ type ImportedSongFormat = 'musicxml' | 'midi';
 function buildLesson(notes: Note[], title: string, tempo: number, format: ImportedSongFormat): Lesson | null {
   if (notes.length === 0) return null;
 
+  const totalBeats = notes.reduce((sum, note) => sum + Math.max(note.duration, 0), 0);
+  const averageDensity = notes.length / Math.max(totalBeats, 1);
+  const difficulty: Lesson['difficulty'] =
+    notes.length > 160 || averageDensity > 4 ? 'advanced' : notes.length > 70 ? 'intermediate' : 'beginner';
+
   return {
     id: `user-${format}-${Date.now()}`,
     title,
     tempo,
-    difficulty: 'beginner',
+    difficulty,
     category: 'Imported Song',
     source: 'user-uploaded',
     sourceName: format === 'musicxml' ? 'MusicXML Import' : 'MIDI Import',
+    synopsis: `Imported ${format.toUpperCase()} song with ${notes.length} notes.`,
+    tags: ['imported', format],
     notes,
   };
 }

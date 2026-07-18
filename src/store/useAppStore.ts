@@ -92,7 +92,7 @@ export const useAppStore = create<AppStore>()(
       // Custom Lessons
       customLessons: [],
       addCustomLesson: (lesson) => set((state) => ({
-        customLessons: [...state.customLessons, lesson]
+        customLessons: [...state.customLessons.filter((existing) => existing.id !== lesson.id), lesson]
       })),
 
       // Cloud Lessons

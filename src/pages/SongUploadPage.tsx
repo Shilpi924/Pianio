@@ -6,7 +6,7 @@ import { SongImportService } from '../services/songImportService';
 import type { Lesson } from '../types';
 
 export default function SongUploadPage() {
-  const { setCurrentView, setCurrentLesson } = useAppStore();
+  const { setCurrentView, setCurrentLesson, addCustomLesson } = useAppStore();
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [parsedLesson, setParsedLesson] = useState<Lesson | null>(null);
@@ -70,6 +70,7 @@ export default function SongUploadPage() {
         return;
       }
 
+      addCustomLesson(lesson);
       setParsedLesson(lesson);
     } catch (err) {
       setError('Error reading file: ' + (err as Error).message);
@@ -83,6 +84,11 @@ export default function SongUploadPage() {
       setCurrentLesson(parsedLesson);
       setCurrentView('lesson');
     }
+  };
+
+  const handleOpenLibrary = () => {
+    setCurrentLesson(null);
+    setCurrentView('lesson');
   };
 
   const handleReset = () => {
@@ -144,7 +150,7 @@ export default function SongUploadPage() {
               </p>
               <input
                 type="file"
-                accept=".xml,.musicxml"
+                accept=".xml,.musicxml,.mid,.midi"
                 onChange={handleFileInput}
                 className="hidden"
                 id="file-upload"
@@ -274,6 +280,14 @@ export default function SongUploadPage() {
                   className="flex-1 py-4 bg-gray-200 dark:bg-gray-700 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold"
                 >
                   Upload Another
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleOpenLibrary}
+                  className="flex-1 py-4 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 transition-colors font-semibold"
+                >
+                  Open Library
                 </motion.button>
               </div>
             </div>
