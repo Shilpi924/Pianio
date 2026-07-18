@@ -6,8 +6,10 @@ import type { PersonalizationData } from '../types/userProfile';
 import { signInWithGoogle, logOut, auth } from '../services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfileSwitcher() {
+  const { t } = useTranslation();
   const { profiles, activeProfileId, switchProfile, createProfile, deleteProfile } = useUserProfileStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -24,6 +26,10 @@ export default function ProfileSwitcher() {
 
   const activeProfile = profiles[activeProfileId];
   const allProfiles = Object.values(profiles);
+  const displayName =
+    activeProfile?.name && activeProfile.name !== 'Learner'
+      ? activeProfile.name
+      : t('profileSwitcher.learner');
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +55,7 @@ export default function ProfileSwitcher() {
         className="flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md px-4 py-2 text-sm font-bold shadow-sm ring-1 ring-slate-200 transition-all hover:bg-white dark:bg-gray-800/80 dark:ring-gray-700 dark:hover:bg-gray-800"
       >
         <User className="h-4 w-4 text-blue-500" />
-        <span className="text-slate-900 dark:text-gray-100">{activeProfile?.name || 'Learner'}</span>
+        <span className="text-slate-900 dark:text-gray-100">{displayName}</span>
         <ChevronDown className="h-4 w-4 text-slate-500" />
       </button>
 
@@ -63,7 +69,7 @@ export default function ProfileSwitcher() {
           >
             <div className="p-2">
               <div className="mb-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-                Switch Profile
+                {t('profileSwitcher.switchProfile')}
               </div>
               <div className="space-y-1">
                 {allProfiles.map((p) => (
@@ -100,7 +106,7 @@ export default function ProfileSwitcher() {
                   <input
                     type="text"
                     autoFocus
-                    placeholder="Learner name..."
+                    placeholder={t('profileSwitcher.placeholder')}
                     value={newProfileName}
                     onChange={(e) => setNewProfileName(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
@@ -111,14 +117,14 @@ export default function ProfileSwitcher() {
                       disabled={!newProfileName.trim()}
                       className="flex-1 rounded-lg bg-blue-500 py-1.5 text-xs font-bold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
                     >
-                      Create
+                      {t('profileSwitcher.create')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsCreating(false)}
                       className="flex-1 rounded-lg bg-slate-100 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-200 dark:bg-gray-700 dark:text-gray-300"
                     >
-                      Cancel
+                      {t('profileSwitcher.cancel')}
                     </button>
                   </div>
                 </form>
@@ -128,7 +134,7 @@ export default function ProfileSwitcher() {
                   className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   <Plus className="h-4 w-4" />
-                  Add New Learner
+                  {t('profileSwitcher.addNewLearner')}
                 </button>
               )}
             </div>

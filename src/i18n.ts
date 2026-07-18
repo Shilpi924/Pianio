@@ -49,6 +49,14 @@ const resources = {
       settings: {
         language: "Language"
       },
+      profileSwitcher: {
+        learner: "Learner",
+        switchProfile: "Switch Profile",
+        placeholder: "Learner name...",
+        create: "Create",
+        cancel: "Cancel",
+        addNewLearner: "Add New Learner",
+      },
       settingsPage: {
         back: "Back",
         title: "Settings",
@@ -150,6 +158,14 @@ const resources = {
       },
       settings: {
         language: "语言 (Language)"
+      },
+      profileSwitcher: {
+        learner: "学习者",
+        switchProfile: "切换资料",
+        placeholder: "学习者姓名...",
+        create: "创建",
+        cancel: "取消",
+        addNewLearner: "添加新学习者",
       },
       settingsPage: {
         back: "返回",
@@ -253,6 +269,14 @@ const resources = {
       settings: {
         language: "言語 (Language)"
       },
+      profileSwitcher: {
+        learner: "学習者",
+        switchProfile: "プロフィール切替",
+        placeholder: "学習者名...",
+        create: "作成",
+        cancel: "キャンセル",
+        addNewLearner: "新しい学習者を追加",
+      },
       settingsPage: {
         back: "戻る",
         title: "設定",
@@ -355,6 +379,14 @@ const resources = {
       settings: {
         language: "Sprache (Language)"
       },
+      profileSwitcher: {
+        learner: "Lernender",
+        switchProfile: "Profil wechseln",
+        placeholder: "Name des Lernenden...",
+        create: "Erstellen",
+        cancel: "Abbrechen",
+        addNewLearner: "Neuen Lernenden hinzufügen",
+      },
       settingsPage: {
         back: "Zurück",
         title: "Einstellungen",
@@ -456,6 +488,14 @@ const resources = {
       },
       settings: {
         language: "Idioma (Language)"
+      },
+      profileSwitcher: {
+        learner: "Aprendiz",
+        switchProfile: "Cambiar perfil",
+        placeholder: "Nombre del aprendiz...",
+        create: "Crear",
+        cancel: "Cancelar",
+        addNewLearner: "Añadir nuevo aprendiz",
       },
       settingsPage: {
         back: "Volver",
