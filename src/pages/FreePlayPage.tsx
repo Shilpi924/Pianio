@@ -204,6 +204,18 @@ export default function FreePlayPage() {
             >
               {audioEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
             </button>
+            <button
+              onClick={toggleRecording}
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-bold shadow-sm transition-all ${
+                isRecording
+                  ? 'bg-rose-500 text-white hover:bg-rose-600'
+                  : 'bg-white text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+              }`}
+              title={isRecording ? 'Stop recording' : 'Start recording'}
+            >
+              {isRecording ? <Square className="h-4 w-4 fill-current" /> : <Disc className="h-4 w-4" />}
+              <span>{isRecording ? 'Recording' : 'Record'}</span>
+            </button>
             <MIDIStatus />
           </div>
         </header>

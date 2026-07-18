@@ -27,7 +27,7 @@ const PREVIEW_TEMPO_BPM = 90;
 const PREVIEW_FALLING_NOTE_SPEED = 1.5;
 
 export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) {
-  const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress } = useAppStore();
+  const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress, settings } = useAppStore();
   const { addCompletedLesson, addExperience, addPracticeTime, addPracticeSession, updateStreak } = useUserProfileStore();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
@@ -45,7 +45,6 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [showSettings, setShowSettings] = useState(false);
   const [waitModeEnabled, setWaitModeEnabled] = useState(true);
   const [showGhostHand, setShowGhostHand] = useState(true);
-  const [useMicrophone, setUseMicrophone] = useState(false);
   const [currentTime, setCurrentTime] = useState(-2);
   const [noteStartTime, setNoteStartTime] = useState(0);
   const [, setTimingFeedback] = useState<'perfect' | 'good' | 'early' | 'late' | null>(null);
@@ -84,6 +83,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     });
   }, [lesson.notes, tempo]);
   const previewDuration = previewTimeline.at(-1)?.end ?? 0;
+  const inputMode = settings.inputMode ?? 'midi';
+  const useMicrophone = inputMode === 'microphone' || (inputMode === 'auto' && !midiService.isSupported());
   const sectionMarkers = useMemo(() => {
     if (lesson.id !== 'wellerman' || lesson.notes.length < 65) return [];
     const markers: Array<{ index: number; label: string }> = [{ index: 0, label: 'Verse 1' }];
@@ -138,7 +139,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         handleNotePlayed(note);
       }).catch(err => {
         console.error('Failed to start pitch detection', err);
-        setUseMicrophone(false);
+        setMascotMood('thinking');
+        setMascotMessage('Microphone access failed. Switch Lesson Input to MIDI in Settings and try again.');
       });
     } else {
       pitchDetectionService.stop();
@@ -789,7 +791,21 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               <div className="space-y-3">
                 <CoachRow label="Wait for me" description="Song pauses until right key is pressed." enabled={waitModeEnabled} onToggle={() => setWaitModeEnabled(!waitModeEnabled)} />
                 <CoachRow label="Metronome" description="Play a tick sound on the beat." enabled={metronomeEnabled} onToggle={() => setMetronomeEnabled(!metronomeEnabled)} />
-                <CoachRow label="Microphone Pitch Detection" description="Use if you don't have a MIDI keyboard." enabled={useMicrophone} onToggle={() => setUseMicrophone(!useMicrophone)} />
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+                  <div className="font-semibold text-gray-900 dark:text-gray-100">Lesson Input</div>
+                  <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                    {inputMode === 'midi'
+                      ? 'MIDI keyboard mode is active.'
+                      : inputMode === 'microphone'
+                      ? 'Microphone pitch detection is active.'
+                      : useMicrophone
+                      ? 'Auto mode is using the microphone fallback.'
+                      : 'Auto mode is using MIDI input.'}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Change this in Settings if the input you want is not working.
+                  </div>
+                </div>
                 <CoachRow label="Show Finger Guide" description="Shows finger numbers next to target." enabled={showGhostHand} onToggle={() => setShowGhostHand(!showGhostHand)} />
                 <CoachRow label="Show Sheet Music" description="Display standard notation." enabled={showSheetMusic} onToggle={() => setShowSheetMusic(!showSheetMusic)} />
               </div>

@@ -47,6 +47,7 @@ const defaultSettings: Settings = {
   showNoteNames: true,
   useSharps: true,
   darkMode: false,
+  inputMode: 'midi',
   selectedMIDIDevice: null,
   audioVolume: 70,
   animationSpeed: 1,

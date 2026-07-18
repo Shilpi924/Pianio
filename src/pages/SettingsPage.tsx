@@ -53,7 +53,7 @@ type SliderSetting = {
 };
 
 type SelectSetting = {
-  key: 'language';
+  key: 'language' | 'inputMode';
   label: string;
   type: 'select';
   options: { value: string; label: string }[];
@@ -159,6 +159,16 @@ export default function SettingsPage() {
           min: 0,
           max: 100,
           step: 5,
+        },
+        {
+          key: 'inputMode',
+          label: 'Lesson Input',
+          type: 'select' as const,
+          options: [
+            { value: 'midi', label: 'MIDI Keyboard' },
+            { value: 'microphone', label: 'Microphone' },
+            { value: 'auto', label: 'Auto' },
+          ],
         },
       ] as Setting[],
     },
@@ -544,6 +554,7 @@ export default function SettingsPage() {
                     showNoteNames: true,
                     useSharps: true,
                     darkMode: false,
+                    inputMode: 'midi',
                     selectedMIDIDevice: null,
                     audioVolume: 0.7,
                     animationSpeed: 1,

@@ -69,6 +69,7 @@ export interface Settings {
   showNoteNames: boolean;
   useSharps: boolean; // false for flats
   darkMode: boolean;
+  inputMode?: 'auto' | 'midi' | 'microphone';
   selectedMIDIDevice: string | null;
   audioVolume: number;
   animationSpeed: number;
