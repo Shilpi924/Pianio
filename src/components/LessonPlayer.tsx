@@ -305,15 +305,17 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     }
   };
 
-  const stopSongPreview = () => {
+  const stopSongPreview = (resetPosition = true) => {
     audioService.stopAllNotes();
     previewStartedAtRef.current = null;
     previewLastPlayedIndexRef.current = -1;
     setIsPreviewingSong(false);
-    setTempo(lesson.tempo);
-    setFallingNotesSpeed(1);
-    setCurrentTime(-2);
-    setCurrentNoteIndex(0);
+    if (resetPosition) {
+      setTempo(lesson.tempo);
+      setFallingNotesSpeed(1);
+      setCurrentTime(-2);
+      setCurrentNoteIndex(0);
+    }
   };
 
   const previewSong = async () => {
@@ -331,7 +333,9 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   };
 
   const togglePractice = async () => {
-    stopSongPreview();
+    if (isPreviewingSong) {
+      stopSongPreview(true);
+    }
     await ensureAudio();
     setIsPlaying((prev) => !prev);
     if (!isPlaying && currentNote) {
@@ -544,7 +548,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         });
       }
     },
-    [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo]
+    [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, isPreviewingSong, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo]
   );
 
   const adjustTempo = (delta: number) => {
