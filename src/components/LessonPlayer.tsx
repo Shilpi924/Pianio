@@ -345,11 +345,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     await ensureAudio();
     setIsPlaying((prev) => !prev);
     if (!isPlaying && currentNote) {
-      // setCurrentTime(0);
       setMascotMood('happy');
-      setMascotMessage('Press the glowing key. I will wait for the right note.');
-      const durationInSeconds = (60 / tempo) * currentNote.duration;
-      audioService.playNote(currentNote.note, durationInSeconds);
+      setMascotMessage('Press the glowing key. I will wait for your note.');
     }
   };
 
