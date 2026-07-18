@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, FileText, CheckCircle, XCircle, ArrowLeft, Play } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { MusicXMLParser } from '../services/musicXmlParser';
+import { SongImportService } from '../services/songImportService';
 import type { Lesson } from '../types';
 
 export default function SongUploadPage() {
@@ -45,28 +45,27 @@ export default function SongUploadPage() {
     setIsProcessing(true);
     setParsedLesson(null);
 
-    // Check file extension
-    if (!file.name.endsWith('.xml') && !file.name.endsWith('.musicxml')) {
-      setError('Please upload a .xml or .musicxml file');
+    const lower = file.name.toLowerCase();
+    const supported = lower.endsWith('.xml') || lower.endsWith('.musicxml') || lower.endsWith('.mid') || lower.endsWith('.midi');
+    if (!supported) {
+      setError('Please upload a .xml, .musicxml, .mid, or .midi file');
       setIsProcessing(false);
       return;
     }
 
     try {
-      const content = await file.text();
-      
-      // Validate MusicXML
-      if (!MusicXMLParser.validate(content)) {
-        setError('Invalid MusicXML file format');
+      const content = lower.endsWith('.mid') || lower.endsWith('.midi') ? '' : await file.text();
+
+      if (!SongImportService.validate(content, file.name)) {
+        setError('Invalid song file format');
         setIsProcessing(false);
         return;
       }
 
-      // Parse MusicXML
-      const lesson = MusicXMLParser.parse(content);
+      const lesson = await SongImportService.parseFile(file);
       
       if (!lesson) {
-        setError('Failed to parse MusicXML. Please check the file format.');
+        setError('Failed to parse the song file. Please check the file format.');
         setIsProcessing(false);
         return;
       }
@@ -138,7 +137,7 @@ export default function SongUploadPage() {
             >
               <Upload className="w-16 h-16 mx-auto mb-4 text-blue-500" />
               <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
-                Drop your MusicXML file here
+                Drop your song file here
               </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 or click to browse
@@ -157,7 +156,7 @@ export default function SongUploadPage() {
                 Select File
               </label>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                Supports .xml and .musicxml files
+                Supports .xml, .musicxml, .mid, and .midi files
               </p>
             </div>
 
@@ -291,7 +290,8 @@ export default function SongUploadPage() {
                     <li>• Songs you upload are stored locally in your browser</li>
                     <li>• You are responsible for ensuring you have the right to use the sheet music</li>
                     <li>• Finger numbers and hand assignments are set to defaults - you can edit them later</li>
-                    <li>• For best results, use MusicXML files from reputable sources</li>
+                    <li>• For best results, use MusicXML files when you want the most accurate note timing</li>
+                    <li>• MIDI files also work well when you mainly need melody and rhythm</li>
                   </ul>
                 </div>
               </div>

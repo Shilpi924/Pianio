@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { Note } from '../types';
 
 interface FallingNoteData {
   id: string;
+  index: number;
   note: string;
   hand: 'left' | 'right';
   finger: number;
   heightPx: number;
   topPx: number;
-  col: number;        // column index in keyboard
-  totalCols: number;  // total white keys displayed
+  leftPct: number;
+  widthPct: number;
   isBlack: boolean;
+  holdProgress: number;
+  secondsRemaining: number;
+  isHolding: boolean;
 }
 
 interface FallingNotesProps {
@@ -90,8 +93,18 @@ function getLayout(
 }
 
 const HAND_COLORS = {
-  right: { bg: '#3b82f6', border: '#1d4ed8', text: '#eff6ff', glow: '#3b82f688' },
-  left:  { bg: '#ef4444', border: '#b91c1c', text: '#fff1f2', glow: '#ef444488' },
+  right: {
+    gradient: 'linear-gradient(145deg, #22d3ee 0%, #3b82f6 48%, #8b5cf6 100%)',
+    border: '#a5f3fc',
+    text: '#f8fafc',
+    glow: 'rgba(59,130,246,0.62)',
+  },
+  left: {
+    gradient: 'linear-gradient(145deg, #fb7185 0%, #f97316 48%, #facc15 100%)',
+    border: '#fecdd3',
+    text: '#fff7ed',
+    glow: 'rgba(249,115,22,0.62)',
+  },
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -124,62 +137,82 @@ export default function FallingNotes({
 
   const totalWhite = whiteKeys.length;
 
+  const timeline = useMemo(() => {
+    const secondsPerBeat = 60 / tempo;
+    let elapsed = 0;
+
+    return notes.map((note, index) => {
+      const start = elapsed;
+      const duration = note.duration * secondsPerBeat;
+      elapsed += duration;
+      return { note, index, start, duration, end: elapsed };
+    });
+  }, [notes, tempo]);
+
   // Build visible falling notes
   const fallingNotes = useMemo((): FallingNoteData[] => {
     if (!notes.length || !totalWhite) return [];
 
     const HIT_H   = 60;
     const TRAVEL  = containerH - HIT_H;
-    const spb      = 60 / tempo;
-    const lookSecs = (4 * spb) / speed;
+    // Keep the travel time comfortable and consistent at every song tempo.
+    // Tempo controls the music; this setting only controls how far ahead the
+    // learner can see. At 1x a note takes 5.5 seconds to reach the hit line.
+    const lookSecs = 5.5 / speed;
     const pxPerSec = TRAVEL / lookSecs;
 
     const visible: FallingNoteData[] = [];
-    let beat = 0;
-    for (let i = 0; i < currentNoteIndex; i++) {
-      beat += notes[i].duration;
-    }
-
-    notes.slice(currentNoteIndex, currentNoteIndex + 12).forEach((n, vi) => {
-      const idx       = currentNoteIndex + vi;
-      const noteSecs  = beat * spb;
-      const secsLeft  = noteSecs - (isPlaying ? currentTime : 0);
-      const heightPx  = Math.max(40, n.duration * spb * pxPerSec * 0.9);
+    const playhead = isPlaying ? currentTime : 0;
+    // Select by time instead of by a fixed number of notes. A 12-note window
+    // could become empty during dense passages or when browser timers drifted.
+    timeline.forEach(({ note: n, index, start, duration, end }) => {
+      const secsLeft  = start - playhead;
+      // The bar's exact length is the amount of time the key must be held.
+      const heightPx  = Math.max(20, duration * pxPerSec);
       const bottomY   = TRAVEL - secsLeft * pxPerSec;
       const topPx     = bottomY - heightPx;
 
       if (topPx < containerH + 60 && bottomY > -20) {
         const layout = getLayout(n.note, whiteKeys, totalWhite);
         if (layout) {
+          const isHolding = playhead >= start && playhead < end;
+          const holdProgress = Math.min(100, Math.max(0, ((playhead - start) / duration) * 100));
           visible.push({
-            id: `${n.note}-${idx}`,
+            id: `${n.note}-${index}`,
+            index,
             note: n.note,
             hand: n.hand,
             finger: n.finger,
             heightPx,
             topPx,
-            col: layout.leftPct,
-            totalCols: layout.widthPct,
+            leftPct: layout.leftPct,
+            widthPct: layout.widthPct,
             isBlack: layout.isBlack,
-          } as any);
-          // Attach leftPct/widthPct via spread trick
-          Object.assign(visible[visible.length - 1], layout);
+            holdProgress,
+            secondsRemaining: Math.max(0, end - playhead),
+            isHolding,
+          });
         }
       }
-      beat += n.duration;
     });
 
     return visible;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notes, tempo, isPlaying, currentTime, currentNoteIndex, speed, containerH, totalWhite]);
+  }, [containerH, currentTime, isPlaying, notes.length, speed, timeline, totalWhite, whiteKeys]);
+
+  const heldNote = fallingNotes.find(note => note.isHolding);
 
   return (
     <div
       ref={containerRef}
+      data-testid="falling-note-stage"
       className="relative w-full overflow-hidden rounded-xl shadow-2xl select-none"
       style={{
         height: 'clamp(280px, 44vh, 440px)',
-        background: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 65%, #0f172a 100%)',
+        background: [
+          'radial-gradient(circle at 14% 18%, rgba(217,70,239,0.24), transparent 27%)',
+          'radial-gradient(circle at 84% 30%, rgba(34,211,238,0.2), transparent 30%)',
+          'linear-gradient(180deg, #11142d 0%, #25134f 58%, #0f172a 100%)',
+        ].join(','),
       }}
     >
       {/* Lane guides */}
@@ -191,58 +224,92 @@ export default function FallingNotes({
         />
       ))}
 
-      {/* Hit glow line */}
+      {/* Thin luminous timing line: the bottom of a bar starts the note; its
+          glowing top cap reaching this line means release. */}
       <div
-        className="absolute left-0 right-0 h-1"
+        data-testid="hold-line"
+        className="absolute left-0 right-0 z-20 h-0.5"
         style={{
           bottom: 60,
-          background: 'linear-gradient(90deg, transparent, #22d3ee, transparent)',
-          boxShadow: '0 0 20px 6px rgba(34,211,238,0.45)',
+          background: 'linear-gradient(90deg, transparent, #67e8f9 12%, #ffffff 50%, #67e8f9 88%, transparent)',
+          boxShadow: '0 0 9px 2px rgba(34,211,238,0.8)',
         }}
       />
 
+      {heldNote && (
+        <div className="absolute bottom-[66px] left-2 z-30 rounded-full border border-cyan-200/50 bg-slate-950/80 px-2 py-0.5 text-[10px] font-black text-cyan-50 shadow-[0_0_9px_rgba(34,211,238,0.45)] backdrop-blur-md">
+          {heldNote.note} · hold {heldNote.secondsRemaining.toFixed(1)}s
+        </div>
+      )}
+
       {/* Falling note tiles */}
-      <AnimatePresence>
-        {(fallingNotes as any[]).map((fn) => {
-          const colors  = HAND_COLORS[fn.hand as 'left' | 'right'];
-          const isHit   = activeNotes.includes(fn.note);
+      {fallingNotes.map((fn) => {
+          const colors  = HAND_COLORS[fn.hand];
+          const isHit   = activeNotes.includes(fn.note) && fn.index === currentNoteIndex;
           return (
-            <motion.div
+            <div
               key={fn.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.08 }}
-              className="absolute flex flex-col items-center justify-center rounded-lg border font-bold"
+              data-note-index={fn.index}
+              data-hold-progress={Math.round(fn.holdProgress)}
+              className="absolute flex flex-col items-center justify-center overflow-hidden rounded-[10px] border font-bold"
               style={{
                 left:   `calc(${fn.leftPct}% + 1px)`,
                 width:  `calc(${fn.widthPct}% - 2px)`,
-                top:    fn.topPx,
+                top:    0,
                 height: fn.heightPx,
-                background:   isHit ? '#fbbf24' : colors.bg,
-                borderColor:  isHit ? '#d97706' : colors.border,
+                background:   fn.isHolding
+                  ? 'linear-gradient(145deg, #06b6d4 0%, #6366f1 52%, #d946ef 100%)'
+                  : isHit
+                  ? 'linear-gradient(145deg, #fde047 0%, #fb923c 100%)'
+                  : colors.gradient,
+                borderColor:  fn.isHolding ? '#a5f3fc' : isHit ? '#d97706' : colors.border,
                 color:        isHit ? '#1c1917' : colors.text,
-                boxShadow:    isHit
+                boxShadow:    fn.isHolding
+                  ? '0 0 14px 3px rgba(34,211,238,0.72)'
+                  : isHit
                   ? '0 0 22px 6px rgba(251,191,36,0.65)'
-                  : `0 0 10px 2px ${colors.glow}`,
-                transition: 'top 0.07s linear, background-color 0.08s',
+                  : `0 0 10px 2px ${colors.glow}, inset 0 1px 0 rgba(255,255,255,0.36)`,
+                transform: `translate3d(0, ${fn.topPx}px, 0)`,
+                willChange: 'transform',
+                backfaceVisibility: 'hidden',
                 zIndex: fn.isBlack ? 10 : 5,
               }}
             >
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,transparent_20%,rgba(255,255,255,0.28)_45%,transparent_68%)]" />
+
+              {/* The fill and its luminous leading edge travel upward together.
+                  Release when the moving beam meets the white top cap. */}
+              {fn.holdProgress > 0 && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 bg-white/30"
+                  style={{ height: `${fn.holdProgress}%` }}
+                />
+              )}
+              {fn.isHolding && (
+                <div
+                  data-testid="note-hold-beam"
+                  className="absolute left-0 right-0 z-20 h-px bg-white"
+                  style={{
+                    bottom: `calc(${fn.holdProgress}% - 1px)`,
+                    boxShadow: '0 0 4px 1px #ffffff, 0 0 10px 3px #22d3ee, 0 0 15px 4px rgba(217,70,239,0.7)',
+                    transition: 'bottom 45ms linear',
+                  }}
+                />
+              )}
+              <div className="absolute left-0 right-0 top-0 z-20 h-0.5 bg-white shadow-[0_0_6px_2px_rgba(103,232,249,0.95)]" />
               {fn.heightPx >= 28 && (
-                <span style={{ fontSize: fn.heightPx > 48 ? 12 : 9 }} className="leading-none drop-shadow">
+                <span style={{ fontSize: fn.heightPx > 48 ? 10 : 8 }} className="relative z-10 leading-none drop-shadow">
                   {fn.note}
                 </span>
               )}
               {fn.heightPx >= 40 && (
-                <span className="text-[11px] font-black leading-none opacity-90 mt-0.5">
+                <span className="relative z-10 mt-0.5 text-[9px] font-black leading-none opacity-90">
                   {fn.finger}
                 </span>
               )}
-            </motion.div>
+            </div>
           );
         })}
-      </AnimatePresence>
 
       {/* Mini keyboard */}
       <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gray-950 border-t-2 border-cyan-500/40">
@@ -278,7 +345,7 @@ export default function FallingNotes({
       {/* Status overlay */}
       {!isPlaying && (
         <div className="absolute inset-x-4 top-3 z-20 rounded-2xl bg-black/70 px-4 py-2.5 text-center text-sm font-bold text-white backdrop-blur-md border border-white/10">
-          🎹 Press <span className="text-cyan-400">Start</span> — notes will fall toward the keyboard
+          🎹 Longer bar = longer hold · release when the glow reaches the top
         </div>
       )}
 

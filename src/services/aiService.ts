@@ -1,95 +1,77 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { useAppStore } from '../store/useAppStore';
+type ChatRole = 'user' | 'assistant';
 
-const getApiKey = () => {
-  return useAppStore.getState().settings.claudeApiKey || import.meta.env.VITE_CLAUDE_API_KEY || '';
+interface ChatMessage {
+  role: ChatRole;
+  content: string;
+}
+
+const offlineHelp = (question: string) => {
+  const text = question.toLowerCase();
+  if (text.includes('middle c')) {
+    return 'Middle C is the white key immediately to the left of the pair of two black keys nearest the center of your piano. 🎹';
+  }
+  if (text.includes('falling note')) {
+    return 'Follow each falling bar to the glowing line. Press when its bottom reaches the line, then hold until the bright fill reaches the top of the bar.';
+  }
+  if (text.includes('midi')) {
+    return 'Connect your MIDI keyboard before opening a lesson, allow MIDI access in the browser, and then press Start. Chrome-based browsers provide the best WebMIDI support.';
+  }
+  if (text.includes('upload') || text.includes('custom song')) {
+    return 'Open **Library → My Music** and upload a licensed MusicXML or MIDI file. MusicXML usually gives Pianio the best rhythm and note-duration information.';
+  }
+  if (text.includes('finger')) {
+    return 'Finger numbers are: **1 thumb, 2 index, 3 middle, 4 ring, 5 pinky**. The lesson shows which hand to use.';
+  }
+  if (text.includes('wait for me') || text.includes('practice')) {
+    return 'Turn on **Wait for me** in Practice Settings. Pianio will pause at each note until you play the correct key.';
+  }
+  return 'My online piano brain is temporarily unavailable. I can still help with falling notes, MIDI keyboards, finger numbers, practice mode, Middle C, and uploading songs.';
 };
 
-const SYSTEM_INSTRUCTION = `You are Pianio Bot, the incredibly helpful, encouraging, and highly knowledgeable AI assistant built directly into the Pianio app. Your job is twofold:
-1. Act as the ultimate user manual for the Pianio app.
-2. Act as an expert piano teacher for any musical questions, ranging from absolute beginner to advanced theory.
-
-### About the Pianio App:
-- It is a piano learning app designed primarily for kids (but usable by adults), optimized for iPad in landscape mode.
-- It connects to physical MIDI keyboards via WebMIDI, but also has a touchscreen piano interface.
-- **Home Page**: Shows progress, streaks, and allows switching user profiles.
-- **Song Library**: Where users select a song to learn. They can filter by category, difficulty, or quest track.
-- **Practice Modes** (inside the Lesson Player):
-  - **Wait for me**: The app pauses the song and waits until the user presses the correct key before moving to the next note.
-  - **Use Microphone**: The app uses the device microphone for pitch detection to hear an acoustic piano if the user doesn't have a MIDI keyboard.
-  - **Show finger**: Shows the recommended finger number (1=Thumb, 2=Index, 3=Middle, 4=Ring, 5=Pinky) and hand (Left/Right) for the current note.
-  - **Show sheet music**: Shows a standard grand staff instead of falling notes.
-- **Falling Notes**: A visual representation of upcoming notes dropping toward the piano keys, similar to Synthesia.
-- **Free Play Mode**: A page to just play the piano, explore sounds, and record melodies.
-- **Adding Custom Songs**: Users can't add MP3s directly to generate lessons yet. They can ask a grown-up to upload a MIDI or JSON lesson file in the app.
-
-### Your Personality & Tone:
-- You are **SUPER playful, fun, and energetic**! You act like a cheerful mascot who believes piano is the most fun thing in the world.
-- You use emojis constantly and naturally (🎹, 🎶, 🚀, ✨, etc.).
-- When explaining music theory, use fun analogies (like pizza slices for fractions, or jumping frogs for intervals). Keep it incredibly simple if the user seems like a beginner.
-- Never be boring or overly formal. You are the ultimate hype-bot!
-- Never say you can't help with piano—you are an expert.
-- Keep responses concise and easy to read. Use bullet points or bold text for emphasis.
-
-If a user asks how to do something in the app, give them clear, step-by-step instructions based on the features above.`;
-
 class AIService {
-  private anthropic: Anthropic | null = null;
-  private history: Anthropic.MessageParam[] = [];
+  private history: ChatMessage[] = [];
 
   initializeChat() {
-    const key = getApiKey();
-    if (!key) {
-      console.error('Claude API key is missing. Please add VITE_CLAUDE_API_KEY to your environment variables or app settings.');
-      return;
-    }
-
-    try {
-      this.anthropic = new Anthropic({
-        apiKey: key,
-        dangerouslyAllowBrowser: true,
-      });
-      this.history = [];
-    } catch (error) {
-      console.error('Failed to initialize AI Chat Session:', error);
-    }
+    this.history = [];
   }
 
   async sendMessage(message: string): Promise<string> {
-    const key = getApiKey();
-    if (!key) {
-      return "I'm sorry, my AI brain isn't connected right now! Ask a grown-up to add the `VITE_CLAUDE_API_KEY` to the app settings.";
-    }
-
-    if (!this.anthropic) {
-      this.initializeChat();
-    }
-
-    if (!this.anthropic) {
-      return "I ran into a problem starting up. Please try again later!";
-    }
+    const userMessage: ChatMessage = { role: 'user', content: message };
+    const messages = [...this.history, userMessage].slice(-12);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 25_000);
 
     try {
-      this.history.push({ role: 'user', content: message });
-
-      const msg = await this.anthropic.messages.create({
-        model: 'claude-3-5-haiku-20241022',
-        max_tokens: 1000,
-        temperature: 0.7,
-        system: SYSTEM_INSTRUCTION,
-        messages: this.history,
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages }),
+        signal: controller.signal,
       });
+      const payload = await response.json().catch(() => ({})) as { reply?: string; error?: string };
 
-      const text = msg.content[0].type === 'text' ? msg.content[0].text : "I couldn't generate a text response.";
-      
-      this.history.push({ role: 'assistant', content: text });
-      
-      return text;
-    } catch (error: any) {
-      console.error('AI Send Message Error:', error);
-      // Remove the last user message if there was an error
-      this.history.pop();
-      return "Oops, I got a little confused just now. Could you ask that again?";
+      if (!response.ok || !payload.reply) {
+        throw new Error(payload.error || `Pianio Bot request failed (${response.status})`);
+      }
+
+      const assistantMessage: ChatMessage = { role: 'assistant', content: payload.reply };
+      this.history = [...messages, assistantMessage].slice(-12);
+      return payload.reply;
+    } catch (error) {
+      console.error('Pianio Bot request failed:', error);
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return 'My piano brain is taking too long to answer. Please try once more in a moment! 🎹';
+      }
+      const detail = error instanceof Error ? error.message : '';
+      if (detail.includes('not configured') || detail.includes('API credits')) {
+        return offlineHelp(message);
+      }
+      if (detail.includes('busy')) {
+        return 'I am getting lots of questions right now! Please try again in a few seconds. 🎶';
+      }
+      return 'I could not reach the piano helper service just now. Please check your connection and try again.';
+    } finally {
+      window.clearTimeout(timeout);
     }
   }
 }

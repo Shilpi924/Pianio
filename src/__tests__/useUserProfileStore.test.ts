@@ -17,6 +17,7 @@ describe('useUserProfileStore', () => {
           favoriteGenres: [],
           completedLessons: [],
           totalPracticeTime: 0,
+          practiceHistory: [],
           currentStreak: 0,
           longestStreak: 0,
           level: 1,

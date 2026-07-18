@@ -17,6 +17,7 @@ const baseProfile: UserProfile = {
   favoriteGenres: ['Pop', 'Classical'],
   completedLessons: [],
   totalPracticeTime: 0,
+  practiceHistory: [],
   currentStreak: 2,
   longestStreak: 2,
   level: 1,
