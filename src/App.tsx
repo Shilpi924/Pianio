@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from './store/useAppStore';
 import { useUserProfileStore } from './store/useUserProfileStore';
 import HomePage from './pages/HomePage';
@@ -27,14 +27,22 @@ import ContentAdminPage from './pages/ContentAdminPage';
 import RewardsShopPage from './pages/RewardsShopPage';
 import ArcadePage from './pages/ArcadePage';
 import AIChatBot from './components/AIChatBot';
+import PwaBanner from './components/PwaBanner';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
 import './index.css';
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
 
 function App() {
   useCloudSync();
   const { currentView, settings, currentLesson, setCurrentView, setCurrentLesson } = useAppStore();
   const { completeOnboarding } = useUserProfileStore();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     // Apply dark mode
@@ -53,6 +61,33 @@ function App() {
     const normalizedVol = (rawVol > 0 && rawVol <= 1) ? rawVol * 100 : rawVol;
     audioService.setVolume(normalizedVol / 100);
   }, [settings.audioVolume]);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+  };
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -133,6 +168,11 @@ function App() {
   return (
     <div className="min-h-screen">
       {renderCurrentView()}
+      <PwaBanner
+        isOnline={isOnline}
+        canInstall={Boolean(installPrompt)}
+        onInstall={handleInstall}
+      />
       <AIChatBot />
     </div>
   );
