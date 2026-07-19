@@ -26,3 +26,8 @@ dist-ssr
 coverage/
 .vercel
 .env*
+
+# Codex scratch files
+refactor_player.py
+test_claude.ts
+test_claude_2.ts
