@@ -46,9 +46,8 @@ export async function POST(request: Request): Promise<Response> {
 
     const anthropic = new Anthropic({ apiKey, timeout: 15_000, maxRetries: 0 });
     const result = await anthropic.messages.create({
-      model: process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001',
+      model: process.env.CLAUDE_MODEL || 'claude-opus-4-8',
       max_tokens: 600,
-      temperature: 0.5,
       system: SYSTEM_INSTRUCTION,
       messages,
     });
