@@ -69,6 +69,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const currentNoteIndexRef = useRef(0);
   const isPlayingRef = useRef(false);
   const advanceTimeoutRef = useRef<number | null>(null);
+  const micNoteHandlerRef = useRef<(note: string) => void>(() => undefined);
 
   const currentNote = lesson.notes[currentNoteIndex];
   const progress = ((currentNoteIndex + 1) / lesson.notes.length) * 100;
@@ -166,25 +167,6 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       midiService.removeListener(handleMIDIMessage);
     };
   }, [isAudioInitialized]);
-
-  useEffect(() => {
-    if (isPlaying && useMicrophone) {
-      pitchDetectionService.start((note) => {
-        handleNotePlayed(note);
-      }).catch(err => {
-        console.error('Failed to start pitch detection', err);
-        setMascotMood('thinking');
-        setMascotMessage('Microphone access failed. Switch Lesson Input to MIDI in Settings and try again.');
-      });
-    } else {
-      pitchDetectionService.stop();
-    }
-    
-    return () => {
-      pitchDetectionService.stop();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, useMicrophone]);
 
   useEffect(() => {
     return () => {
@@ -629,6 +611,28 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     },
     [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, isPreviewingSong, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo, useMicrophone]
   );
+
+  useEffect(() => {
+    micNoteHandlerRef.current = handleNotePlayed;
+  }, [handleNotePlayed]);
+
+  useEffect(() => {
+    if (isPlaying && useMicrophone) {
+      pitchDetectionService.start((note) => {
+        micNoteHandlerRef.current(note);
+      }).catch(err => {
+        console.error('Failed to start pitch detection', err);
+        setMascotMood('thinking');
+        setMascotMessage('Microphone access failed. Switch Lesson Input to MIDI in Settings and try again.');
+      });
+    } else {
+      pitchDetectionService.stop();
+    }
+
+    return () => {
+      pitchDetectionService.stop();
+    };
+  }, [isPlaying, useMicrophone]);
 
   const adjustTempo = (delta: number) => {
     setTempo((current) => Math.max(40, Math.min(200, current + delta)));
