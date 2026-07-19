@@ -67,6 +67,8 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const previewStartedAtRef = useRef<number | null>(null);
   const previewLastPlayedIndexRef = useRef(-1);
   const currentNoteIndexRef = useRef(0);
+  const isPlayingRef = useRef(false);
+  const advanceTimeoutRef = useRef<number | null>(null);
 
   const currentNote = lesson.notes[currentNoteIndex];
   const progress = ((currentNoteIndex + 1) / lesson.notes.length) * 100;
@@ -100,6 +102,17 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   useEffect(() => {
     currentNoteIndexRef.current = currentNoteIndex;
   }, [currentNoteIndex]);
+
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  const clearAdvanceTimeout = useCallback(() => {
+    if (advanceTimeoutRef.current !== null) {
+      window.clearTimeout(advanceTimeoutRef.current);
+      advanceTimeoutRef.current = null;
+    }
+  }, []);
   const sectionMarkers = useMemo(() => {
     if (lesson.id !== 'wellerman' || lesson.notes.length < 65) return [];
     const markers: Array<{ index: number; label: string }> = [{ index: 0, label: 'Verse 1' }];
@@ -172,9 +185,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      clearAdvanceTimeout();
       audioService.stopAllNotes();
     };
-  }, []);
+  }, [clearAdvanceTimeout]);
 
   useEffect(() => {
     if (metronomeEnabled && isPlaying) {
@@ -320,6 +334,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     audioService.stopAllNotes();
     previewStartedAtRef.current = null;
     previewLastPlayedIndexRef.current = -1;
+    clearAdvanceTimeout();
     setIsPreviewingSong(false);
     if (resetPosition) {
       setTempo(lesson.tempo);
@@ -347,6 +362,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     if (isPreviewingSong) {
       stopSongPreview(true);
     }
+    clearAdvanceTimeout();
     await ensureAudio();
     if (useMicrophone) {
       setIsAdaptiveTraining(false);
@@ -385,7 +401,9 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         audioService.startNote(playedNote);
       }
 
-      if (playedNote === currentNote.note) {
+      const holdDurationMs = Math.max(0, (60 / tempo) * 1000 * currentNote.duration);
+
+      const advanceCorrectNote = () => {
         recordNotePlayed(true);
         const timeDiff = Date.now() - noteStartTime;
         const expectedTime = (60 / tempo) * 1000;
@@ -518,6 +536,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
             frame();
           }
 
+
           setShowLevelUp(true);
           updateLessonProgress(lesson.id, {
             lessonId: lesson.id,
@@ -534,7 +553,28 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           }
           onComplete?.();
         }
+      };
+
+      if (playedNote === currentNote.note) {
+        if (useMicrophone) {
+          clearAdvanceTimeout();
+          const holdMs = Math.max(0, holdDurationMs - (Date.now() - noteStartTime));
+          advanceTimeoutRef.current = window.setTimeout(() => {
+            advanceTimeoutRef.current = null;
+            if (!isPlayingRef.current) return;
+            if (currentNoteIndexRef.current !== currentNoteIndex) return;
+            advanceCorrectNote();
+          }, Math.max(holdMs, 120));
+          setMascotMood('happy');
+          setMascotMessage(`Hold ${currentNote.note} until the bar finishes.`);
+          return;
+        }
+
+        advanceCorrectNote();
       } else {
+        if (useMicrophone) {
+          clearAdvanceTimeout();
+        }
         recordNotePlayed(false);
         setCombo(0);
         
