@@ -25,7 +25,12 @@ class AudioService {
   private volume = 0.7;
 
   async initialize(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {
+      if (Tone.context.state !== 'running') {
+        await Tone.start();
+      }
+      return;
+    }
 
     // MUST call Tone.start() inside a user-gesture handler
     await Tone.start();
