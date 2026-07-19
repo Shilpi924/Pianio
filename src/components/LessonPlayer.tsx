@@ -345,6 +345,11 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   };
 
   const previewSong = async () => {
+    if (useMicrophone) {
+      setMascotMood('thinking');
+      setMascotMessage('Microphone practice is listening to you, so Hear song is disabled. Switch Lesson Input to MIDI to preview the song.');
+      return;
+    }
     stopSongPreview();
     await ensureAudio();
     setTempo(PREVIEW_TEMPO_BPM);
@@ -682,7 +687,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={previewSong}
-              disabled={isPreviewingSong}
+              disabled={isPreviewingSong || useMicrophone}
               className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-emerald-600 disabled:opacity-80"
               title="Hear the song"
             >
