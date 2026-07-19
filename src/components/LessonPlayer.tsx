@@ -89,6 +89,15 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const microphoneVisible = inputMode === 'microphone' || useMicrophone;
 
   useEffect(() => {
+    if (!useMicrophone) return;
+    setIsAdaptiveTraining(false);
+    setAdaptiveTargetNotes([]);
+    setAdaptiveSuccessCount(0);
+    setOriginalTempo(lesson.tempo);
+    setMistakeStreak(0);
+  }, [lesson.tempo, useMicrophone]);
+
+  useEffect(() => {
     currentNoteIndexRef.current = currentNoteIndex;
   }, [currentNoteIndex]);
   const sectionMarkers = useMemo(() => {
@@ -339,6 +348,13 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       stopSongPreview(true);
     }
     await ensureAudio();
+    if (useMicrophone) {
+      setIsAdaptiveTraining(false);
+      setAdaptiveTargetNotes([]);
+      setAdaptiveSuccessCount(0);
+      setOriginalTempo(lesson.tempo);
+      setMistakeStreak(0);
+    }
     setIsPlaying((prev) => !prev);
     if (!isPlaying && currentNote) {
       setMascotMood('happy');
@@ -359,6 +375,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     (playedNote: string) => {
       if (!isPlaying || !currentNote) return;
       const isQuietMicPractice = useMicrophone;
+      const canUseAdaptiveTraining = !isQuietMicPractice && isAdaptiveTraining;
 
       if (practiceMode === 'hands-separate' && selectedHand !== 'both' && currentNote.hand !== selectedHand) {
         return;
@@ -431,7 +448,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
 
         setCorrectNotes((prev) => new Set(prev).add(currentNoteIndex));
 
-        if (isAdaptiveTraining) {
+        if (canUseAdaptiveTraining) {
           if (currentNoteIndex === adaptiveTargetNotes[adaptiveTargetNotes.length - 1]) {
             const newSuccessCount = adaptiveSuccessCount + 1;
             setAdaptiveSuccessCount(newSuccessCount);
@@ -523,7 +540,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         
         setMistakeStreak((prev) => {
           const nextStreak = prev + 1;
-          if (!isQuietMicPractice && nextStreak >= 3 && !isAdaptiveTraining) {
+          if (!isQuietMicPractice && nextStreak >= 3 && !canUseAdaptiveTraining) {
             setIsAdaptiveTraining(true);
             setOriginalTempo(tempo);
             setTempo(Math.max(40, Math.round(tempo * 0.7))); // Slow down by 30%
@@ -588,12 +605,12 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 md:text-2xl">{lesson.title}</h2>
             {microphoneVisible && (
-              <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-rose-600 shadow-sm dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-300">
+              <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-rose-600 shadow-sm dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-300">
                 {useMicrophone ? <Mic className="h-3.5 w-3.5 animate-pulse" /> : <MicOff className="h-3.5 w-3.5" />}
                 <span>
                   {useMicrophone
-                    ? 'Mic listening'
-                    : 'Mic selected'}
+                    ? 'Microphone is listening'
+                    : 'Microphone selected'}
                 </span>
               </div>
             )}
@@ -825,9 +842,9 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
                   : 'Auto mode is using MIDI input.'}
                 </div>
                 {microphoneVisible && (
-                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">
                     {useMicrophone ? <Mic className="h-3.5 w-3.5 animate-pulse" /> : <MicOff className="h-3.5 w-3.5" />}
-                    {useMicrophone ? 'Microphone active' : 'Microphone selected'}
+                    {useMicrophone ? 'Microphone is listening' : 'Microphone selected'}
                   </div>
                 )}
                 <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
