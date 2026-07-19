@@ -90,14 +90,27 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const useMicrophone = inputMode === 'microphone' || (inputMode === 'auto' && !midiService.isSupported());
   const microphoneVisible = inputMode === 'microphone' || useMicrophone;
 
+  const clearAdvanceTimeout = useCallback(() => {
+    if (advanceTimeoutRef.current !== null) {
+      window.clearTimeout(advanceTimeoutRef.current);
+      advanceTimeoutRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     if (!useMicrophone) return;
+    audioService.stopAllNotes();
+    setIsPreviewingSong(false);
+    setMetronomeEnabled(false);
+    previewStartedAtRef.current = null;
+    previewLastPlayedIndexRef.current = -1;
+    clearAdvanceTimeout();
     setIsAdaptiveTraining(false);
     setAdaptiveTargetNotes([]);
     setAdaptiveSuccessCount(0);
     setOriginalTempo(lesson.tempo);
     setMistakeStreak(0);
-  }, [lesson.tempo, useMicrophone]);
+  }, [clearAdvanceTimeout, lesson.tempo, useMicrophone]);
 
   useEffect(() => {
     currentNoteIndexRef.current = currentNoteIndex;
@@ -106,13 +119,6 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
-
-  const clearAdvanceTimeout = useCallback(() => {
-    if (advanceTimeoutRef.current !== null) {
-      window.clearTimeout(advanceTimeoutRef.current);
-      advanceTimeoutRef.current = null;
-    }
-  }, []);
   const sectionMarkers = useMemo(() => {
     if (lesson.id !== 'wellerman' || lesson.notes.length < 65) return [];
     const markers: Array<{ index: number; label: string }> = [{ index: 0, label: 'Verse 1' }];
@@ -368,13 +374,16 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       stopSongPreview(true);
     }
     clearAdvanceTimeout();
-    await ensureAudio();
     if (useMicrophone) {
+      audioService.stopAllNotes();
+      setMetronomeEnabled(false);
       setIsAdaptiveTraining(false);
       setAdaptiveTargetNotes([]);
       setAdaptiveSuccessCount(0);
       setOriginalTempo(lesson.tempo);
       setMistakeStreak(0);
+    } else {
+      await ensureAudio();
     }
     setIsPlaying((prev) => !prev);
     if (!isPlaying && currentNote) {
