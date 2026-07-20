@@ -70,6 +70,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const isPlayingRef = useRef(false);
   const advanceTimeoutRef = useRef<number | null>(null);
   const micNoteHandlerRef = useRef<(note: string) => void>(() => undefined);
+  const prevUseMicrophoneRef = useRef(false);
 
   const currentNote = lesson.notes[currentNoteIndex];
   const progress = ((currentNoteIndex + 1) / lesson.notes.length) * 100;
@@ -99,6 +100,9 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   }, []);
 
   useEffect(() => {
+    if (useMicrophone === prevUseMicrophoneRef.current) return;
+    prevUseMicrophoneRef.current = useMicrophone;
+    
     if (!useMicrophone) return;
     audioService.stopAllNotes();
     setIsPreviewingSong(false);
