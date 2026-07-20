@@ -13,8 +13,8 @@ class PitchDetectionService {
   private animationFrameId: number | null = null;
   private callback: PitchCallback | null = null;
   private sessionId: number = 0;
-  private bufferSize: number = 2048;
-  private buffer: Float32Array<ArrayBuffer> = new Float32Array(2048);
+  private bufferSize: number = 4096;
+  private buffer: Float32Array<ArrayBuffer> = new Float32Array(4096);
   private sampleRate: number = 44100;
   
   // Note frequency data
@@ -34,10 +34,13 @@ class PitchDetectionService {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.sampleRate = this.audioContext.sampleRate;
       
+      // Request microphone with optimized settings for pitch detection
       const stream = await navigator.mediaDevices.getUserMedia({ audio: {
         echoCancellation: false,
         autoGainControl: false,
-        noiseSuppression: false
+        noiseSuppression: false,
+        channelCount: 1,
+        sampleRate: this.sampleRate
       } });
 
       if (activeSessionId !== this.sessionId) {
@@ -49,6 +52,9 @@ class PitchDetectionService {
       this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
       this.analyzer = this.audioContext.createAnalyser();
       this.analyzer.fftSize = this.bufferSize;
+      this.analyzer.smoothingTimeConstant = 0.1;
+      this.analyzer.minDecibels = -100;
+      this.analyzer.maxDecibels = -30;
       
       this.mediaStreamSource.connect(this.analyzer);
       this.isRunning = true;
@@ -96,10 +102,10 @@ class PitchDetectionService {
     if (frequency !== -1) {
       const noteName = this.frequencyToNote(frequency);
       
-      // Debounce logic: only trigger if we consistently detect the same note
+      // Improved debounce logic: trigger faster for better responsiveness
       if (noteName === this.lastDetectedNote) {
         this.noteHoldCounter++;
-        if (this.noteHoldCounter === 2 && this.callback) { // trigger on the 3rd consistent frame
+        if (this.noteHoldCounter === 1 && this.callback) { // trigger on the 2nd consistent frame
           this.callback(noteName, frequency);
         }
       } else {
@@ -123,7 +129,7 @@ class PitchDetectionService {
       rms += val * val;
     }
     rms = Math.sqrt(rms / size);
-    if (rms < 0.01) return -1; // Not enough signal
+    if (rms < 0.02) return -1; // Increased threshold to filter out weak signals
 
     let r1 = 0, r2 = size - 1, thres = 0.2;
     for (let i = 0; i < size / 2; i++)

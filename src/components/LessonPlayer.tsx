@@ -5,6 +5,7 @@ import PianoKeyboard from './PianoKeyboard';
 import FingerHint from './FingerHint';
 import FallingNotes from './FallingNotes';
 import SheetMusic from './SheetMusic';
+import HandPlacementGuide from './HandPlacementGuide';
 import confetti from 'canvas-confetti';
 
 import type { Lesson, PracticeMode } from '../types';
@@ -45,6 +46,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [showSettings, setShowSettings] = useState(false);
   const [waitModeEnabled, setWaitModeEnabled] = useState(true);
   const [showGhostHand, setShowGhostHand] = useState(true);
+  const [showHandPlacementGuide, setShowHandPlacementGuide] = useState(true);
   const [currentTime, setCurrentTime] = useState(-2);
   const [noteStartTime, setNoteStartTime] = useState(0);
   const [, setTimingFeedback] = useState<'perfect' | 'good' | 'early' | 'late' | null>(null);
@@ -920,6 +922,18 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* Hand Placement Guide */}
+      {showHandPlacementGuide && (
+        <HandPlacementGuide
+          lesson={lesson}
+          onClose={() => setShowHandPlacementGuide(false)}
+          onStart={() => {
+            setShowHandPlacementGuide(false);
+            togglePractice();
+          }}
+        />
       )}
     </div>
   );

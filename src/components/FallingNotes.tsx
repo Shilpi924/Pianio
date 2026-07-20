@@ -346,27 +346,13 @@ export default function FallingNotes({
               <div className="relative z-10 flex flex-col items-center justify-center px-1 text-center">
                 <span
                   className="leading-none drop-shadow"
-                  style={{ fontSize: fn.isShort ? 9 : fn.heightPx > 48 ? 11 : 8 }}
+                  style={{ fontSize: fn.isShort ? 10 : fn.heightPx > 48 ? 12 : 9 }}
                 >
                   {fn.displayLabel}
                 </span>
-                <span className="mt-0.5 inline-flex items-center gap-1">
-                  <span className="rounded-full bg-black/20 px-1.5 py-0.5 text-[7px] font-black leading-none text-white/90">
+                {fn.heightPx >= 35 && (
+                  <span className="mt-1 rounded-full bg-black/20 px-2 py-0.5 text-[8px] font-black leading-none text-white/90">
                     {fn.displayHand}
-                  </span>
-                  {fn.isShort ? (
-                    <span className="rounded-full bg-black/20 px-1.5 py-0.5 text-[7px] font-black leading-none text-white/90">
-                      {fn.secondsRemaining.toFixed(1)}s
-                    </span>
-                  ) : fn.heightPx >= 40 ? (
-                    <span className="rounded-full bg-black/20 px-1.5 py-0.5 text-[7px] font-black leading-none text-white/90">
-                      hold
-                    </span>
-                  ) : null}
-                </span>
-                {!fn.isShort && fn.heightPx >= 40 && (
-                  <span className="mt-1 text-[9px] font-black leading-none opacity-90">
-                    finger {fn.finger}
                   </span>
                 )}
               </div>
