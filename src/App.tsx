@@ -22,6 +22,7 @@ import VRPianoPage from './pages/VRPianoPage';
 import MultiplayerPage from './pages/MultiplayerPage';
 import TutorialsPage from './pages/TutorialsPage';
 import SongUploadPage from './pages/SongUploadPage';
+import CommunityLibraryPage from './pages/CommunityLibraryPage';
 import OnboardingPage from './pages/OnboardingPage';
 import ContentAdminPage from './pages/ContentAdminPage';
 import RewardsShopPage from './pages/RewardsShopPage';
@@ -150,6 +151,8 @@ function App() {
         return <TutorialsPage />;
       case 'song-upload':
         return <SongUploadPage />;
+      case 'community-library':
+        return <CommunityLibraryPage />;
       case 'onboarding':
         return <OnboardingPage onComplete={(data) => {
           completeOnboarding(data);

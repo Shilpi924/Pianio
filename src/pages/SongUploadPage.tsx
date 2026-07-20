@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileText, CheckCircle, XCircle, ArrowLeft, Play, Library, BadgeCheck, ShieldCheck, PencilLine } from 'lucide-react';
+import { Upload, FileText, CheckCircle, XCircle, ArrowLeft, Play, Library, BadgeCheck, ShieldCheck, PencilLine, Share2, Users } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { SongImportService } from '../services/songImportService';
+import { communityLibraryService } from '../services/communityLibraryService';
 import type { Lesson } from '../types';
 
 export default function SongUploadPage() {
@@ -12,6 +13,10 @@ export default function SongUploadPage() {
   const [parsedLesson, setParsedLesson] = useState<Lesson | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [uploaderName, setUploaderName] = useState('');
+  const [shareToCommunity, setShareToCommunity] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -102,6 +107,29 @@ export default function SongUploadPage() {
     setUploadedFile(null);
     setParsedLesson(null);
     setError(null);
+    setShareToCommunity(false);
+    setShareSuccess(false);
+  };
+
+  const handleShareToCommunity = async () => {
+    if (!parsedLesson || !uploaderName.trim()) {
+      setError('Please enter your name to share with the community');
+      return;
+    }
+
+    setIsSharing(true);
+    try {
+      await communityLibraryService.uploadToCommunity(
+        parsedLesson,
+        uploaderName.trim(),
+        [parsedLesson.category, parsedLesson.difficulty]
+      );
+      setShareSuccess(true);
+    } catch (error) {
+      setError('Failed to share to community: ' + (error as Error).message);
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -403,6 +431,83 @@ export default function SongUploadPage() {
                 >
                   Open Library
                 </motion.button>
+              </div>
+
+              {/* Community Sharing Section */}
+              <div className="mt-6 rounded-2xl border border-purple-200 bg-purple-50 p-6 dark:border-purple-900/60 dark:bg-purple-900/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500 text-white">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-purple-900 dark:text-purple-100">Share with Community</h4>
+                    <p className="text-sm text-purple-700 dark:text-purple-300">Let other users learn from your song arrangement</p>
+                  </div>
+                </div>
+
+                {!shareSuccess ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-purple-900 dark:text-purple-100 mb-2">
+                        Your Name (required for sharing)
+                      </label>
+                      <input
+                        type="text"
+                        value={uploaderName}
+                        onChange={(e) => setUploaderName(e.target.value)}
+                        placeholder="Enter your name"
+                        className="w-full rounded-xl border border-purple-300 bg-white px-4 py-2 text-purple-900 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:border-purple-700 dark:bg-purple-950 dark:text-purple-100"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="share-community"
+                        checked={shareToCommunity}
+                        onChange={(e) => setShareToCommunity(e.target.checked)}
+                        className="h-5 w-5 rounded border-purple-300 text-purple-600 focus:ring-purple-500"
+                      />
+                      <label htmlFor="share-community" className="text-sm text-purple-700 dark:text-purple-300">
+                        Share this song with the Pianio community (requires approval)
+                      </label>
+                    </div>
+
+                    {shareToCommunity && (
+                      <motion.button
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleShareToCommunity}
+                        disabled={isSharing || !uploaderName.trim()}
+                        className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 py-3 font-bold text-white shadow-lg transition-all hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {isSharing ? (
+                          <>
+                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            Sharing...
+                          </>
+                        ) : (
+                          <>
+                            <Share2 className="h-5 w-5" />
+                            Share to Community
+                          </>
+                        )}
+                      </motion.button>
+                    )}
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="rounded-xl bg-emerald-100 p-4 text-center dark:bg-emerald-900/30"
+                  >
+                    <CheckCircle className="h-8 w-8 mx-auto mb-2 text-emerald-600 dark:text-emerald-400" />
+                    <p className="font-bold text-emerald-900 dark:text-emerald-100">Shared Successfully!</p>
+                    <p className="text-sm text-emerald-700 dark:text-emerald-300">Your song is pending approval and will be available to the community soon.</p>
+                  </motion.div>
+                )}
               </div>
             </div>
 

@@ -118,7 +118,7 @@ export default function HomePage() {
         </section>
 
         {/* Secondary Options */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <SecondaryCard
             icon={Gamepad2}
             title={t('home.arcade')}
@@ -132,6 +132,13 @@ export default function HomePage() {
             subtitle={t('home.rewardsDesc')}
             color="from-amber-400 to-orange-500"
             onClick={() => setCurrentView('rewards-shop')}
+          />
+          <SecondaryCard
+            icon={Users}
+            title="Community Library"
+            subtitle="Browse songs shared by users"
+            color="from-purple-400 to-violet-500"
+            onClick={() => setCurrentView('community-library')}
           />
           <SecondaryCard
             icon={Play}
