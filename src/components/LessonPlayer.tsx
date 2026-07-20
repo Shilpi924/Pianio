@@ -7,6 +7,7 @@ import FallingNotes from './FallingNotes';
 import SheetMusic from './SheetMusic';
 import HandPlacementGuide from './HandPlacementGuide';
 import confetti from 'canvas-confetti';
+import { useKeyboardPiano } from '../hooks/useKeyboardPiano';
 
 import type { Lesson, PracticeMode } from '../types';
 import { audioService } from '../services/audioService';
@@ -93,6 +94,14 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const inputMode = settings.inputMode ?? 'midi';
   const useMicrophone = inputMode === 'microphone' || (inputMode === 'auto' && !midiService.isSupported());
   const microphoneVisible = inputMode === 'microphone' || useMicrophone;
+
+  // Computer keyboard support (for iPad and desktop)
+  const useComputerKeyboard = !useMicrophone;
+  useKeyboardPiano(
+    useComputerKeyboard && isPlaying,
+    (note) => handleNotePlayed(note),
+    (note) => handleNoteReleased(note)
+  );
 
   const clearAdvanceTimeout = useCallback(() => {
     if (advanceTimeoutRef.current !== null) {
