@@ -2,6 +2,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SettingsPage from '../pages/SettingsPage';
 import { useAppStore } from '../store/useAppStore';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../i18n';
 
 vi.mock('../store/useAppStore', () => ({
   useAppStore: vi.fn(),
@@ -10,11 +12,13 @@ vi.mock('../store/useAppStore', () => ({
 describe('SettingsPage Component', () => {
   const setCurrentViewMock = vi.fn();
   const updateSettingsMock = vi.fn();
+  const goBackMock = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     (useAppStore as any).mockReturnValue({
       setCurrentView: setCurrentViewMock,
+      goBack: goBackMock,
       settings: {
         darkMode: false,
         showKeyboardLabels: true,
@@ -28,8 +32,16 @@ describe('SettingsPage Component', () => {
     });
   });
 
+  const renderWithI18n = (component: React.ReactElement) => {
+    return render(
+      <I18nextProvider i18n={i18n}>
+        {component}
+      </I18nextProvider>
+    );
+  };
+
   it('renders settings categories after switching tabs', () => {
-    render(<SettingsPage />);
+    renderWithI18n(<SettingsPage />);
     // Switch to App Preferences tab
     fireEvent.click(screen.getByText('App Preferences'));
     
@@ -39,7 +51,7 @@ describe('SettingsPage Component', () => {
   });
 
   it('can toggle a boolean setting', () => {
-    render(<SettingsPage />);
+    renderWithI18n(<SettingsPage />);
     // Switch to App Preferences tab
     fireEvent.click(screen.getByText('App Preferences'));
 
@@ -53,9 +65,9 @@ describe('SettingsPage Component', () => {
   });
 
   it('navigates back to home on back button click', () => {
-    render(<SettingsPage />);
-    const backButton = screen.getByText(/Back home/i).closest('button');
+    renderWithI18n(<SettingsPage />);
+    const backButton = screen.getByRole('button', { name: /back/i }).closest('button');
     fireEvent.click(backButton!);
-    expect(setCurrentViewMock).toHaveBeenCalledWith('home');
+    expect(goBackMock).toHaveBeenCalled();
   });
 });

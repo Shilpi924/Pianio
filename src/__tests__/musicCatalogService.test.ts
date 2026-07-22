@@ -20,13 +20,13 @@ describe('musicCatalogService', () => {
     it('includes the renamed MusicBrainz source "Pop Song Ideas"', () => {
       const mb = catalogSources.find(s => s.id === 'musicbrainz');
       expect(mb).toBeDefined();
-      expect(mb?.name).toBe('Discover Songs (MusicBrainz)');
+      expect(mb?.name).toBe('Pop Song Ideas');
     });
 
     it('includes the renamed IMSLP source "Free Classic Songs"', () => {
       const imslp = catalogSources.find(s => s.id === 'imslp');
       expect(imslp).toBeDefined();
-      expect(imslp?.name).toBe('Classical Masterpieces (IMSLP)');
+      expect(imslp?.name).toBe('Free Classic Songs');
       expect(imslp?.type).toBe('public-domain');
     });
 
@@ -45,12 +45,12 @@ describe('musicCatalogService', () => {
 
     it('IMSLP notes contain user instructions', () => {
       const imslp = catalogSources.find(s => s.id === 'imslp');
-      expect(imslp?.notes.toLowerCase()).toContain('browse imslp');
+      expect(imslp?.notes.toLowerCase()).toContain('grown-up');
     });
 
     it('MusicBrainz notes contain user instructions', () => {
       const mb = catalogSources.find(s => s.id === 'musicbrainz');
-      expect(mb?.notes.toLowerCase()).toContain('search for your favorite artist');
+      expect(mb?.notes.toLowerCase()).toContain('song ideas');
     });
   });
 

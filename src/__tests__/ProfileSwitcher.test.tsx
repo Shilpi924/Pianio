@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ProfileSwitcher from '../components/ProfileSwitcher';
 import { useUserProfileStore } from '../store/useUserProfileStore';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../i18n';
 
 describe('ProfileSwitcher', () => {
   beforeEach(() => {
@@ -36,12 +38,20 @@ describe('ProfileSwitcher', () => {
   });
 
   it('renders the active profile name', () => {
-    render(<ProfileSwitcher />);
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ProfileSwitcher />
+      </I18nextProvider>
+    );
     expect(screen.getByText('Learner')).toBeInTheDocument();
   });
 
   it('opens dropdown and allows creating a new profile', () => {
-    render(<ProfileSwitcher />);
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ProfileSwitcher />
+      </I18nextProvider>
+    );
     
     // Click the main button to open dropdown
     fireEvent.click(screen.getByText('Learner'));
