@@ -13,8 +13,7 @@ class PitchDetectionService {
   private animationFrameId: number | null = null;
   private callback: PitchCallback | null = null;
   private sessionId: number = 0;
-  private bufferSize: number = 4096;
-  private buffer: Float32Array<ArrayBuffer> = new Float32Array(4096);
+  private buffer: Float32Array<ArrayBuffer> = new Float32Array(2048);
   private sampleRate: number = 44100;
   
   // Note frequency data
@@ -34,12 +33,18 @@ class PitchDetectionService {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.sampleRate = this.audioContext.sampleRate;
       
+      // Resume AudioContext if suspended (required on iOS/Safari)
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      
       // Request microphone with optimized settings for pitch detection
       const stream = await navigator.mediaDevices.getUserMedia({ audio: {
         echoCancellation: false,
         autoGainControl: false,
         noiseSuppression: false,
         channelCount: 1,
+        // iOS Safari may not support custom sampleRate, so handle gracefully
         sampleRate: this.sampleRate
       } });
 
@@ -51,7 +56,9 @@ class PitchDetectionService {
       this.mediaStream = stream;
       this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
       this.analyzer = this.audioContext.createAnalyser();
-      this.analyzer.fftSize = this.bufferSize;
+      // Use smaller FFT for faster response on mobile/iPad
+      this.analyzer.fftSize = 2048;
+      this.buffer = new Float32Array(2048);
       this.analyzer.smoothingTimeConstant = 0.1;
       this.analyzer.minDecibels = -100;
       this.analyzer.maxDecibels = -30;
@@ -61,6 +68,10 @@ class PitchDetectionService {
       this.tick();
     } catch (err) {
       console.error("Error accessing microphone:", err);
+      // Provide more specific error message for iOS
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        console.error('Microphone permission denied. Please allow microphone access in Settings.');
+      }
       throw err;
     }
   }
@@ -102,15 +113,17 @@ class PitchDetectionService {
     if (frequency !== -1) {
       const noteName = this.frequencyToNote(frequency);
       
-      // Improved debounce logic: trigger faster for better responsiveness
+      // Improved debounce logic: trigger immediately for better responsiveness
       if (noteName === this.lastDetectedNote) {
         this.noteHoldCounter++;
-        if (this.noteHoldCounter === 1 && this.callback) { // trigger on the 2nd consistent frame
-          this.callback(noteName, frequency);
-        }
       } else {
         this.lastDetectedNote = noteName;
         this.noteHoldCounter = 0;
+      }
+      
+      // Trigger on first detection for immediate response
+      if (this.callback && this.noteHoldCounter === 0) {
+        this.callback(noteName, frequency);
       }
     } else {
       this.lastDetectedNote = null;
@@ -129,7 +142,7 @@ class PitchDetectionService {
       rms += val * val;
     }
     rms = Math.sqrt(rms / size);
-    if (rms < 0.02) return -1; // Increased threshold to filter out weak signals
+    if (rms < 0.01) return -1; // Lowered threshold for better iPad microphone sensitivity
 
     let r1 = 0, r2 = size - 1, thres = 0.2;
     for (let i = 0; i < size / 2; i++)
