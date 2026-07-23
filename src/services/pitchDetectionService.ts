@@ -4,6 +4,7 @@
 
 type PitchCallback = (noteName: string, frequency: number) => void;
 type CalibrationCallback = (isCalibrating: boolean, progress: number, threshold: number) => void;
+type AudioLevelCallback = (level: number) => void;
 
 export type CalibrationPreset = 'quiet' | 'normal' | 'noisy';
 
@@ -40,13 +41,14 @@ class PitchDetectionService {
   private calibrationDuration = 60; // frames to calibrate
   private isManualCalibration = false;
   private calibrationCallback: CalibrationCallback | null = null;
+  private audioLevelCallback: AudioLevelCallback | null = null;
   private calibrationSettings: CalibrationSettings = {
     preset: 'normal',
     duration: 60,
     sensitivity: 1.5
   };
 
-  async start(callback: PitchCallback, calibrationCallback?: CalibrationCallback) {
+  async start(callback: PitchCallback, calibrationCallback?: CalibrationCallback, audioLevelCallback?: AudioLevelCallback) {
     this.callback = callback;
     if (this.isRunning) return;
     
@@ -65,6 +67,7 @@ class PitchDetectionService {
       this.calibrationFrames = 0;
       this.isManualCalibration = false;
       this.calibrationCallback = calibrationCallback || null;
+      this.audioLevelCallback = audioLevelCallback || null;
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.sampleRate = this.audioContext.sampleRate;
       
@@ -141,6 +144,7 @@ class PitchDetectionService {
     this.isRunning = false;
     this.callback = null;
     this.calibrationCallback = null;
+    this.audioLevelCallback = null;
     this.lastDetectedNote = null;
     this.noteHoldCounter = 0;
     this.cleanup();
@@ -182,6 +186,11 @@ class PitchDetectionService {
     
     // Update adaptive threshold based on noise level
     this.updateAdaptiveThreshold(rms);
+    
+    // Send audio level to callback for UI visualization
+    if (this.audioLevelCallback) {
+      this.audioLevelCallback(rms);
+    }
     
     if (frequency !== -1) {
       const noteName = this.frequencyToNote(frequency);

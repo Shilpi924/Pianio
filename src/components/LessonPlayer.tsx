@@ -6,6 +6,7 @@ import FingerHint from './FingerHint';
 import FallingNotes from './FallingNotes';
 import SheetMusic from './SheetMusic';
 import HandPlacementGuide from './HandPlacementGuide';
+import { MicrophoneFeedback } from './MicrophoneFeedback';
 import confetti from 'canvas-confetti';
 import { useKeyboardPiano } from '../hooks/useKeyboardPiano';
 
@@ -63,6 +64,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const [adaptiveTargetNotes, setAdaptiveTargetNotes] = useState<number[]>([]);
   const [adaptiveSuccessCount, setAdaptiveSuccessCount] = useState(0);
   const [originalTempo, setOriginalTempo] = useState(lesson.tempo);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [isCalibrating, setIsCalibrating] = useState(false);
+  const [calibrationProgress, setCalibrationProgress] = useState(0);
+  const [currentThreshold, setCurrentThreshold] = useState(0.015);
   const metronomeRef = useRef<number | null>(null);
   const practiceStartedAtRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -633,19 +638,33 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
 
   useEffect(() => {
     if (isPlaying && useMicrophone) {
-      pitchDetectionService.start((note) => {
-        micNoteHandlerRef.current(note);
-      }).catch(err => {
+      pitchDetectionService.start(
+        (note) => {
+          micNoteHandlerRef.current(note);
+        },
+        (isCalibrating, progress, threshold) => {
+          setIsCalibrating(isCalibrating);
+          setCalibrationProgress(progress);
+          setCurrentThreshold(threshold);
+        },
+        (level) => {
+          setAudioLevel(level);
+        }
+      ).catch(err => {
         console.error('Failed to start pitch detection', err);
         setMascotMood('thinking');
         setMascotMessage('Microphone access failed. Switch Lesson Input to MIDI in Settings and try again.');
       });
     } else {
       pitchDetectionService.stop();
+      setAudioLevel(0);
+      setIsCalibrating(false);
     }
 
     return () => {
       pitchDetectionService.stop();
+      setAudioLevel(0);
+      setIsCalibrating(false);
     };
   }, [isPlaying, useMicrophone]);
 
@@ -904,26 +923,37 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
                 <CoachRow label="Wait for me" description="Song pauses until right key is pressed." enabled={waitModeEnabled} onToggle={() => setWaitModeEnabled(!waitModeEnabled)} />
                 <CoachRow label="Metronome" description="Play a tick sound on the beat." enabled={metronomeEnabled} onToggle={() => setMetronomeEnabled(!metronomeEnabled)} />
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50">
-                <div className="font-semibold text-gray-900 dark:text-gray-100">Lesson Input</div>
-                <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                  {inputMode === 'midi'
-                    ? 'MIDI keyboard mode is active.'
-                    : inputMode === 'microphone'
-                      ? 'Microphone pitch detection is active.'
-                      : useMicrophone
-                      ? 'Auto mode is using the microphone fallback.'
-                  : 'Auto mode is using MIDI input.'}
-                </div>
-                {microphoneVisible && (
-                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">
-                    {useMicrophone ? <Mic className="h-3.5 w-3.5 animate-pulse" /> : <MicOff className="h-3.5 w-3.5" />}
-                    {useMicrophone ? 'Microphone is listening' : 'Microphone selected'}
+                  <div className="font-semibold text-gray-900 dark:text-gray-100">Lesson Input</div>
+                  <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                    {inputMode === 'midi'
+                      ? 'MIDI keyboard mode is active.'
+                      : inputMode === 'microphone'
+                        ? 'Microphone pitch detection is active.'
+                        : useMicrophone
+                        ? 'Auto mode is using the microphone fallback.'
+                    : 'Auto mode is using MIDI input.'}
                   </div>
-                )}
-                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Change this in Settings if the input you want is not working.
+                  {microphoneVisible && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">
+                      {useMicrophone ? <Mic className="h-3.5 w-3.5 animate-pulse" /> : <MicOff className="h-3.5 w-3.5" />}
+                      {useMicrophone ? 'Microphone is listening' : 'Microphone selected'}
+                    </div>
+                  )}
+                  {microphoneVisible && useMicrophone && (
+                    <div className="mt-4">
+                      <MicrophoneFeedback
+                        isActive={isPlaying}
+                        audioLevel={audioLevel}
+                        threshold={currentThreshold}
+                        isCalibrating={isCalibrating}
+                        calibrationProgress={calibrationProgress}
+                      />
+                    </div>
+                  )}
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Change this in Settings if the input you want is not working.
+                  </div>
                 </div>
-              </div>
                 <CoachRow label="Show Finger Guide" description="Shows finger numbers next to target." enabled={showGhostHand} onToggle={() => setShowGhostHand(!showGhostHand)} />
                 <CoachRow label="Show Sheet Music" description="Display standard notation." enabled={showSheetMusic} onToggle={() => setShowSheetMusic(!showSheetMusic)} />
               </div>
