@@ -650,7 +650,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
         (level) => {
           setAudioLevel(level);
         }
-      ).catch(err => {
+      ).catch((err: Error) => {
         console.error('Failed to start pitch detection', err);
         setMascotMood('thinking');
         setMascotMessage('Microphone access failed. Switch Lesson Input to MIDI in Settings and try again.');

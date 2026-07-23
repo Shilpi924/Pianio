@@ -47,12 +47,17 @@ class PitchDetectionService {
     duration: 60,
     sensitivity: 1.5
   };
+  private retryCount = 0;
+  private readonly maxRetries = 3;
+  private readonly retryDelay = 1000; // 1 second initial delay
+  private retryTimeoutId: number | null = null;
 
-  async start(callback: PitchCallback, calibrationCallback?: CalibrationCallback, audioLevelCallback?: AudioLevelCallback) {
+  async start(callback: PitchCallback, calibrationCallback?: CalibrationCallback, audioLevelCallback?: AudioLevelCallback): Promise<void> {
     this.callback = callback;
     if (this.isRunning) return;
     
     const activeSessionId = ++this.sessionId;
+    this.retryCount = 0;
 
     try {
       // Check browser support
@@ -106,13 +111,38 @@ class PitchDetectionService {
       this.tick();
     } catch (err) {
       console.error("Error accessing microphone:", err);
+      
       // Provide more specific error message for iOS
       if (err instanceof Error && err.name === 'NotAllowedError') {
         console.error('Microphone permission denied. Please allow microphone access in Settings.');
+        this.cleanup();
+        throw err;
       }
-      // Cleanup on failure
-      this.cleanup();
-      throw err;
+      
+      // Retry logic for recoverable errors
+      if (this.retryCount < this.maxRetries) {
+        this.retryCount++;
+        const delay = this.retryDelay * Math.pow(2, this.retryCount - 1); // Exponential backoff
+        console.log(`Retrying microphone access (${this.retryCount}/${this.maxRetries}) in ${delay}ms...`);
+        
+        await new Promise((resolve) => {
+          this.retryTimeoutId = window.setTimeout(resolve, delay);
+        });
+        
+        // Check if session is still valid
+        if (activeSessionId !== this.sessionId) {
+          console.log('Session changed during retry, aborting');
+          this.cleanup();
+          return;
+        }
+        
+        // Retry the start process
+        return this.start(callback, calibrationCallback, audioLevelCallback);
+      } else {
+        console.error('Max retries reached, giving up on microphone access');
+        this.cleanup();
+        throw err;
+      }
     }
   }
 
@@ -120,6 +150,10 @@ class PitchDetectionService {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
+    }
+    if (this.retryTimeoutId !== null) {
+      clearTimeout(this.retryTimeoutId);
+      this.retryTimeoutId = null;
     }
     if (this.mediaStreamSource) {
       this.mediaStreamSource.disconnect();
@@ -147,6 +181,11 @@ class PitchDetectionService {
     this.audioLevelCallback = null;
     this.lastDetectedNote = null;
     this.noteHoldCounter = 0;
+    this.retryCount = 0;
+    if (this.retryTimeoutId !== null) {
+      clearTimeout(this.retryTimeoutId);
+      this.retryTimeoutId = null;
+    }
     this.cleanup();
   }
 
