@@ -13,7 +13,7 @@ class PitchDetectionService {
   private animationFrameId: number | null = null;
   private callback: PitchCallback | null = null;
   private sessionId: number = 0;
-  private buffer: Float32Array<ArrayBuffer> = new Float32Array(2048);
+  private buffer!: Float32Array;
   private sampleRate: number = 44100;
   
   // Note frequency data
@@ -28,6 +28,11 @@ class PitchDetectionService {
     const activeSessionId = ++this.sessionId;
 
     try {
+      // Check browser support
+      if (!window.AudioContext && !(window as any).webkitAudioContext) {
+        throw new Error('AudioContext is not supported in this browser');
+      }
+
       this.lastDetectedNote = null;
       this.noteHoldCounter = 0;
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -58,7 +63,7 @@ class PitchDetectionService {
       this.analyzer = this.audioContext.createAnalyser();
       // Use smaller FFT for faster response on mobile/iPad
       this.analyzer.fftSize = 2048;
-      this.buffer = new Float32Array(2048);
+      this.buffer = new Float32Array(this.analyzer.frequencyBinCount);
       this.analyzer.smoothingTimeConstant = 0.1;
       this.analyzer.minDecibels = -100;
       this.analyzer.maxDecibels = -30;
@@ -72,16 +77,13 @@ class PitchDetectionService {
       if (err instanceof Error && err.name === 'NotAllowedError') {
         console.error('Microphone permission denied. Please allow microphone access in Settings.');
       }
+      // Cleanup on failure
+      this.cleanup();
       throw err;
     }
   }
 
-  stop() {
-    this.sessionId++;
-    this.isRunning = false;
-    this.callback = null;
-    this.lastDetectedNote = null;
-    this.noteHoldCounter = 0;
+  private cleanup() {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
@@ -104,26 +106,33 @@ class PitchDetectionService {
     }
   }
 
+  stop() {
+    this.sessionId++;
+    this.isRunning = false;
+    this.callback = null;
+    this.lastDetectedNote = null;
+    this.noteHoldCounter = 0;
+    this.cleanup();
+  }
+
   private tick = () => {
     if (!this.isRunning || !this.analyzer) return;
 
-    this.analyzer.getFloatTimeDomainData(this.buffer);
+    this.analyzer.getFloatTimeDomainData(this.buffer as any);
     const frequency = this.autoCorrelate(this.buffer, this.sampleRate);
     
     if (frequency !== -1) {
       const noteName = this.frequencyToNote(frequency);
       
-      // Improved debounce logic: trigger immediately for better responsiveness
-      if (noteName === this.lastDetectedNote) {
-        this.noteHoldCounter++;
-      } else {
+      // Debounce logic: trigger on first detection of each note
+      if (noteName !== this.lastDetectedNote) {
         this.lastDetectedNote = noteName;
         this.noteHoldCounter = 0;
-      }
-      
-      // Trigger on first detection for immediate response
-      if (this.callback && this.noteHoldCounter === 0) {
-        this.callback(noteName, frequency);
+        if (this.callback) {
+          this.callback(noteName, frequency);
+        }
+      } else {
+        this.noteHoldCounter++;
       }
     } else {
       this.lastDetectedNote = null;
@@ -142,7 +151,7 @@ class PitchDetectionService {
       rms += val * val;
     }
     rms = Math.sqrt(rms / size);
-    if (rms < 0.01) return -1; // Lowered threshold for better iPad microphone sensitivity
+    if (rms < 0.015) return -1; // Balanced threshold for noise filtering vs sensitivity
 
     let r1 = 0, r2 = size - 1, thres = 0.2;
     for (let i = 0; i < size / 2; i++)
@@ -167,14 +176,22 @@ class PitchDetectionService {
       }
     }
     let T0 = maxpos;
+    if (T0 <= 0) return -1; // Prevent division by zero
 
-    // parabolic interpolation
-    let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
-    let a = (x1 + x3 - 2 * x2) / 2;
-    let b = (x3 - x1) / 2;
-    if (a) T0 = T0 - b / (2 * a);
+    // parabolic interpolation with bounds checking
+    if (T0 > 0 && T0 < size - 1) {
+      const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+      const a = (x1 + x3 - 2 * x2) / 2;
+      const b = (x3 - x1) / 2;
+      if (a !== 0) T0 = T0 - b / (2 * a);
+    }
 
-    return sampleRate / T0;
+    const frequency = sampleRate / T0;
+    
+    // Validate frequency is in piano range (C2-C8: ~65Hz-4186Hz)
+    if (frequency < 65 || frequency > 4200) return -1;
+    
+    return frequency;
   }
 
   private frequencyToNote(frequency: number): string {
