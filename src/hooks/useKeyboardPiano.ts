@@ -41,6 +41,8 @@ export function useKeyboardPiano(
   );
 
   useEffect(() => {
+    if (!enabled) return;
+    
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     
@@ -48,7 +50,7 @@ export function useKeyboardPiano(
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [handleKeyDown, handleKeyUp]);
+  }, [enabled, handleKeyDown, handleKeyUp]);
 
   return { activeComputerKeys };
 }

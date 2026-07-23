@@ -15,6 +15,11 @@ class MIDIService {
   private onStateChangeCallback: ((devices: MIDIDevice[]) => void) | null = null;
 
   async initialize(): Promise<boolean> {
+    if (!this.isSupported()) {
+      console.error('Web MIDI API is not supported in this browser');
+      return false;
+    }
+
     try {
       this.midiAccess = await navigator.requestMIDIAccess();
       
@@ -28,6 +33,7 @@ class MIDIService {
       return true;
     } catch (error) {
       console.error('Failed to initialize MIDI:', error);
+      this.cleanup();
       return false;
     }
   }
@@ -57,15 +63,17 @@ class MIDIService {
   }
 
   private handleMIDIMessage(event: any): void {
+    if (!event.data || event.data.length < 3) return;
+    
     const [status, note, velocity] = event.data;
     const isNoteOn = status >= 144 && status < 160;
     const isNoteOff = status >= 128 && status < 144;
 
     if (isNoteOn || isNoteOff) {
       const message: MIDIMessage = {
-        note,
-        velocity: isNoteOn ? velocity : 0,
-        timestamp: event.timeStamp,
+        note: note ?? 0,
+        velocity: isNoteOn ? (velocity ?? 0) : 0,
+        timestamp: event.timeStamp ?? Date.now(),
       };
 
       this.listeners.forEach((listener) => listener(message));
@@ -115,6 +123,31 @@ class MIDIService {
 
   onStateChange(callback: (devices: MIDIDevice[]) => void): void {
     this.onStateChangeCallback = callback;
+  }
+
+  private cleanup(): void {
+    this.listeners.clear();
+    this.inputs.forEach((input) => {
+      try {
+        input.removeEventListener('midimessage', (event: any) => this.handleMIDIMessage(event));
+      } catch (e) {
+        console.error('Error removing MIDI listener:', e);
+      }
+    });
+    this.inputs.clear();
+    if (this.midiAccess) {
+      try {
+        this.midiAccess.removeEventListener('statechange', () => this.handleStateChange());
+      } catch (e) {
+        console.error('Error removing state change listener:', e);
+      }
+    }
+    this.midiAccess = null;
+  }
+
+  dispose(): void {
+    this.cleanup();
+    this.onStateChangeCallback = null;
   }
 
   isSupported(): boolean {

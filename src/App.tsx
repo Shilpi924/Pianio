@@ -1,38 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo, lazy, Suspense } from 'react';
 import { useAppStore } from './store/useAppStore';
 import { useUserProfileStore } from './store/useUserProfileStore';
 import HomePage from './pages/HomePage';
-import FreePlayPage from './pages/FreePlayPage';
-import LessonLibraryPage from './pages/LessonLibraryPage';
 import LessonPlayer from './components/LessonPlayer';
-import StatisticsPage from './pages/StatisticsPage';
-import SettingsPage from './pages/SettingsPage';
-import LessonCreatorPage from './pages/LessonCreatorPage';
-import ChordTrainerPage from './pages/ChordTrainerPage';
-import ScalesTrainerPage from './pages/ScalesTrainerPage';
-import CurriculumPage from './pages/CurriculumPage';
-import EarTrainingPage from './pages/EarTrainingPage';
-import NoteNamingPage from './pages/NoteNamingPage';
-import SightReadingPage from './pages/SightReadingPage';
-import HandPositioningPage from './pages/HandPositioningPage';
-import PerformanceModePage from './pages/PerformanceModePage';
-import IntervalTrainingPage from './pages/IntervalTrainingPage';
-import RhythmTrainingPage from './pages/RhythmTrainingPage';
-import VRPianoPage from './pages/VRPianoPage';
-import MultiplayerPage from './pages/MultiplayerPage';
-import TutorialsPage from './pages/TutorialsPage';
-import SongUploadPage from './pages/SongUploadPage';
-import CommunityLibraryPage from './pages/CommunityLibraryPage';
-import OnboardingPage from './pages/OnboardingPage';
-import ContentAdminPage from './pages/ContentAdminPage';
-import RewardsShopPage from './pages/RewardsShopPage';
-import ArcadePage from './pages/ArcadePage';
 import AIChatBot from './components/AIChatBot';
 import PwaBanner from './components/PwaBanner';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
 import i18n from './i18n';
 import './index.css';
+
+// Lazy load heavy pages for better performance
+const FreePlayPage = lazy(() => import('./pages/FreePlayPage'));
+const LessonLibraryPage = lazy(() => import('./pages/LessonLibraryPage'));
+const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const LessonCreatorPage = lazy(() => import('./pages/LessonCreatorPage'));
+const ChordTrainerPage = lazy(() => import('./pages/ChordTrainerPage'));
+const ScalesTrainerPage = lazy(() => import('./pages/ScalesTrainerPage'));
+const CurriculumPage = lazy(() => import('./pages/CurriculumPage'));
+const EarTrainingPage = lazy(() => import('./pages/EarTrainingPage'));
+const NoteNamingPage = lazy(() => import('./pages/NoteNamingPage'));
+const SightReadingPage = lazy(() => import('./pages/SightReadingPage'));
+const HandPositioningPage = lazy(() => import('./pages/HandPositioningPage'));
+const PerformanceModePage = lazy(() => import('./pages/PerformanceModePage'));
+const IntervalTrainingPage = lazy(() => import('./pages/IntervalTrainingPage'));
+const RhythmTrainingPage = lazy(() => import('./pages/RhythmTrainingPage'));
+const VRPianoPage = lazy(() => import('./pages/VRPianoPage'));
+const MultiplayerPage = lazy(() => import('./pages/MultiplayerPage'));
+const TutorialsPage = lazy(() => import('./pages/TutorialsPage'));
+const SongUploadPage = lazy(() => import('./pages/SongUploadPage'));
+const CommunityLibraryPage = lazy(() => import('./pages/CommunityLibraryPage'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+const ContentAdminPage = lazy(() => import('./pages/ContentAdminPage'));
+const RewardsShopPage = lazy(() => import('./pages/RewardsShopPage'));
+const ArcadePage = lazy(() => import('./pages/ArcadePage'));
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -100,6 +102,12 @@ function App() {
   };
 
   const renderCurrentView = () => {
+    const LoadingFallback = () => (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+
     switch (currentView) {
       case 'home':
         return <HomePage />;
@@ -121,57 +129,151 @@ function App() {
             </div>
           </div>
         ) : (
-          <LessonLibraryPage />
+          <Suspense fallback={<LoadingFallback />}>
+            <LessonLibraryPage />
+          </Suspense>
         );
       case 'practice':
-        return <ChordTrainerPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <ChordTrainerPage />
+          </Suspense>
+        );
       case 'scales':
-        return <ScalesTrainerPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <ScalesTrainerPage />
+          </Suspense>
+        );
       case 'curriculum':
-        return <CurriculumPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <CurriculumPage />
+          </Suspense>
+        );
       case 'ear-training':
-        return <EarTrainingPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <EarTrainingPage />
+          </Suspense>
+        );
       case 'note-naming':
-        return <NoteNamingPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <NoteNamingPage />
+          </Suspense>
+        );
       case 'sight-reading':
-        return <SightReadingPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <SightReadingPage />
+          </Suspense>
+        );
       case 'hand-positioning':
-        return <HandPositioningPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <HandPositioningPage />
+          </Suspense>
+        );
       case 'performance':
-        return <PerformanceModePage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <PerformanceModePage />
+          </Suspense>
+        );
       case 'interval-training':
-        return <IntervalTrainingPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <IntervalTrainingPage />
+          </Suspense>
+        );
       case 'rhythm-training':
-        return <RhythmTrainingPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <RhythmTrainingPage />
+          </Suspense>
+        );
       case 'vr-piano':
-        return <VRPianoPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <VRPianoPage />
+          </Suspense>
+        );
       case 'multiplayer':
-        return <MultiplayerPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <MultiplayerPage />
+          </Suspense>
+        );
       case 'tutorials':
-        return <TutorialsPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <TutorialsPage />
+          </Suspense>
+        );
       case 'song-upload':
-        return <SongUploadPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <SongUploadPage />
+          </Suspense>
+        );
       case 'community-library':
-        return <CommunityLibraryPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <CommunityLibraryPage />
+          </Suspense>
+        );
       case 'onboarding':
-        return <OnboardingPage onComplete={(data) => {
-          completeOnboarding(data);
-          setCurrentView('home');
-        }} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <OnboardingPage onComplete={(data) => {
+              completeOnboarding(data);
+              setCurrentView('home');
+            }} />
+          </Suspense>
+        );
       case 'free-play':
-        return <FreePlayPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <FreePlayPage />
+          </Suspense>
+        );
       case 'statistics':
-        return <StatisticsPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <StatisticsPage />
+          </Suspense>
+        );
       case 'settings':
-        return <SettingsPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <SettingsPage />
+          </Suspense>
+        );
       case 'lesson-creator':
-        return <LessonCreatorPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <LessonCreatorPage />
+          </Suspense>
+        );
       case 'admin':
-        return <ContentAdminPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <ContentAdminPage />
+          </Suspense>
+        );
       case 'rewards-shop':
-        return <RewardsShopPage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <RewardsShopPage />
+          </Suspense>
+        );
       case 'arcade':
-        return <ArcadePage />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <ArcadePage />
+          </Suspense>
+        );
       default:
         return <HomePage />;
     }
@@ -190,4 +292,4 @@ function App() {
   );
 }
 
-export default App;
+export default memo(App);

@@ -16,7 +16,15 @@ class BeatService {
   async initialize() {
     if (this.isInitialized) return;
     
-    await Tone.start();
+    try {
+      await Tone.start();
+      if (Tone.context.state !== 'running') {
+        await Tone.context.resume();
+      }
+    } catch (error) {
+      console.error('Failed to initialize Tone.js:', error);
+      return;
+    }
 
     this.masterVolume = new Tone.Volume(-6).toDestination(); // Start slightly quieter
 
@@ -142,6 +150,45 @@ class BeatService {
 
   stop() {
     this.playBeat('none');
+    Tone.Transport.stop();
+  }
+
+  private cleanup(): void {
+    if (this.currentPart) {
+      this.currentPart.stop();
+      this.currentPart.dispose();
+      this.currentPart = null;
+    }
+    
+    Tone.Transport.stop();
+    Tone.Transport.cancel(0);
+
+    if (this.kick) {
+      this.kick.dispose();
+      this.kick = null;
+    }
+    if (this.snare) {
+      this.snare.dispose();
+      this.snare = null;
+    }
+    if (this.hihat) {
+      this.hihat.dispose();
+      this.hihat = null;
+    }
+    if (this.synth) {
+      this.synth.dispose();
+      this.synth = null;
+    }
+    if (this.masterVolume) {
+      this.masterVolume.dispose();
+      this.masterVolume = null;
+    }
+
+    this.isInitialized = false;
+  }
+
+  dispose(): void {
+    this.cleanup();
   }
 
   getCurrentBeat(): BeatType {
