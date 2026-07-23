@@ -3,6 +3,15 @@
 // but this serves as a good foundational algorithm using the Web Audio API.
 
 type PitchCallback = (noteName: string, frequency: number) => void;
+type CalibrationCallback = (isCalibrating: boolean, progress: number, threshold: number) => void;
+
+export type CalibrationPreset = 'quiet' | 'normal' | 'noisy';
+
+interface CalibrationSettings {
+  preset: CalibrationPreset;
+  duration: number;
+  sensitivity: number;
+}
 
 class PitchDetectionService {
   private audioContext: AudioContext | null = null;
@@ -21,7 +30,23 @@ class PitchDetectionService {
   private lastDetectedNote: string | null = null;
   private noteHoldCounter: number = 0;
 
-  async start(callback: PitchCallback) {
+  // Adaptive noise threshold
+  private noiseLevelHistory: number[] = [];
+  private readonly noiseHistorySize = 100;
+  private adaptiveThreshold: number = 0.015;
+  private readonly minThreshold = 0.005;
+  private readonly maxThreshold = 0.05;
+  private calibrationFrames = 0;
+  private calibrationDuration = 60; // frames to calibrate
+  private isManualCalibration = false;
+  private calibrationCallback: CalibrationCallback | null = null;
+  private calibrationSettings: CalibrationSettings = {
+    preset: 'normal',
+    duration: 60,
+    sensitivity: 1.5
+  };
+
+  async start(callback: PitchCallback, calibrationCallback?: CalibrationCallback) {
     this.callback = callback;
     if (this.isRunning) return;
     
@@ -35,6 +60,11 @@ class PitchDetectionService {
 
       this.lastDetectedNote = null;
       this.noteHoldCounter = 0;
+      this.noiseLevelHistory = [];
+      this.adaptiveThreshold = 0.015;
+      this.calibrationFrames = 0;
+      this.isManualCalibration = false;
+      this.calibrationCallback = calibrationCallback || null;
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.sampleRate = this.audioContext.sampleRate;
       
@@ -110,16 +140,48 @@ class PitchDetectionService {
     this.sessionId++;
     this.isRunning = false;
     this.callback = null;
+    this.calibrationCallback = null;
     this.lastDetectedNote = null;
     this.noteHoldCounter = 0;
     this.cleanup();
+  }
+
+  startManualCalibration(preset: CalibrationPreset = 'normal'): void {
+    if (!this.isRunning) return;
+    
+    this.isManualCalibration = true;
+    this.calibrationFrames = 0;
+    this.noiseLevelHistory = [];
+    
+    // Set calibration settings based on preset
+    switch (preset) {
+      case 'quiet':
+        this.calibrationSettings = { preset, duration: 30, sensitivity: 2.0 };
+        break;
+      case 'noisy':
+        this.calibrationSettings = { preset, duration: 90, sensitivity: 1.2 };
+        break;
+      default:
+        this.calibrationSettings = { preset: 'normal', duration: 60, sensitivity: 1.5 };
+    }
+    
+    this.calibrationDuration = this.calibrationSettings.duration;
+    
+    if (this.calibrationCallback) {
+      this.calibrationCallback(true, 0, this.adaptiveThreshold);
+    }
+    
+    console.log(`Starting manual calibration: ${preset} mode, ${this.calibrationDuration} frames`);
   }
 
   private tick = () => {
     if (!this.isRunning || !this.analyzer) return;
 
     this.analyzer.getFloatTimeDomainData(this.buffer as any);
-    const frequency = this.autoCorrelate(this.buffer, this.sampleRate);
+    const { frequency, rms } = this.autoCorrelate(this.buffer, this.sampleRate);
+    
+    // Update adaptive threshold based on noise level
+    this.updateAdaptiveThreshold(rms);
     
     if (frequency !== -1) {
       const noteName = this.frequencyToNote(frequency);
@@ -142,7 +204,62 @@ class PitchDetectionService {
     this.animationFrameId = requestAnimationFrame(this.tick);
   };
 
-  private autoCorrelate(buf: Float32Array, sampleRate: number): number {
+  private updateAdaptiveThreshold(rms: number): void {
+    // During calibration, collect noise samples
+    if (this.calibrationFrames < this.calibrationDuration) {
+      this.noiseLevelHistory.push(rms);
+      this.calibrationFrames++;
+      
+      // Update calibration progress
+      if (this.calibrationCallback) {
+        const progress = this.calibrationFrames / this.calibrationDuration;
+        this.calibrationCallback(true, progress, this.adaptiveThreshold);
+      }
+      
+      // After calibration, set initial threshold
+      if (this.calibrationFrames === this.calibrationDuration) {
+        const avgNoise = this.noiseLevelHistory.reduce((a, b) => a + b, 0) / this.noiseLevelHistory.length;
+        const sensitivity = this.calibrationSettings.sensitivity;
+        this.adaptiveThreshold = Math.min(Math.max(avgNoise * sensitivity, this.minThreshold), this.maxThreshold);
+        console.log(`Calibrated noise threshold: ${this.adaptiveThreshold.toFixed(4)} (preset: ${this.calibrationSettings.preset})`);
+        
+        if (this.calibrationCallback) {
+          this.calibrationCallback(false, 1, this.adaptiveThreshold);
+        }
+        
+        this.isManualCalibration = false;
+      }
+      return;
+    }
+    
+    // After calibration, continuously adapt to changing noise levels
+    this.noiseLevelHistory.push(rms);
+    if (this.noiseLevelHistory.length > this.noiseHistorySize) {
+      this.noiseLevelHistory.shift();
+    }
+    
+    // Calculate moving average of noise levels
+    const avgNoise = this.noiseLevelHistory.reduce((a, b) => a + b, 0) / this.noiseLevelHistory.length;
+    
+    // Gradually adjust threshold (smoothing factor of 0.1)
+    const sensitivity = this.isManualCalibration ? this.calibrationSettings.sensitivity : 1.5;
+    const targetThreshold = Math.min(Math.max(avgNoise * sensitivity, this.minThreshold), this.maxThreshold);
+    this.adaptiveThreshold = this.adaptiveThreshold * 0.9 + targetThreshold * 0.1;
+  }
+
+  getCurrentThreshold(): number {
+    return this.adaptiveThreshold;
+  }
+
+  isCalibrating(): boolean {
+    return this.calibrationFrames < this.calibrationDuration;
+  }
+
+  getCalibrationProgress(): number {
+    return this.calibrationFrames / this.calibrationDuration;
+  }
+
+  private autoCorrelate(buf: Float32Array, sampleRate: number): { frequency: number; rms: number } {
     let size = buf.length;
     let rms = 0;
 
@@ -151,7 +268,10 @@ class PitchDetectionService {
       rms += val * val;
     }
     rms = Math.sqrt(rms / size);
-    if (rms < 0.015) return -1; // Balanced threshold for noise filtering vs sensitivity
+    
+    // Use adaptive threshold after calibration
+    const threshold = this.calibrationFrames >= this.calibrationDuration ? this.adaptiveThreshold : 0.015;
+    if (rms < threshold) return { frequency: -1, rms };
 
     let r1 = 0, r2 = size - 1, thres = 0.2;
     for (let i = 0; i < size / 2; i++)
@@ -176,7 +296,7 @@ class PitchDetectionService {
       }
     }
     let T0 = maxpos;
-    if (T0 <= 0) return -1; // Prevent division by zero
+    if (T0 <= 0) return { frequency: -1, rms }; // Prevent division by zero
 
     // parabolic interpolation with bounds checking
     if (T0 > 0 && T0 < size - 1) {
@@ -189,9 +309,9 @@ class PitchDetectionService {
     const frequency = sampleRate / T0;
     
     // Validate frequency is in piano range (C2-C8: ~65Hz-4186Hz)
-    if (frequency < 65 || frequency > 4200) return -1;
+    if (frequency < 65 || frequency > 4200) return { frequency: -1, rms };
     
-    return frequency;
+    return { frequency, rms };
   }
 
   private frequencyToNote(frequency: number): string {
