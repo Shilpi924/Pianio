@@ -34,8 +34,8 @@ class PitchDetectionService {
   // Adaptive noise threshold
   private noiseLevelHistory: number[] = [];
   private readonly noiseHistorySize = 100;
-  private adaptiveThreshold: number = 0.015;
-  private readonly minThreshold = 0.005;
+  private adaptiveThreshold: number = 0.008; // Lowered for better iPad sensitivity
+  private readonly minThreshold = 0.002; // Lowered minimum for quiet environments
   private readonly maxThreshold = 0.05;
   private calibrationFrames = 0;
   private calibrationDuration = 60; // frames to calibrate
@@ -68,13 +68,15 @@ class PitchDetectionService {
       this.lastDetectedNote = null;
       this.noteHoldCounter = 0;
       this.noiseLevelHistory = [];
-      this.adaptiveThreshold = 0.015;
+      this.adaptiveThreshold = 0.008; // Lowered for better iPad sensitivity
       this.calibrationFrames = 0;
       this.isManualCalibration = false;
       this.calibrationCallback = calibrationCallback || null;
       this.audioLevelCallback = audioLevelCallback || null;
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.sampleRate = this.audioContext.sampleRate;
+      
+      console.log('Pitch detection starting with threshold:', this.adaptiveThreshold);
       
       // Resume AudioContext if suspended (required on iOS/Safari)
       if (this.audioContext.state === 'suspended') {
@@ -231,6 +233,11 @@ class PitchDetectionService {
       this.audioLevelCallback(rms);
     }
     
+    // Log detection info every 30 frames (approx 0.5 seconds)
+    if (this.calibrationFrames % 30 === 0) {
+      console.log(`[Pitch Detection] RMS: ${rms.toFixed(4)}, Threshold: ${this.adaptiveThreshold.toFixed(4)}, Frequency: ${frequency.toFixed(1)}Hz, Note: ${frequency !== -1 ? this.frequencyToNote(frequency) : 'none'}`);
+    }
+    
     if (frequency !== -1) {
       const noteName = this.frequencyToNote(frequency);
       
@@ -238,6 +245,7 @@ class PitchDetectionService {
       if (noteName !== this.lastDetectedNote) {
         this.lastDetectedNote = noteName;
         this.noteHoldCounter = 0;
+        console.log(`[Pitch Detection] Note detected: ${noteName} (${frequency.toFixed(1)}Hz)`);
         if (this.callback) {
           this.callback(noteName, frequency);
         }

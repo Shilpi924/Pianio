@@ -13,6 +13,7 @@ import {
   Sparkles,
   WandSparkles,
   ShieldCheck,
+  Volume2,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
@@ -22,6 +23,7 @@ import { searchRecordings } from '../services/musicbrainzService';
 import type { MusicBrainzRecording } from '../services/musicbrainzService';
 import { searchPublicDomainScores, fetchAndParseMidi } from '../services/publicDomainService';
 import type { PublicDomainScore } from '../services/publicDomainService';
+import { audioService } from '../services/audioService';
 import type { Lesson } from '../types';
 
 const allBuiltinLessons = getEnhancedLessons();
@@ -65,6 +67,8 @@ export default function LessonLibraryPage() {
   const [requestArtist, setRequestArtist] = useState('');
   const [requestNote, setRequestNote] = useState('');
   const [requestSaved, setRequestSaved] = useState<string | null>(null);
+  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+  const [previewingLessonId, setPreviewingLessonId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCloudLessons();
@@ -82,6 +86,67 @@ export default function LessonLibraryPage() {
       // ignore storage issues
     }
   }, []);
+
+  const handlePreviewSong = async (lesson: Lesson, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    console.log('Preview song clicked:', lesson.title, 'Notes:', lesson.notes.length);
+    
+    if (lesson.notes.length === 0) {
+      console.warn('Lesson has no notes to preview');
+      return;
+    }
+
+    if (!isAudioInitialized) {
+      try {
+        console.log('Initializing audio...');
+        await audioService.initialize();
+        setIsAudioInitialized(true);
+        console.log('Audio initialized successfully');
+      } catch (err) {
+        console.error('Failed to initialize audio:', err);
+        return;
+      }
+    }
+
+    if (previewingLessonId === lesson.id) {
+      // Stop preview
+      console.log('Stopping preview');
+      audioService.stopAllNotes();
+      setPreviewingLessonId(null);
+      return;
+    }
+
+    // Stop any current preview
+    if (previewingLessonId) {
+      console.log('Stopping previous preview');
+      audioService.stopAllNotes();
+    }
+
+    setPreviewingLessonId(lesson.id);
+
+    // Play first 10 notes as preview
+    const previewNotes = lesson.notes.slice(0, 10);
+    console.log('Playing preview notes:', previewNotes.map(n => n.note));
+    let noteIndex = 0;
+
+    const playNextNote = () => {
+      if (noteIndex >= previewNotes.length || previewingLessonId !== lesson.id) {
+        console.log('Preview finished or stopped');
+        setPreviewingLessonId(null);
+        return;
+      }
+
+      const note = previewNotes[noteIndex];
+      console.log('Playing note:', note.note, 'Index:', noteIndex);
+      audioService.playNote(note.note, '8n');
+      noteIndex++;
+
+      setTimeout(playNextNote, 300); // 300ms between notes
+    };
+
+    playNextNote();
+  };
 
   const allLessonsMap = new Map<string, Lesson>();
   [...allBuiltinLessons, ...cloudLessons, ...customLessons].forEach((lesson) => {
@@ -479,6 +544,19 @@ export default function LessonLibraryPage() {
                             <ShieldCheck className="h-3 w-3" />
                             {rightsBadge.label}
                           </span>
+                          {lesson.notes.length > 0 && (
+                            <button
+                              onClick={(e) => handlePreviewSong(lesson, e)}
+                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition-colors ${
+                                previewingLessonId === lesson.id
+                                  ? 'bg-fuchsia-500 text-white'
+                                  : 'bg-fuchsia-100 text-fuchsia-700 hover:bg-fuchsia-200 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 dark:hover:bg-fuchsia-900/50'
+                              }`}
+                            >
+                              <Volume2 className="h-3 w-3" />
+                              {previewingLessonId === lesson.id ? 'Playing...' : 'Hear'}
+                            </button>
+                          )}
                         </div>
                         <p className="mt-2 h-10 line-clamp-2 text-sm text-slate-500">{lesson.synopsis}</p>
 
