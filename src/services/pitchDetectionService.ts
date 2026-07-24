@@ -325,37 +325,55 @@ class PitchDetectionService {
     }
     rms = Math.sqrt(rms / size);
     
-    // Use adaptive threshold after calibration
-    const threshold = this.calibrationFrames >= this.calibrationDuration ? this.adaptiveThreshold : 0.015;
+    // Use adaptive threshold after calibration - lowered for better sensitivity
+    const threshold = this.calibrationFrames >= this.calibrationDuration ? this.adaptiveThreshold : 0.01;
     if (rms < threshold) return { frequency: -1, rms };
 
-    let r1 = 0, r2 = size - 1, thres = 0.2;
+    // Improved signal preprocessing - apply windowing to reduce spectral leakage
+    const windowedBuf = new Float32Array(size);
+    for (let i = 0; i < size; i++) {
+      // Hann window for better frequency accuracy
+      const window = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (size - 1)));
+      windowedBuf[i] = buf[i] * window;
+    }
+
+    // Find the first and last zero crossings to trim silence
+    let r1 = 0, r2 = size - 1, thres = 0.1; // Lowered threshold for better sensitivity
     for (let i = 0; i < size / 2; i++)
-      if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+      if (Math.abs(windowedBuf[i]) < thres) { r1 = i; break; }
     for (let i = 1; i < size / 2; i++)
-      if (Math.abs(buf[size - i]) < thres) { r2 = size - i; break; }
+      if (Math.abs(windowedBuf[size - i]) < thres) { r2 = size - i; break; }
 
-    buf = buf.slice(r1, r2);
-    size = buf.length;
+    // Ensure we have enough signal
+    if (r2 - r1 < size * 0.1) return { frequency: -1, rms };
 
-    const c = new Array(size).fill(0);
-    for (let i = 0; i < size; i++)
-      for (let j = 0; j < size - i; j++)
-        c[i] = c[i] + buf[j] * buf[j + i];
+    const trimmedBuf = windowedBuf.slice(r1, r2);
+    const trimmedSize = trimmedBuf.length;
 
-    let d = 0; while (c[d] > c[d + 1]) d++;
+    // Autocorrelation
+    const c = new Array(trimmedSize).fill(0);
+    for (let i = 0; i < trimmedSize; i++)
+      for (let j = 0; j < trimmedSize - i; j++)
+        c[i] = c[i] + trimmedBuf[j] * trimmedBuf[j + i];
+
+    // Find the first dip in autocorrelation
+    let d = 0;
+    while (d < trimmedSize - 1 && c[d] > c[d + 1]) d++;
+
+    // Find the peak after the dip
     let maxval = -1, maxpos = -1;
-    for (let i = d; i < size; i++) {
+    for (let i = d; i < trimmedSize; i++) {
       if (c[i] > maxval) {
         maxval = c[i];
         maxpos = i;
       }
     }
-    let T0 = maxpos;
-    if (T0 <= 0) return { frequency: -1, rms }; // Prevent division by zero
 
-    // parabolic interpolation with bounds checking
-    if (T0 > 0 && T0 < size - 1) {
+    let T0 = maxpos;
+    if (T0 <= 0) return { frequency: -1, rms };
+
+    // Parabolic interpolation for sub-sample accuracy
+    if (T0 > 0 && T0 < trimmedSize - 1) {
       const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
       const a = (x1 + x3 - 2 * x2) / 2;
       const b = (x3 - x1) / 2;
@@ -366,6 +384,9 @@ class PitchDetectionService {
     
     // Validate frequency is in piano range (C2-C8: ~65Hz-4186Hz)
     if (frequency < 65 || frequency > 4200) return { frequency: -1, rms };
+    
+    // Additional validation: check if the peak is significant enough
+    if (maxval < c[0] * 0.3) return { frequency: -1, rms };
     
     return { frequency, rms };
   }
