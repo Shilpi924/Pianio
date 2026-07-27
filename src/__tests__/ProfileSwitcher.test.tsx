@@ -1,9 +1,24 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ProfileSwitcher from '../components/ProfileSwitcher';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
+
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(),
+  onAuthStateChanged: vi.fn(() => vi.fn()), // returns unsubscribe mock
+  GoogleAuthProvider: class {},
+  signInWithPopup: vi.fn(),
+  signOut: vi.fn(),
+}));
+
+vi.mock('../services/firebase', () => ({
+  auth: {},
+  signInWithGoogle: vi.fn(),
+  logOut: vi.fn(),
+}));
+
 
 describe('ProfileSwitcher', () => {
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -69,6 +69,7 @@ export default function LessonLibraryPage() {
   const [requestSaved, setRequestSaved] = useState<string | null>(null);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
   const [previewingLessonId, setPreviewingLessonId] = useState<string | null>(null);
+  const previewingRef = useRef<string | null>(null);
 
   useEffect(() => {
     fetchCloudLessons();
@@ -85,6 +86,13 @@ export default function LessonLibraryPage() {
     } catch {
       // ignore storage issues
     }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      audioService.stopAllNotes();
+      previewingRef.current = null;
+    };
   }, []);
 
   const handlePreviewSong = async (lesson: Lesson, event: React.MouseEvent) => {
@@ -109,21 +117,23 @@ export default function LessonLibraryPage() {
       }
     }
 
-    if (previewingLessonId === lesson.id) {
+    if (previewingRef.current === lesson.id) {
       // Stop preview
       console.log('Stopping preview');
       audioService.stopAllNotes();
       setPreviewingLessonId(null);
+      previewingRef.current = null;
       return;
     }
 
     // Stop any current preview
-    if (previewingLessonId) {
+    if (previewingRef.current) {
       console.log('Stopping previous preview');
       audioService.stopAllNotes();
     }
 
     setPreviewingLessonId(lesson.id);
+    previewingRef.current = lesson.id;
 
     // Play first 10 notes as preview
     const previewNotes = lesson.notes.slice(0, 10);
@@ -131,9 +141,12 @@ export default function LessonLibraryPage() {
     let noteIndex = 0;
 
     const playNextNote = () => {
-      if (noteIndex >= previewNotes.length || previewingLessonId !== lesson.id) {
+      if (noteIndex >= previewNotes.length || previewingRef.current !== lesson.id) {
         console.log('Preview finished or stopped');
         setPreviewingLessonId(null);
+        if (previewingRef.current === lesson.id) {
+          previewingRef.current = null;
+        }
         return;
       }
 
@@ -489,14 +502,22 @@ export default function LessonLibraryPage() {
                   const rightsBadge = getRightsBadge(lesson);
 
                   return (
-                    <motion.button
+                    <motion.div
                       layout
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       key={lesson.id}
                       onClick={() => startLesson(lesson)}
-                      className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-white text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800"
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          startLesson(lesson);
+                        }
+                      }}
+                      className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-white text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800 cursor-pointer"
                     >
                       <div
                         className={`relative flex h-24 w-full items-center justify-center p-4 ${
@@ -579,7 +600,7 @@ export default function LessonLibraryPage() {
                           )}
                         </div>
                       </div>
-                    </motion.button>
+                    </motion.div>
                   );
                 })}
               </AnimatePresence>
