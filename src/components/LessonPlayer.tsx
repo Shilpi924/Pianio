@@ -30,7 +30,7 @@ const PREVIEW_TEMPO_BPM = 90;
 const PREVIEW_FALLING_NOTE_SPEED = 1.5;
 
 export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) {
-  const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress, settings, goBack } = useAppStore();
+  const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress, settings } = useAppStore();
   const { addCompletedLesson, addExperience, addPracticeTime, addPracticeSession, updateStreak } = useUserProfileStore();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
@@ -770,7 +770,7 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={goBack}
+                onClick={onExit}
                 className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rose-100 px-4 py-2 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300"
                 title="Back"
               >
