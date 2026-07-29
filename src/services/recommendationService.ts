@@ -31,7 +31,7 @@ export function getPersonalizedRecommendations(
       if (profile) {
         if (lessonMatchesSkill(lesson, profile.skillLevel)) score += 4;
         if (lessonMatchesGoal(lesson, profile.learningGoal)) score += 3;
-        if (profile.favoriteGenres.some((genre) => lesson.category.toLowerCase().includes(genre.toLowerCase()))) score += 2;
+        if (profile.favoriteGenres?.some((genre) => lesson.category.toLowerCase().includes(genre.toLowerCase()))) score += 2;
         if (profile.ageGroup === '9-12' && lesson.ageBand === 'kids') score += 2;
       }
 

@@ -42,7 +42,7 @@ const ARCADE_GAMES = [
     description: 'Practice your scales and modes up and down the keyboard.',
     icon: AlignCenterVertical,
     color: 'from-amber-500 to-yellow-500',
-    view: 'scales-trainer'
+    view: 'scales'
   },
   {
     id: 'chord-trainer',
@@ -50,7 +50,7 @@ const ARCADE_GAMES = [
     description: 'Learn and identify piano chords instantly.',
     icon: Gamepad2,
     color: 'from-sky-500 to-blue-500',
-    view: 'chord-trainer'
+    view: 'practice'
   }
 ];
 
@@ -89,13 +89,13 @@ export default function ArcadePage() {
             const Icon = game.icon;
             
             return (
-              <motion.div
+              <motion.button
                 key={game.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={() => setCurrentView(game.view as any)}
-                className="group relative flex cursor-pointer flex-col overflow-hidden rounded-[2.5rem] bg-slate-800 p-6 shadow-2xl transition-all hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700 hover:border-cyan-500/50"
+                className="group relative flex flex-col overflow-hidden rounded-[2.5rem] bg-slate-800 p-6 text-left shadow-2xl transition-all hover:-translate-y-2 hover:shadow-cyan-500/20 border border-slate-700 hover:border-cyan-500/50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400/60"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${game.color} text-white shadow-lg`}>
@@ -118,7 +118,7 @@ export default function ArcadePage() {
                     <PlayIcon className="h-5 w-5 ml-1" />
                   </div>
                 </div>
-              </motion.div>
+              </motion.button>
             );
           })}
         </div>

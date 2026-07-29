@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Download, Star, Users, Clock, ArrowLeft, Music, TrendingUp } from 'lucide-react';
+import { Search, Download, Star, Users, Clock, ArrowLeft, Music, TrendingUp, Upload } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { communityLibraryService } from '../services/communityLibraryService';
 import type { CommunitySong } from '../services/communityLibraryService';
@@ -98,7 +98,15 @@ export default function CommunityLibraryPage() {
             Back
           </motion.button>
 
-          <div className="hidden md:block" />
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setCurrentView('song-upload')}
+            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-violet-600 px-4 py-2 text-sm font-bold text-white shadow-lg"
+          >
+            <Upload className="h-5 w-5" />
+            Share a Song
+          </motion.button>
         </div>
 
         {/* Hero Section */}

@@ -1,10 +1,12 @@
-import { useEffect, useState, memo, lazy, Suspense } from 'react';
+import { useEffect, useState, useRef, memo, lazy, Suspense } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/useAppStore';
 import { useUserProfileStore } from './store/useUserProfileStore';
 import HomePage from './pages/HomePage';
 import LessonPlayer from './components/LessonPlayer';
 import AIChatBot from './components/AIChatBot';
 import PwaBanner from './components/PwaBanner';
+import LevelUpAnimation from './components/LevelUpAnimation';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
 import i18n from './i18n';
@@ -15,7 +17,6 @@ const FreePlayPage = lazy(() => import('./pages/FreePlayPage'));
 const LessonLibraryPage = lazy(() => import('./pages/LessonLibraryPage'));
 const StatisticsPage = lazy(() => import('./pages/StatisticsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const LessonCreatorPage = lazy(() => import('./pages/LessonCreatorPage'));
 const ChordTrainerPage = lazy(() => import('./pages/ChordTrainerPage'));
 const ScalesTrainerPage = lazy(() => import('./pages/ScalesTrainerPage'));
 const CurriculumPage = lazy(() => import('./pages/CurriculumPage'));
@@ -32,7 +33,6 @@ const TutorialsPage = lazy(() => import('./pages/TutorialsPage'));
 const SongUploadPage = lazy(() => import('./pages/SongUploadPage'));
 const CommunityLibraryPage = lazy(() => import('./pages/CommunityLibraryPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
-const ContentAdminPage = lazy(() => import('./pages/ContentAdminPage'));
 const RewardsShopPage = lazy(() => import('./pages/RewardsShopPage'));
 const ArcadePage = lazy(() => import('./pages/ArcadePage'));
 
@@ -44,9 +44,30 @@ type BeforeInstallPromptEvent = Event & {
 function App() {
   useCloudSync();
   const { currentView, settings, currentLesson, setCurrentView, setCurrentLesson, goBack } = useAppStore();
-  const { completeOnboarding } = useUserProfileStore();
+  const { completeOnboarding, hasCompletedOnboarding } = useUserProfileStore();
+  const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [levelUpTo, setLevelUpTo] = useState<number | null>(null);
+  const previousLevelRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Send first-time users through onboarding before they reach Home.
+    // Empty deps: only check once on mount so it never fights manual navigation afterward.
+    if (!hasCompletedOnboarding) {
+      setCurrentView('onboarding');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const level = userProfile?.level;
+    if (level === undefined) return;
+    if (previousLevelRef.current !== null && level > previousLevelRef.current) {
+      setLevelUpTo(level);
+    }
+    previousLevelRef.current = level;
+  }, [userProfile?.level]);
 
   useEffect(() => {
     // Apply dark mode
@@ -250,18 +271,6 @@ function App() {
             <SettingsPage />
           </Suspense>
         );
-      case 'lesson-creator':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <LessonCreatorPage />
-          </Suspense>
-        );
-      case 'admin':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <ContentAdminPage />
-          </Suspense>
-        );
       case 'rewards-shop':
         return (
           <Suspense fallback={<LoadingFallback />}>
@@ -288,6 +297,11 @@ function App() {
         onInstall={handleInstall}
       />
       <AIChatBot />
+      <AnimatePresence>
+        {levelUpTo !== null && (
+          <LevelUpAnimation level={levelUpTo} onComplete={() => setLevelUpTo(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

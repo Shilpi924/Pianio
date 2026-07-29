@@ -89,11 +89,11 @@ describe('HomePage Component', () => {
     expect(setCurrentViewMock).toHaveBeenCalledWith('statistics');
   });
 
-  it('navigates to settings when Settings is clicked', () => {
+  it('navigates to settings when the settings icon is clicked', () => {
     render(<HomePage />);
-    const settingsButton = screen.getByText('Settings').closest('button');
+    const settingsButton = screen.getByLabelText('Settings');
     expect(settingsButton).not.toBeNull();
-    fireEvent.click(settingsButton!);
+    fireEvent.click(settingsButton);
     expect(setCurrentViewMock).toHaveBeenCalledWith('settings');
   });
 });

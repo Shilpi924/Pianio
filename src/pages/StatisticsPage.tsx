@@ -5,6 +5,7 @@ import { useUserProfileStore } from '../store/useUserProfileStore';
 import { achievements, calculateLevel, getXPForNextLevel } from '../data/achievements';
 import { getEnhancedLessons } from '../services/musicCatalogService';
 import { BADGES } from '../types/userProfile';
+import DailyChallenge from '../components/DailyChallenge';
 
 const lessons = getEnhancedLessons();
 
@@ -215,6 +216,8 @@ export default function StatisticsPage() {
                 <MiniCard label="Weekly songs" value={`${userProfile?.practiceGoals.weeklySongs ?? 3}`} />
               </div>
             </div>
+
+            <DailyChallenge />
 
             <div className="overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-slate-200/50 dark:bg-slate-800 dark:shadow-none p-6 md:p-8">
               <h2 className="mb-6 text-2xl font-black text-slate-900 dark:text-white">Completed songs</h2>

@@ -1,13 +1,17 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Music, Library, Sparkles, Piano, Settings, Award, Globe, Map, Glasses, Users, Gamepad2, ShoppingBag } from 'lucide-react';
+import { Play, Music, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, Flame, ArrowRight } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
+import { getEnhancedLessons } from '../services/musicCatalogService';
+import { getPersonalizedRecommendations } from '../services/recommendationService';
 import ProfileSwitcher from '../components/ProfileSwitcher';
 import Mascot from '../components/Mascot';
 
+const lessons = getEnhancedLessons();
+
 export default function HomePage() {
-  const { setCurrentView, settings, updateSettings } = useAppStore();
+  const { setCurrentView, setCurrentLesson, settings, updateSettings, lessonProgress, statistics } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const { t, i18n } = useTranslation();
 
@@ -15,6 +19,27 @@ export default function HomePage() {
     const lang = e.target.value;
     i18n.changeLanguage(lang);
     updateSettings({ language: lang });
+  };
+
+  // Find a lesson already in progress so the hero CTA always points somewhere concrete.
+  const inProgressEntry = Object.values(lessonProgress || {}).find((p) => !p.completed && p.currentNoteIndex > 0);
+  const continueLesson = inProgressEntry ? lessons.find((l) => l.id === inProgressEntry.lessonId) : undefined;
+
+  // No lesson in progress yet: fall back to the top pick from the learner's saved
+  // onboarding profile (age/skill/goal) so personalization shows up on day one.
+  const recommendedLesson = !continueLesson && userProfile && statistics
+    ? getPersonalizedRecommendations(lessons, userProfile, lessonProgress || {}, statistics)[0]
+    : undefined;
+
+  const heroLesson = continueLesson || recommendedLesson;
+
+  const handleContinue = () => {
+    if (heroLesson) {
+      setCurrentLesson(heroLesson);
+      setCurrentView('lesson');
+    } else {
+      setCurrentView('curriculum');
+    }
   };
 
   return (
@@ -26,7 +51,7 @@ export default function HomePage() {
         className="mx-auto max-w-5xl space-y-8"
       >
         {/* Header */}
-        <header className="flex flex-col items-center justify-between gap-6 md:flex-row md:items-center">
+        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="text-center md:text-left">
             <motion.div
               initial={{ y: -10, opacity: 0 }}
@@ -41,11 +66,23 @@ export default function HomePage() {
               {t('home.welcome', { name: userProfile?.name || 'Pianist' })}
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex flex-wrap items-center justify-center gap-3 md:justify-end">
+            <div className="flex items-center gap-3 rounded-full bg-white/80 backdrop-blur-md px-4 py-2 shadow-sm ring-1 ring-slate-200 dark:bg-gray-800/80 dark:ring-gray-700">
+              <div className="flex items-center gap-1.5 text-sm font-bold text-orange-500">
+                <Flame className="h-4 w-4" />
+                {userProfile?.currentStreak ?? 0}
+              </div>
+              <div className="h-4 w-px bg-slate-200 dark:bg-gray-700" />
+              <div className="flex items-center gap-1.5 text-sm font-bold text-violet-600 dark:text-violet-400">
+                <Sparkles className="h-4 w-4" />
+                {userProfile?.experiencePoints ?? 0} XP
+              </div>
+            </div>
             <div className="relative">
               <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <select 
-                value={settings.language || 'en'} 
+              <select
+                value={settings.language || 'en'}
                 onChange={handleLanguageChange}
                 className="appearance-none rounded-full bg-white/80 backdrop-blur-md pl-9 pr-8 py-2 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-gray-800/80 dark:text-gray-200 dark:ring-gray-700 dark:hover:bg-gray-800"
               >
@@ -57,41 +94,64 @@ export default function HomePage() {
               </select>
             </div>
             <ProfileSwitcher />
+            <button
+              onClick={() => setCurrentView('settings')}
+              aria-label={t('home.settings')}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/80 backdrop-blur-md text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-white hover:text-slate-900 dark:bg-gray-800/80 dark:text-gray-300 dark:ring-gray-700 dark:hover:bg-gray-800"
+            >
+              <Settings className="h-5 w-5" />
+            </button>
           </div>
         </header>
 
-        {/* Big Action Grid */}
+        {/* Hero: single dominant "what to do next" action */}
+        <motion.button
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          onClick={handleContinue}
+          className="group relative flex w-full flex-col items-start gap-4 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-violet-500 via-indigo-500 to-blue-500 p-8 text-left shadow-xl shadow-indigo-200 transition-transform hover:scale-[1.01] dark:shadow-none sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div className="absolute right-0 top-0 -mr-10 -mt-10 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
+            <Piano className="h-56 w-56 text-white" />
+          </div>
+          <div className="relative z-10 flex items-center gap-5">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
+              <Play className="h-8 w-8 fill-white" />
+            </div>
+            <div className="text-white">
+              <div className="text-xs font-bold uppercase tracking-wider text-white/70">
+                {continueLesson ? t('home.continue') : heroLesson ? t('home.recommended') : t('home.startLearning')}
+              </div>
+              <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
+                {heroLesson ? heroLesson.title : t('home.path')}
+              </h2>
+              <p className="mt-1 text-base font-medium text-white/80">
+                {continueLesson ? t('home.continueDesc') : heroLesson ? t('home.recommendedDesc') : t('home.pathDesc')}
+              </p>
+            </div>
+          </div>
+          <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center self-end rounded-full bg-white/20 text-white backdrop-blur-md transition-transform group-hover:translate-x-1 sm:self-center">
+            <ArrowRight className="h-6 w-6" />
+          </div>
+        </motion.button>
+
+        {/* More ways to play */}
         <section className="grid gap-6 md:grid-cols-3">
-          {/* Learning Path Action */}
-          <button
-            onClick={() => setCurrentView('curriculum')}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-400 to-teal-500 p-8 text-left shadow-xl shadow-teal-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[280px]"
-          >
-            <div className="absolute right-0 top-0 -mr-8 -mt-8 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
-              <Map className="h-64 w-64 text-white" />
-            </div>
-            <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
-              <Map className="h-8 w-8" />
-            </div>
-            <div className="relative z-10 mt-12 text-white">
-              <h2 className="text-4xl font-black tracking-tight">{t('home.path')}</h2>
-              <p className="mt-2 text-lg font-medium text-white/80">{t('home.pathDesc')}</p>
-            </div>
-          </button>
           {/* Main Play Action */}
           <button
             onClick={() => setCurrentView('free-play')}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sky-400 to-indigo-500 p-8 text-left shadow-xl shadow-indigo-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[280px]"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sky-400 to-indigo-500 p-8 text-left shadow-xl shadow-indigo-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[220px]"
           >
             <div className="absolute right-0 top-0 -mr-8 -mt-8 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
-              <Piano className="h-64 w-64 text-white" />
+              <Piano className="h-56 w-56 text-white" />
             </div>
-            <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
-              <Piano className="h-8 w-8" />
+            <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
+              <Piano className="h-7 w-7" />
             </div>
-            <div className="relative z-10 mt-12 text-white">
-              <h2 className="text-4xl font-black tracking-tight">{t('home.freePlay')}</h2>
-              <p className="mt-2 text-lg font-medium text-white/80">
+            <div className="relative z-10 mt-10 text-white">
+              <h2 className="text-3xl font-black tracking-tight">{t('home.freePlay')}</h2>
+              <p className="mt-2 text-base font-medium text-white/80">
                 {t('home.freePlayDesc')}
               </p>
             </div>
@@ -100,10 +160,10 @@ export default function HomePage() {
           {/* Library Action */}
           <button
             onClick={() => setCurrentView('lesson')}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-rose-400 to-orange-400 p-8 text-left shadow-xl shadow-orange-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[280px]"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-rose-400 to-orange-400 p-8 text-left shadow-xl shadow-orange-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[220px]"
           >
             <div className="absolute right-0 top-0 -mr-8 -mt-8 opacity-20 transition-transform duration-700 group-hover:-rotate-12 group-hover:scale-110">
-              <Music className="h-64 w-64 text-white" />
+              <Music className="h-56 w-56 text-white" />
             </div>
             <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
               <Library className="h-8 w-8" />
@@ -118,7 +178,7 @@ export default function HomePage() {
         </section>
 
         {/* Secondary Options */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <SecondaryCard
             icon={Gamepad2}
             title={t('home.arcade')}
@@ -135,17 +195,10 @@ export default function HomePage() {
           />
           <SecondaryCard
             icon={Users}
-            title="Community Library"
-            subtitle="Browse songs shared by users"
-            color="from-purple-400 to-violet-500"
-            onClick={() => setCurrentView('community-library')}
-          />
-          <SecondaryCard
-            icon={Play}
-            title={t('home.tutorials')}
-            subtitle={t('home.tutorialsDesc')}
-            color="from-emerald-400 to-teal-500"
-            onClick={() => setCurrentView('tutorials')}
+            title={t('home.duet')}
+            subtitle={t('home.duetDesc')}
+            color="from-indigo-400 to-violet-500"
+            onClick={() => setCurrentView('multiplayer')}
           />
           <SecondaryCard
             icon={Glasses}
@@ -155,11 +208,11 @@ export default function HomePage() {
             onClick={() => setCurrentView('vr-piano')}
           />
           <SecondaryCard
-            icon={Users}
-            title={t('home.duet')}
-            subtitle={t('home.duetDesc')}
-            color="from-indigo-400 to-violet-500"
-            onClick={() => setCurrentView('multiplayer')}
+            icon={Play}
+            title={t('home.tutorials')}
+            subtitle={t('home.tutorialsDesc')}
+            color="from-emerald-400 to-teal-500"
+            onClick={() => setCurrentView('tutorials')}
           />
           <SecondaryCard
             icon={Award}
@@ -167,13 +220,6 @@ export default function HomePage() {
             subtitle={t('home.progressDesc')}
             color="from-purple-400 to-fuchsia-500"
             onClick={() => setCurrentView('statistics')}
-          />
-          <SecondaryCard
-            icon={Settings}
-            title={t('home.settings')}
-            subtitle={t('home.settingsDesc')}
-            color="from-slate-400 to-slate-600"
-            onClick={() => setCurrentView('settings')}
           />
         </section>
       </motion.main>
