@@ -325,7 +325,7 @@ export default function OnboardingPage({ onComplete }: OnboardingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-8 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-indigo-50 to-slate-50 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-900 p-8 flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -340,7 +340,7 @@ export default function OnboardingPage({ onComplete }: OnboardingPageProps) {
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <motion.div
-                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
+                className="gradient-primary h-2 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${((step + 1) / steps.length) * 100}%` }}
                 transition={{ duration: 0.5 }}
@@ -387,7 +387,7 @@ export default function OnboardingPage({ onComplete }: OnboardingPageProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleNext}
-              className="flex-1 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold flex items-center justify-center gap-2"
+              className="gradient-primary flex-1 py-4 text-white rounded-xl font-semibold flex items-center justify-center gap-2"
               disabled={step === 5 && data.favoriteGenres.length === 0}
             >
               {step === steps.length - 1 ? (
