@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Music, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, Flame, ArrowRight } from 'lucide-react';
+import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, Flame, ArrowRight } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { getEnhancedLessons } from '../services/musicCatalogService';
@@ -110,7 +110,7 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           onClick={handleContinue}
-          className="group relative flex w-full flex-col items-start gap-4 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-violet-500 via-indigo-500 to-blue-500 p-8 text-left shadow-xl shadow-indigo-200 transition-transform hover:scale-[1.01] dark:shadow-none sm:flex-row sm:items-center sm:justify-between"
+          className="gradient-primary group relative flex w-full flex-col items-start gap-4 overflow-hidden rounded-3xl p-8 text-left shadow-xl shadow-indigo-200 transition-transform hover:scale-[1.01] dark:shadow-none sm:flex-row sm:items-center sm:justify-between"
         >
           <div className="absolute right-0 top-0 -mr-10 -mt-10 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
             <Piano className="h-56 w-56 text-white" />
@@ -137,44 +137,21 @@ export default function HomePage() {
         </motion.button>
 
         {/* More ways to play */}
-        <section className="grid gap-6 md:grid-cols-3">
-          {/* Main Play Action */}
-          <button
+        <section className="grid gap-4 sm:grid-cols-2">
+          <SecondaryCard
+            icon={Piano}
+            title={t('home.freePlay')}
+            subtitle={t('home.freePlayDesc')}
+            accent="primary"
             onClick={() => setCurrentView('free-play')}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sky-400 to-indigo-500 p-8 text-left shadow-xl shadow-indigo-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[220px]"
-          >
-            <div className="absolute right-0 top-0 -mr-8 -mt-8 opacity-20 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
-              <Piano className="h-56 w-56 text-white" />
-            </div>
-            <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
-              <Piano className="h-7 w-7" />
-            </div>
-            <div className="relative z-10 mt-10 text-white">
-              <h2 className="text-3xl font-black tracking-tight">{t('home.freePlay')}</h2>
-              <p className="mt-2 text-base font-medium text-white/80">
-                {t('home.freePlayDesc')}
-              </p>
-            </div>
-          </button>
-
-          {/* Library Action */}
-          <button
+          />
+          <SecondaryCard
+            icon={Library}
+            title={t('home.library')}
+            subtitle={t('home.libraryDesc')}
+            accent="primary"
             onClick={() => setCurrentView('lesson')}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-rose-400 to-orange-400 p-8 text-left shadow-xl shadow-orange-200 transition-transform hover:scale-[1.02] dark:shadow-none min-h-[220px]"
-          >
-            <div className="absolute right-0 top-0 -mr-8 -mt-8 opacity-20 transition-transform duration-700 group-hover:-rotate-12 group-hover:scale-110">
-              <Music className="h-56 w-56 text-white" />
-            </div>
-            <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md">
-              <Library className="h-8 w-8" />
-            </div>
-            <div className="relative z-10 mt-12 text-white">
-              <h2 className="text-4xl font-black tracking-tight">{t('home.library')}</h2>
-              <p className="mt-2 text-lg font-medium text-white/80">
-                {t('home.libraryDesc')}
-              </p>
-            </div>
-          </button>
+          />
         </section>
 
         {/* Secondary Options */}
@@ -183,42 +160,42 @@ export default function HomePage() {
             icon={Gamepad2}
             title={t('home.arcade')}
             subtitle={t('home.arcadeDesc')}
-            color="from-pink-400 to-rose-500"
+            accent="accent"
             onClick={() => setCurrentView('arcade')}
           />
           <SecondaryCard
             icon={ShoppingBag}
             title={t('home.rewards')}
             subtitle={t('home.rewardsDesc')}
-            color="from-amber-400 to-orange-500"
+            accent="accent"
             onClick={() => setCurrentView('rewards-shop')}
           />
           <SecondaryCard
             icon={Users}
             title={t('home.duet')}
             subtitle={t('home.duetDesc')}
-            color="from-indigo-400 to-violet-500"
+            accent="primary"
             onClick={() => setCurrentView('multiplayer')}
           />
           <SecondaryCard
             icon={Glasses}
             title={t('home.webxr')}
             subtitle={t('home.webxrDesc')}
-            color="from-cyan-400 to-blue-500"
+            accent="primary"
             onClick={() => setCurrentView('vr-piano')}
           />
           <SecondaryCard
             icon={Play}
             title={t('home.tutorials')}
             subtitle={t('home.tutorialsDesc')}
-            color="from-emerald-400 to-teal-500"
+            accent="success"
             onClick={() => setCurrentView('tutorials')}
           />
           <SecondaryCard
             icon={Award}
             title={t('home.progress')}
             subtitle={t('home.progressDesc')}
-            color="from-purple-400 to-fuchsia-500"
+            accent="success"
             onClick={() => setCurrentView('statistics')}
           />
         </section>
@@ -232,30 +209,36 @@ export default function HomePage() {
   );
 }
 
+const ACCENT_STYLES = {
+  primary: 'bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
+  success: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+  accent: 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+} as const;
+
 function SecondaryCard({
   icon: Icon,
   title,
   subtitle,
-  color,
+  accent,
   onClick,
 }: {
   icon: any;
   title: string;
   subtitle: string;
-  color: string;
+  accent: keyof typeof ACCENT_STYLES;
   onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`group flex items-center gap-4 rounded-3xl bg-gradient-to-br ${color} p-6 text-left text-white shadow-lg shadow-slate-200 transition-transform hover:scale-105 dark:shadow-none`}
+      className="group flex items-center gap-4 rounded-3xl bg-white p-6 text-left shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
     >
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md">
-        <Icon className="h-6 w-6 text-white transition-transform group-hover:scale-110" />
+      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-transform group-hover:scale-105 ${ACCENT_STYLES[accent]}`}>
+        <Icon className="h-6 w-6" />
       </div>
       <div>
-        <h3 className="text-xl font-black">{title}</h3>
-        <p className="text-sm font-medium text-white/80">{subtitle}</p>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h3>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{subtitle}</p>
       </div>
     </button>
   );

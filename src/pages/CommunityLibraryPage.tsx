@@ -102,7 +102,7 @@ export default function CommunityLibraryPage() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setCurrentView('song-upload')}
-            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-violet-600 px-4 py-2 text-sm font-bold text-white shadow-lg"
+            className="gradient-primary flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-lg"
           >
             <Upload className="h-5 w-5" />
             Share a Song

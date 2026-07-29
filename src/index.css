@@ -29,6 +29,20 @@
     @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl dark:bg-gray-900/70 dark:border-gray-700/50;
   }
 
+  /* Brand gradient tokens — use these instead of hand-picking a new
+     from-X to-Y pair per card, so the app reads as one product. */
+  .gradient-primary {
+    @apply bg-gradient-to-br from-primary-500 to-indigo-600;
+  }
+
+  .gradient-success {
+    @apply bg-gradient-to-br from-success-500 to-teal-600;
+  }
+
+  .gradient-accent {
+    @apply bg-gradient-to-br from-accent-400 to-orange-500;
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
     height: 8px;

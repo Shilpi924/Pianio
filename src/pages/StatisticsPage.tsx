@@ -59,7 +59,7 @@ export default function StatisticsPage() {
               <ArrowLeft className="h-4 w-4" />
               Back home
             </button>
-            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-500">
+            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-600">
               Progress Center
             </h1>
             <p className="mt-2 text-lg font-medium text-slate-600 dark:text-slate-300">
@@ -134,7 +134,7 @@ export default function StatisticsPage() {
                   initial={{ width: 0 }}
                   animate={{ width: `${xpProgress}%` }}
                   transition={{ duration: 1, ease: 'easeOut' }}
-                  className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500"
+                  className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-600"
                 />
               </div>
               <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
