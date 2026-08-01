@@ -25,8 +25,11 @@ export function getPersonalizedRecommendations(
   const profile = userProfile;
 
   return [...lessons]
-    .map((lesson) => {
+    .map((lesson, index) => {
       let score = 0;
+
+      // Prioritize latest songs (earlier in array = newer songs)
+      score += (lessons.length - index) * 10;
 
       if (profile) {
         if (lessonMatchesSkill(lesson, profile.skillLevel)) score += 4;

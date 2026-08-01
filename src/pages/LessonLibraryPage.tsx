@@ -452,53 +452,6 @@ export default function LessonLibraryPage() {
               </div>
             </div>
 
-            {query.trim() === '' && selectedCategory === 'All' && selectedDifficulty === 'All' && (
-              <div className="grid gap-4 md:grid-cols-3">
-                {[
-                  {
-                    title: 'Full-song ready',
-                    desc: 'Strong note charts and imported classics that feel playable from the first tap.',
-                    icon: BadgeCheck,
-                    tone: 'emerald',
-                  },
-                  {
-                    title: 'Modern practice',
-                    desc: 'Smooth cards, animated progress, and quick access to what users want to hear next.',
-                    icon: Sparkles,
-                    tone: 'fuchsia',
-                  },
-                  {
-                    title: 'Catch the request',
-                    desc: 'When a song is missing, save it instantly so we can add it to the roadmap.',
-                    icon: WandSparkles,
-                    tone: 'sky',
-                  },
-                ].map((card) => (
-                  <div
-                    key={card.title}
-                    className={`rounded-3xl border bg-white p-5 shadow-sm dark:bg-slate-800 ${
-                      card.tone === 'emerald'
-                        ? 'border-emerald-100 dark:border-emerald-900/40'
-                        : card.tone === 'sky'
-                          ? 'border-sky-100 dark:border-sky-900/40'
-                          : 'border-fuchsia-100 dark:border-fuchsia-900/40'
-                    }`}
-                  >
-                    <card.icon
-                      className={`h-6 w-6 ${
-                        card.tone === 'emerald'
-                          ? 'text-emerald-500'
-                          : card.tone === 'sky'
-                            ? 'text-sky-500'
-                            : 'text-fuchsia-500'
-                      }`}
-                    />
-                    <h3 className="mt-3 text-lg font-black text-slate-900 dark:text-white">{card.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-300">{card.desc}</p>
-                  </div>
-                ))}
-              </div>
-            )}
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               <AnimatePresence mode="popLayout">

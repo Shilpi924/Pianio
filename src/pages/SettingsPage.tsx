@@ -1,41 +1,52 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, Check, ChevronDown, Gauge, Keyboard, SlidersHorizontal, Sparkles, User, Volume2, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, Gauge, Keyboard, SlidersHorizontal, Sparkles, User, Volume2, RotateCcw, Star, Trophy, Flame, Zap, Crown, Heart, Music, Gamepad2, Bell, Target } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import type { AgeGroup, LearningGoal, PersonalizationData, PracticeFrequency, SkillLevel } from '../types/userProfile';
 import ProfileSwitcher from '../components/ProfileSwitcher';
 
-const AGE_GROUPS: { value: AgeGroup; label: string; description: string }[] = [
-  { value: '5-8', label: '5-8 years', description: 'Big targets, playful rewards, short lessons' },
-  { value: '9-12', label: '9-12 years', description: 'Challenges, badges, and friendly pacing' },
-  { value: '13-17', label: '13-17 years', description: 'Modern songs, goals, and performance polish' },
-  { value: '18+', label: '18+ years', description: 'Clean practice tools, theory, and analytics' },
+const AGE_GROUPS: { value: AgeGroup; label: string; description: string; icon: any; color: string }[] = [
+  { value: '5-8', label: 'Little Star', description: 'Fun games, big buttons, and happy songs', icon: Star, color: 'from-yellow-400 to-orange-400' },
+  { value: '9-12', label: 'Rock Star', description: 'Cool challenges, badges, and awesome rewards', icon: Crown, color: 'from-purple-400 to-pink-400' },
+  { value: '13-17', label: 'Pro Player', description: 'Modern hits, goals, and performance mode', icon: Trophy, color: 'from-blue-400 to-cyan-400' },
+  { value: '18+', label: 'Master', description: 'Advanced tools, theory, and analytics', icon: Target, color: 'from-emerald-400 to-teal-400' },
 ];
 
-const SKILL_LEVELS: { value: SkillLevel; label: string; description: string }[] = [
-  { value: 'beginner', label: 'Beginner', description: 'Start with note names, rhythm, and simple songs' },
-  { value: 'intermediate', label: 'Intermediate', description: 'Build coordination, dynamics, and fluency' },
-  { value: 'advanced', label: 'Advanced', description: 'Focus on expression, technique, and interpretation' },
+const SKILL_LEVELS: { value: SkillLevel; label: string; description: string; icon: any; color: string }[] = [
+  { value: 'beginner', label: 'Rookie', description: 'Learn notes, rhythm, and your first songs', icon: Sparkles, color: 'from-green-400 to-emerald-400' },
+  { value: 'intermediate', label: 'Champion', description: 'Build skills, play faster, and sound amazing', icon: Flame, color: 'from-orange-400 to-red-400' },
+  { value: 'advanced', label: 'Legend', description: 'Master techniques, express yourself, and shine', icon: Crown, color: 'from-purple-400 to-pink-400' },
 ];
 
-const LEARNING_GOALS: { value: LearningGoal; label: string; description: string }[] = [
-  { value: 'fun', label: 'Just for fun', description: 'Keep practice light and motivating' },
-  { value: 'classical', label: 'Classical', description: 'Prioritize reading, phrasing, and repertoire' },
-  { value: 'pop', label: 'Pop music', description: 'Use chords, hooks, and recognizable songs' },
-  { value: 'jazz', label: 'Jazz', description: 'Add voicings, swing feel, and improvisation' },
-  { value: 'exams', label: 'Exams', description: 'Practice scales, sight reading, and accuracy' },
-  { value: 'professional', label: 'Professional', description: 'Track technique, consistency, and polish' },
+const LEARNING_GOALS: { value: LearningGoal; label: string; description: string; icon: any; color: string }[] = [
+  { value: 'fun', label: 'Just for Fun', description: 'Play for joy, no pressure, just music', icon: Heart, color: 'from-pink-400 to-rose-400' },
+  { value: 'classical', label: 'Classical', description: 'Beautiful classics, reading, and elegance', icon: Music, color: 'from-violet-400 to-purple-400' },
+  { value: 'pop', label: 'Pop Hits', description: 'Chart-toppers, hooks, and catchy tunes', icon: Zap, color: 'from-blue-400 to-indigo-400' },
+  { value: 'jazz', label: 'Jazz', description: 'Smooth grooves, improvisation, and style', icon: Music, color: 'from-amber-400 to-yellow-400' },
+  { value: 'exams', label: 'Exams', description: 'Scales, sight-reading, and perfect scores', icon: Target, color: 'from-red-400 to-orange-400' },
+  { value: 'professional', label: 'Professional', description: 'Technique, consistency, and mastery', icon: Trophy, color: 'from-emerald-400 to-teal-400' },
 ];
 
-const PRACTICE_FREQUENCY: { value: PracticeFrequency; label: string; description: string }[] = [
-  { value: 'daily', label: 'Daily', description: 'Small daily streaks and focused reviews' },
-  { value: 'few-times-week', label: 'Few times a week', description: 'Balanced weekly goals' },
-  { value: 'weekly', label: 'Weekly', description: 'Gentle reminders and longer sessions' },
-  { value: 'occasional', label: 'Occasional', description: 'Flexible, low-pressure practice' },
+const PRACTICE_FREQUENCY: { value: PracticeFrequency; label: string; description: string; icon: any; color: string }[] = [
+  { value: 'daily', label: 'Every Day', description: 'Build streaks, earn daily rewards', icon: Flame, color: 'from-orange-400 to-red-400' },
+  { value: 'few-times-week', label: 'A Few Times', description: 'Balanced goals, steady progress', icon: Zap, color: 'from-blue-400 to-cyan-400' },
+  { value: 'weekly', label: 'Once a Week', description: 'Gentle reminders, flexible schedule', icon: Bell, color: 'from-purple-400 to-pink-400' },
+  { value: 'occasional', label: 'Whenever', description: 'No pressure, play when you want', icon: Heart, color: 'from-green-400 to-emerald-400' },
 ];
 
-const GENRES = ['Classical', 'Pop', 'Jazz', 'Rock', 'Country', 'Hip Hop', 'R&B', 'Electronic', 'Film Music', 'Musicals'];
+const GENRES = [
+  { name: 'Classical', icon: Music, color: 'from-violet-500 to-purple-500' },
+  { name: 'Pop', icon: Zap, color: 'from-pink-500 to-rose-500' },
+  { name: 'Jazz', icon: Music, color: 'from-amber-500 to-yellow-500' },
+  { name: 'Rock', icon: Gamepad2, color: 'from-red-500 to-orange-500' },
+  { name: 'Country', icon: Music, color: 'from-emerald-500 to-teal-500' },
+  { name: 'Hip Hop', icon: Zap, color: 'from-blue-500 to-indigo-500' },
+  { name: 'R&B', icon: Music, color: 'from-purple-500 to-pink-500' },
+  { name: 'Electronic', icon: Zap, color: 'from-cyan-500 to-blue-500' },
+  { name: 'Film Music', icon: Music, color: 'from-fuchsia-500 to-pink-500' },
+  { name: 'Musicals', icon: Music, color: 'from-rose-500 to-red-500' },
+];
 
 type ToggleSetting = {
   key: 'showKeyboardLabels' | 'showNoteNames' | 'useSharps' | 'darkMode' | 'backgroundMusic';
@@ -116,45 +127,45 @@ export default function SettingsPage() {
 
   const settingsGroups = [
     {
-      title: t('settingsPage.groups.display'),
+      title: '🎹 Keyboard Fun',
       icon: Keyboard,
       color: 'from-fuchsia-500 to-pink-500',
       settings: [
         {
           key: 'showKeyboardLabels',
-          label: t('settingsPage.settings.showKeyboardLabels'),
+          label: 'Show finger numbers',
           type: 'toggle' as const,
         },
         {
           key: 'showNoteNames',
-          label: t('settingsPage.settings.showNoteNames'),
+          label: 'Show note names',
           type: 'toggle' as const,
         },
         {
           key: 'useSharps',
-          label: t('settingsPage.settings.useSharps'),
+          label: 'Use sharps (♯) instead of flats (♭)',
           type: 'toggle' as const,
         },
         {
           key: 'darkMode',
-          label: t('settingsPage.settings.darkMode'),
+          label: 'Dark mode',
           type: 'toggle' as const,
         },
       ] as Setting[],
     },
     {
-      title: t('settingsPage.groups.audio'),
+      title: '🔊 Sound & Music',
       icon: Volume2,
       color: 'from-blue-500 to-indigo-500',
       settings: [
         {
           key: 'backgroundMusic',
-          label: t('settingsPage.settings.backgroundMusic'),
+          label: 'Background music',
           type: 'toggle' as const,
         },
         {
           key: 'audioVolume',
-          label: t('settingsPage.settings.audioVolume'),
+          label: 'Volume',
           type: 'slider' as const,
           min: 0,
           max: 100,
@@ -162,24 +173,24 @@ export default function SettingsPage() {
         },
         {
           key: 'inputMode',
-          label: t('settingsPage.settings.inputMode'),
+          label: 'How you play',
           type: 'select' as const,
           options: [
-            { value: 'midi', label: t('settingsPage.inputMode.midi') },
-            { value: 'microphone', label: t('settingsPage.inputMode.microphone') },
-            { value: 'auto', label: t('settingsPage.inputMode.auto') },
+            { value: 'midi', label: '🎹 MIDI Keyboard' },
+            { value: 'microphone', label: '🎤 Microphone' },
+            { value: 'auto', label: '🤖 Auto-detect' },
           ],
         },
       ] as Setting[],
     },
     {
-      title: t('settingsPage.groups.animation'),
+      title: '⚡ Speed & Animations',
       icon: Gauge,
       color: 'from-amber-500 to-orange-500',
       settings: [
         {
           key: 'animationSpeed',
-          label: t('settingsPage.settings.animationSpeed'),
+          label: 'Animation speed',
           type: 'slider' as const,
           min: 0.5,
           max: 2,
@@ -188,20 +199,20 @@ export default function SettingsPage() {
       ] as Setting[],
     },
     {
-      title: t('settingsPage.groups.localization'),
-      icon: Check, // Using Check instead of Globe for now since it's already imported
+      title: '🌍 Language',
+      icon: Check,
       color: 'from-emerald-500 to-teal-500',
       settings: [
         {
           key: 'language',
-          label: t('settingsPage.settings.language'),
+          label: 'Choose your language',
           type: 'select',
           options: [
-            { value: 'en', label: t('settingsPage.languageOptions.en') },
-            { value: 'zh', label: t('settingsPage.languageOptions.zh') },
-            { value: 'ja', label: t('settingsPage.languageOptions.ja') },
-            { value: 'de', label: t('settingsPage.languageOptions.de') },
-            { value: 'es', label: t('settingsPage.languageOptions.es') },
+            { value: 'en', label: '🇺🇸 English' },
+            { value: 'zh', label: '🇨🇳 中文' },
+            { value: 'ja', label: '🇯🇵 日本語' },
+            { value: 'de', label: '🇩🇪 Deutsch' },
+            { value: 'es', label: '🇪🇸 Español' },
           ]
         }
       ] as Setting[]
@@ -213,35 +224,50 @@ export default function SettingsPage() {
     selectedValue,
     onSelect,
   }: {
-    options: { value: Value; label: string; description: string }[];
+    options: { value: Value; label: string; description: string; icon?: any; color?: string }[];
     selectedValue: Value;
     onSelect: (value: Value) => void;
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {options.map((option) => (
-        <motion.button
-          key={option.value}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onSelect(option.value)}
-          className={`min-h-24 rounded-2xl border-2 p-5 text-left transition-all ${
-            selectedValue === option.value
-              ? 'border-violet-500 bg-violet-50 shadow-md shadow-violet-100 dark:bg-violet-900/30 dark:shadow-none'
-              : 'border-slate-100 bg-white hover:border-violet-200 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800'
-          }`}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="font-bold text-slate-900 dark:text-white">{option.label}</div>
-              <div className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">{option.description}</div>
-            </div>
-            {selectedValue === option.value && (
-              <div className="rounded-full bg-violet-500 p-1 text-white shadow-sm shrink-0">
-                <Check className="h-4 w-4" />
+      {options.map((option) => {
+        const Icon = option.icon;
+        return (
+          <motion.button
+            key={option.value}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onSelect(option.value)}
+            className={`relative min-h-28 rounded-2xl border-2 p-5 text-left transition-all ${
+              selectedValue === option.value
+                ? `border-transparent bg-gradient-to-br ${option.color || 'from-violet-500 to-purple-500'} text-white shadow-lg`
+                : 'border-slate-100 bg-white hover:border-violet-200 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800'
+            }`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                {Icon && (
+                  <div className={`rounded-xl p-2 ${selectedValue === option.value ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                )}
+                <div>
+                  <div className={`font-bold ${selectedValue === option.value ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                    {option.label}
+                  </div>
+                  <div className={`mt-1 text-sm font-medium ${selectedValue === option.value ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>
+                    {option.description}
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        </motion.button>
-      ))}
+              {selectedValue === option.value && (
+                <div className="rounded-full bg-white p-1 text-green-500 shadow-sm shrink-0">
+                  <Check className="h-4 w-4" />
+                </div>
+              )}
+            </div>
+          </motion.button>
+        );
+      })}
     </div>
   );
 
@@ -255,18 +281,20 @@ export default function SettingsPage() {
         {/* Header */}
         <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={goBack}
-              className="mb-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+              className="mb-4 inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-slate-800 shadow-lg shadow-purple-500/20 transition-all hover:bg-slate-50 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
               <ArrowLeft className="h-4 w-4" />
-              {t('settingsPage.back')}
-            </button>
-            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">
-              {t('settingsPage.title')}
+              Back
+            </motion.button>
+            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500">
+              ⚙️ Settings
             </h1>
             <p className="mt-2 text-lg font-medium text-slate-600 dark:text-slate-300">
-              {t('settingsPage.subtitle')}
+              Customize your piano adventure! 🎹
             </p>
           </div>
           <div className="flex items-center justify-end">
@@ -277,24 +305,26 @@ export default function SettingsPage() {
         {/* Custom Tabs */}
         <div className="flex p-1 gap-2 bg-white/50 dark:bg-slate-800/50 rounded-2xl shadow-sm backdrop-blur-md">
           {[
-            { id: 'account' as const, label: t('settingsPage.tabs.account'), icon: User },
-            { id: 'preferences' as const, label: t('settingsPage.tabs.preferences'), icon: SlidersHorizontal },
+            { id: 'account' as const, label: '👤 My Profile', icon: User },
+            { id: 'preferences' as const, label: '🎨 Preferences', icon: SlidersHorizontal },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
-              <button
+              <motion.button
                 key={tab.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex items-center justify-center gap-2 rounded-xl px-4 py-4 text-sm font-bold transition-all ${
                   isActive
-                    ? 'bg-white text-pink-600 shadow-lg shadow-pink-100 dark:bg-slate-700 dark:text-pink-400 dark:shadow-none'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
                     : 'text-slate-600 hover:bg-white/50 dark:text-slate-400 dark:hover:bg-slate-700/50'
                 }`}
               >
-                <Icon className={`h-5 w-5 ${isActive ? 'text-pink-500' : ''}`} />
+                <Icon className={`h-5 w-5 ${isActive ? 'text-white' : ''}`} />
                 {tab.label}
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -305,38 +335,61 @@ export default function SettingsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="overflow-hidden rounded-[2rem] bg-white p-6 md:p-8 shadow-xl shadow-slate-200/50 dark:bg-slate-800 dark:shadow-none"
+              className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-6 md:p-8 shadow-xl shadow-purple-500/30 dark:shadow-none"
             >
               <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-6">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 text-3xl font-black text-white shadow-lg shadow-pink-200 dark:shadow-none">
-                    {userProfile?.name ? userProfile.name[0].toUpperCase() : 'P'}
+                  <div className="relative">
+                    <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/20 backdrop-blur-sm text-4xl font-black text-white shadow-xl">
+                      {userProfile?.name ? userProfile.name[0].toUpperCase() : 'P'}
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400 text-xl font-bold text-black shadow-lg">
+                      {userProfile?.level ?? 1}
+                    </div>
                   </div>
                   <div>
-                    <h2 className="text-3xl font-black text-slate-900 dark:text-white">
+                    <h2 className="text-3xl font-black text-white">
                       {userProfile?.name || 'Piano Player'}
                     </h2>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="rounded-lg bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{t('settingsPage.profile.level')} {userProfile?.level ?? 1}</span>
-                      <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-300 capitalize">{personalization.skillLevel}</span>
-                      <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-300 capitalize">{personalization.learningGoal}</span>
+                      <span className="rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
+                        ⭐ Level {userProfile?.level ?? 1}
+                      </span>
+                      <span className="rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold text-white backdrop-blur-sm capitalize">
+                        🎯 {personalization.skillLevel}
+                      </span>
+                      <span className="rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold text-white backdrop-blur-sm capitalize">
+                        💖 {personalization.learningGoal}
+                      </span>
                     </div>
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="flex flex-col items-center justify-center rounded-2xl bg-violet-50 p-4 dark:bg-violet-900/20">
-                    <div className="text-2xl font-black text-violet-600 dark:text-violet-400">{userProfile?.experiencePoints ?? 0}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-violet-400">{t('settingsPage.profile.xp')}</div>
-                  </div>
-                  <div className="flex flex-col items-center justify-center rounded-2xl bg-pink-50 p-4 dark:bg-pink-900/20">
-                    <div className="text-2xl font-black text-pink-600 dark:text-pink-400">{userProfile?.currentStreak ?? 0}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-pink-400">{t('settingsPage.profile.streak')}</div>
-                  </div>
-                  <div className="flex flex-col items-center justify-center rounded-2xl bg-sky-50 p-4 dark:bg-sky-900/20">
-                    <div className="text-2xl font-black text-sky-600 dark:text-sky-400">{userProfile?.practiceGoals.dailyMinutes ?? 15}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-sky-400">{t('settingsPage.profile.minutesPerDay')}</div>
-                  </div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="flex flex-col items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm p-4"
+                  >
+                    <Sparkles className="h-6 w-6 text-yellow-300" />
+                    <div className="mt-2 text-2xl font-black text-white">{userProfile?.experiencePoints ?? 0}</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-white/80">XP Points</div>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="flex flex-col items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm p-4"
+                  >
+                    <Flame className="h-6 w-6 text-orange-300" />
+                    <div className="mt-2 text-2xl font-black text-white">{userProfile?.currentStreak ?? 0}</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-white/80">Day Streak</div>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="flex flex-col items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm p-4"
+                  >
+                    <Music className="h-6 w-6 text-blue-300" />
+                    <div className="mt-2 text-2xl font-black text-white">{userProfile?.completedLessons?.length ?? 0}</div>
+                    <div className="mt-1 text-xs font-bold uppercase tracking-wider text-white/80">Songs</div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
@@ -433,21 +486,34 @@ export default function SettingsPage() {
                           <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs">5</span>
                           {t('settingsPage.personalization.favoriteGenres')}
                         </h3>
-                        <div className="flex flex-wrap gap-3">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           {GENRES.map((genre) => {
-                            const isSelected = personalization.favoriteGenres.includes(genre);
+                            const isSelected = personalization.favoriteGenres.includes(genre.name);
+                            const Icon = genre.icon;
                             return (
-                              <button
-                                key={genre}
-                                onClick={() => toggleGenre(genre)}
-                                className={`rounded-full px-5 py-2.5 text-sm font-bold transition-all shadow-sm ${
+                              <motion.button
+                                key={genre.name}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => toggleGenre(genre.name)}
+                                className={`relative rounded-2xl p-4 text-left transition-all shadow-sm ${
                                   isSelected
-                                    ? 'bg-violet-500 text-white shadow-violet-200'
-                                    : 'bg-white border-2 border-slate-100 text-slate-600 hover:border-violet-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                                    ? `bg-gradient-to-br ${genre.color} text-white shadow-lg`
+                                    : 'bg-white border-2 border-slate-100 text-slate-600 hover:border-violet-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                                 }`}
                               >
-                                {genre}
-                              </button>
+                                <div className="flex items-center gap-3">
+                                  <div className={`rounded-xl p-2 ${isSelected ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-700'}`}>
+                                    <Icon className="h-5 w-5" />
+                                  </div>
+                                  <span className="font-bold">{genre.name}</span>
+                                </div>
+                                {isSelected && (
+                                  <div className="absolute top-2 right-2 rounded-full bg-white p-1">
+                                    <Check className="h-3 w-3 text-green-500" />
+                                  </div>
+                                )}
+                              </motion.button>
                             );
                           })}
                         </div>
