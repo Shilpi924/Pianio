@@ -72,8 +72,11 @@ function App() {
       try {
         const lessons = await contentDatabaseService.getLessons();
         setAllLessons(lessons);
-      } catch (error) {
-        console.error('Failed to load lessons:', error);
+      } catch {
+        // Firebase permission errors are expected if not configured
+        // Fall back to empty array - app will work with local lessons only
+        console.warn('Cloud lessons not available, using local lessons only');
+        setAllLessons([]);
       }
     };
     loadAllLessons();

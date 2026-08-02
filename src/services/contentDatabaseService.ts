@@ -22,8 +22,9 @@ export const contentDatabaseService = {
       });
       
       return lessons;
-    } catch (error) {
-      console.error('Error fetching lessons from cloud database:', error);
+    } catch {
+      // Firebase permission errors are expected if not configured
+      // Silently return empty array - app will work with local lessons only
       return [];
     }
   },

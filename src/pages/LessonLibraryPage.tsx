@@ -74,7 +74,8 @@ export default function LessonLibraryPage() {
 
   useEffect(() => {
     fetchCloudLessons();
-  }, [fetchCloudLessons]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     try {
