@@ -139,18 +139,18 @@ export default function HomePage() {
         {/* More ways to play */}
         <section className="grid gap-4 sm:grid-cols-2">
           <SecondaryCard
-            icon={Piano}
-            title={t('home.freePlay')}
-            subtitle={t('home.freePlayDesc')}
-            accent="primary"
-            onClick={() => setCurrentView('free-play')}
-          />
-          <SecondaryCard
             icon={Library}
             title={t('home.library')}
             subtitle={t('home.libraryDesc')}
             accent="primary"
             onClick={() => setCurrentView('lesson')}
+          />
+          <SecondaryCard
+            icon={Piano}
+            title={t('home.freePlay')}
+            subtitle={t('home.freePlayDesc')}
+            accent="primary"
+            onClick={() => setCurrentView('free-play')}
           />
         </section>
 

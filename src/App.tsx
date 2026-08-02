@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, memo, lazy, Suspense } from 'react';
+import { useEffect, useState, useRef, memo, lazy, Suspense, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useAppStore } from './store/useAppStore';
 import { useUserProfileStore } from './store/useUserProfileStore';
@@ -9,6 +9,7 @@ import PwaBanner from './components/PwaBanner';
 import LevelUpAnimation from './components/LevelUpAnimation';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
+import { contentDatabaseService } from './services/contentDatabaseService';
 import i18n from './i18n';
 import './index.css';
 
@@ -43,11 +44,16 @@ type BeforeInstallPromptEvent = Event & {
 
 function App() {
   useCloudSync();
-  const { currentView, settings, currentLesson, setCurrentView, setCurrentLesson, goBack } = useAppStore();
+  const { currentView, settings, currentLesson, setCurrentView, setCurrentLesson, goBack, customLessons } = useAppStore();
   const { completeOnboarding, hasCompletedOnboarding } = useUserProfileStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [allLessons, setAllLessons] = useState<any[]>([]);
+
+  const allLessonsMemoized = useMemo(() => {
+    return [...allLessons, ...customLessons];
+  }, [allLessons, customLessons]);
   const [levelUpTo, setLevelUpTo] = useState<number | null>(null);
   const previousLevelRef = useRef<number | null>(null);
 
@@ -57,6 +63,20 @@ function App() {
     if (!hasCompletedOnboarding) {
       setCurrentView('onboarding');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Load all lessons for difficulty switching
+    const loadAllLessons = async () => {
+      try {
+        const lessons = await contentDatabaseService.getLessons();
+        setAllLessons(lessons);
+      } catch (error) {
+        console.error('Failed to load lessons:', error);
+      }
+    };
+    loadAllLessons();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -138,6 +158,7 @@ function App() {
             <div className="max-w-7xl mx-auto">
               <LessonPlayer
                 lesson={currentLesson}
+                allLessons={allLessonsMemoized}
                 onExit={() => {
                   setCurrentLesson(null);
                   goBack();
@@ -145,6 +166,9 @@ function App() {
                 onComplete={() => {
                   setCurrentLesson(null);
                   goBack();
+                }}
+                onLessonChange={(newLesson) => {
+                  setCurrentLesson(newLesson);
                 }}
               />
             </div>

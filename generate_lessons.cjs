@@ -1,5 +1,3 @@
-const fs = require('fs');
-
 const parseNotes = (noteString, defaultHand) => {
   // Format: "C4:1 D4:0.5 E4:0.5" -> { note, duration, finger: 1, hand }
   return noteString.trim().split(/\s+/).map(part => {

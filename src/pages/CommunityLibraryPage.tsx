@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Download, Star, Users, Clock, ArrowLeft, Music, TrendingUp, Upload } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
@@ -20,6 +20,7 @@ export default function CommunityLibraryPage() {
 
   useEffect(() => {
     filterAndSortSongs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songs, searchQuery, selectedCategory, selectedDifficulty, sortBy]);
 
   const loadSongs = () => {
@@ -27,7 +28,7 @@ export default function CommunityLibraryPage() {
     setSongs(communitySongs);
   };
 
-  const filterAndSortSongs = () => {
+  const filterAndSortSongs = useCallback(() => {
     let filtered = [...songs];
 
     // Search filter
@@ -59,7 +60,7 @@ export default function CommunityLibraryPage() {
     }
 
     setFilteredSongs(filtered);
-  };
+  }, [songs, searchQuery, selectedCategory, selectedDifficulty, sortBy]);
 
   const handleDownload = async (communitySong: CommunitySong) => {
     communityLibraryService.incrementDownloads(communitySong.id);

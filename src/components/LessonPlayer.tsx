@@ -21,15 +21,17 @@ import { useUserProfileStore } from '../store/useUserProfileStore';
 
 interface LessonPlayerProps {
   lesson: Lesson;
+  allLessons?: Lesson[];
   onComplete?: () => void;
   onExit?: () => void;
+  onLessonChange?: (newLesson: Lesson) => void;
 }
 
 const PREVIEW_LEAD_IN_SECONDS = 2.5;
 const PREVIEW_TEMPO_BPM = 90;
 const PREVIEW_FALLING_NOTE_SPEED = 1.5;
 
-export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlayerProps) {
+export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, onLessonChange }: LessonPlayerProps) {
   const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress, settings } = useAppStore();
   const { addCompletedLesson, addExperience, addPracticeTime, addPracticeSession, updateStreak } = useUserProfileStore();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -99,6 +101,30 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
   const inputMode = settings.inputMode ?? 'midi';
   const useMicrophone = inputMode === 'microphone' || (inputMode === 'auto' && !midiService.isSupported());
   const microphoneVisible = inputMode === 'microphone' || useMicrophone;
+
+  // Find related lessons (same song, different difficulties)
+  const relatedLessons = useMemo(() => {
+    if (!allLessons) return [];
+    const baseName = lesson.title
+      .replace(/\s*\(?Basic\)?$/i, '')
+      .replace(/\s*\(?Beginner\)?$/i, '')
+      .replace(/\s*\(?Intermediate\)?$/i, '')
+      .replace(/\s*\(?Advanced\)?$/i, '')
+      .trim();
+    
+    return allLessons.filter(l => {
+      const lBaseName = l.title
+        .replace(/\s*\(?Basic\)?$/i, '')
+        .replace(/\s*\(?Beginner\)?$/i, '')
+        .replace(/\s*\(?Intermediate\)?$/i, '')
+        .replace(/\s*\(?Advanced\)?$/i, '')
+        .trim();
+      return lBaseName === baseName && l.id !== lesson.id;
+    }).sort((a, b) => {
+      const order = { beginner: 0, intermediate: 1, advanced: 2 };
+      return order[a.difficulty] - order[b.difficulty];
+    });
+  }, [allLessons, lesson.title, lesson.id]);
 
   // Computer keyboard support (for iPad and desktop)
   const useComputerKeyboard = !useMicrophone;
@@ -179,13 +205,10 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
 
     initAudio();
 
-    if (midiService.isSupported()) {
-      midiService.addListener(handleMIDIMessage);
-    }
-
     return () => {
-      midiService.removeListener(handleMIDIMessage);
+      // MIDI listener will be added separately after handleMIDIMessage is defined
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAudioInitialized]);
 
   useEffect(() => {
@@ -323,13 +346,6 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
       setHighlightedNotes([]);
     }
   }, [isPlaying, isPreviewingSong, currentNote, currentNoteIndex, isAudioInitialized, practiceMode, tempo, waitModeEnabled]);
-
-  const handleMIDIMessage = (message: MIDIMessage) => {
-    if (!isPlaying || !currentNote) return;
-    if (message.velocity > 0) {
-      handleNotePlayed(midiToNote(message.note, true));
-    }
-  };
 
   const ensureAudio = async () => {
     if (!isAudioInitialized) {
@@ -632,6 +648,23 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
     [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, isPreviewingSong, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo, useMicrophone]
   );
 
+  const handleMIDIMessage = useCallback((message: MIDIMessage) => {
+    if (!isPlaying || !currentNote) return;
+    if (message.velocity > 0) {
+      handleNotePlayed(midiToNote(message.note, true));
+    }
+  }, [isPlaying, currentNote, handleNotePlayed]);
+
+  useEffect(() => {
+    if (midiService.isSupported()) {
+      midiService.addListener(handleMIDIMessage);
+    }
+
+    return () => {
+      midiService.removeListener(handleMIDIMessage);
+    };
+  }, [handleMIDIMessage]);
+
   useEffect(() => {
     micNoteHandlerRef.current = handleNotePlayed;
   }, [handleNotePlayed]);
@@ -707,6 +740,30 @@ export default function LessonPlayer({ lesson, onComplete, onExit }: LessonPlaye
               </div>
             )}
           </div>
+          {relatedLessons.length > 0 && onLessonChange && (
+            <div className="flex gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-700">
+              {[...relatedLessons, lesson].sort((a, b) => {
+                const order = { beginner: 0, intermediate: 1, advanced: 2 };
+                return order[a.difficulty] - order[b.difficulty];
+              }).map((variant) => (
+                <button
+                  key={variant.id}
+                  onClick={() => {
+                    if (variant.id !== lesson.id) {
+                      onLessonChange(variant);
+                    }
+                  }}
+                  className={`rounded-md px-3 py-1.5 text-xs font-bold uppercase transition-all ${
+                    variant.id === lesson.id
+                      ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-600 dark:text-white'
+                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {variant.difficulty}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2">
             {!isPlaying ? (
               <motion.button

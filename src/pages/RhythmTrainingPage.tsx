@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Play, Square } from 'lucide-react';
 import * as Tone from 'tone';
@@ -97,7 +97,7 @@ export default function RhythmTrainingPage() {
     }
   };
 
-  const handleTap = () => {
+  const handleTap = useCallback(() => {
     if (!isPlaying) return;
     
     // Play a sound when user taps
@@ -108,7 +108,7 @@ export default function RhythmTrainingPage() {
     // Simple logic: if user taps, we assume it's somewhat correct for now
     // A robust implementation would compare Tone.Transport.ticks or Tone.Transport.position with expected beats.
     setScore(prev => prev + 1);
-  };
+  }, [isPlaying, synth]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -119,7 +119,7 @@ export default function RhythmTrainingPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying]);
+  }, [handleTap]);
 
   const accuracy = totalTaps > 0 ? Math.round((score / totalTaps) * 100) : 0;
 

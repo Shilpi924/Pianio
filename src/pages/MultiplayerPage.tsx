@@ -16,6 +16,22 @@ export default function MultiplayerPage() {
   const [localNotes, setLocalNotes] = useState<Set<string>>(new Set());
   const [remoteNotes, setRemoteNotes] = useState<Set<string>>(new Set());
 
+  const handleLocalNoteOn = useCallback((note: string, velocity: number = 0.8) => {
+    setLocalNotes(prev => new Set(prev).add(note));
+    audioService.playNote(note, velocity);
+    webrtcService.sendMessage(JSON.stringify({ type: 'noteOn', note, velocity }));
+  }, []);
+
+  const handleLocalNoteOff = useCallback((note: string) => {
+    setLocalNotes(prev => {
+      const next = new Set(prev);
+      next.delete(note);
+      return next;
+    });
+    audioService.stopNote(note);
+    webrtcService.sendMessage(JSON.stringify({ type: 'noteOff', note }));
+  }, []);
+
   useEffect(() => {
     webrtcService.onStatusChange = (newStatus) => {
       setStatus(newStatus);
@@ -57,7 +73,7 @@ export default function MultiplayerPage() {
       webrtcService.disconnect();
       midiService.removeListener(handleMidiMessage);
     };
-  }, []);
+  }, [handleLocalNoteOn, handleLocalNoteOff]);
 
   const handleCreateRoom = async () => {
     try {
@@ -80,22 +96,6 @@ export default function MultiplayerPage() {
       setStatus('disconnected');
     }
   };
-
-  const handleLocalNoteOn = useCallback((note: string, velocity: number = 0.8) => {
-    setLocalNotes(prev => new Set(prev).add(note));
-    audioService.playNote(note, velocity);
-    webrtcService.sendMessage(JSON.stringify({ type: 'noteOn', note, velocity }));
-  }, []);
-
-  const handleLocalNoteOff = useCallback((note: string) => {
-    setLocalNotes(prev => {
-      const next = new Set(prev);
-      next.delete(note);
-      return next;
-    });
-    audioService.stopNote(note);
-    webrtcService.sendMessage(JSON.stringify({ type: 'noteOff', note }));
-  }, []);
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-6 flex flex-col">

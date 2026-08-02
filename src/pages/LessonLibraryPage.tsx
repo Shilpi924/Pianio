@@ -190,6 +190,36 @@ export default function LessonLibraryPage() {
     return matchesQuery && matchesCategory && matchesDifficulty;
   });
 
+  // Group lessons by base song name
+  const groupLessonsBySong = (lessons: Lesson[]) => {
+    const groups = new Map<string, Lesson[]>();
+    
+    lessons.forEach((lesson) => {
+      // Extract base name by removing difficulty suffixes only
+      let baseName = lesson.title
+        .replace(/\s*\(?Basic\)?$/i, '')
+        .replace(/\s*\(?Beginner\)?$/i, '')
+        .replace(/\s*\(?Intermediate\)?$/i, '')
+        .replace(/\s*\(?Advanced\)?$/i, '')
+        .trim();
+      
+      if (!groups.has(baseName)) {
+        groups.set(baseName, []);
+      }
+      groups.get(baseName)!.push(lesson);
+    });
+    
+    return Array.from(groups.entries()).map(([name, variants]) => ({
+      name,
+      variants: variants.sort((a, b) => {
+        const order = { beginner: 0, intermediate: 1, advanced: 2 };
+        return order[a.difficulty] - order[b.difficulty];
+      }),
+    }));
+  };
+
+  const groupedLessons = groupLessonsBySong(filteredLessons);
+
   const libraryStats = {
     playable: allLessons.filter((lesson) => lesson.notes.length > 40).length,
     imported: customLessons.length,
@@ -455,12 +485,13 @@ export default function LessonLibraryPage() {
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               <AnimatePresence mode="popLayout">
-                {filteredLessons.map((lesson) => {
-                  const progress = lessonProgress[lesson.id];
-                  const percent = progress ? Math.round((progress.currentNoteIndex / lesson.notes.length) * 100) : 0;
-                  const isRecommended = recommendedIds.has(lesson.id);
-                  const isFullSong = lesson.notes.length > 40;
-                  const rightsBadge = getRightsBadge(lesson);
+                {groupedLessons.map(({ name, variants }) => {
+                  const selectedLesson = variants[0];
+                  const progress = lessonProgress[selectedLesson.id];
+                  const percent = progress ? Math.round((progress.currentNoteIndex / selectedLesson.notes.length) * 100) : 0;
+                  const isRecommended = recommendedIds.has(selectedLesson.id);
+                  const isFullSong = selectedLesson.notes.length > 40;
+                  const rightsBadge = getRightsBadge(selectedLesson);
 
                   return (
                     <motion.div
@@ -468,23 +499,14 @@ export default function LessonLibraryPage() {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
-                      key={lesson.id}
-                      onClick={() => startLesson(lesson)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          startLesson(lesson);
-                        }
-                      }}
-                      className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-white text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800 cursor-pointer"
+                      key={name}
+                      className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-white text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800"
                     >
                       <div
                         className={`relative flex h-24 w-full items-center justify-center p-4 ${
-                          lesson.difficulty === 'beginner'
+                          selectedLesson.difficulty === 'beginner'
                             ? 'bg-emerald-100 dark:bg-emerald-900/30'
-                            : lesson.difficulty === 'intermediate'
+                            : selectedLesson.difficulty === 'intermediate'
                               ? 'bg-amber-100 dark:bg-amber-900/30'
                               : 'bg-sky-100 dark:bg-sky-900/30'
                         }`}
@@ -495,20 +517,43 @@ export default function LessonLibraryPage() {
                           </div>
                         )}
                         <span className="text-5xl transition-transform duration-300 group-hover:scale-110">
-                          {lesson.difficulty === 'beginner' ? '🎹' : lesson.difficulty === 'intermediate' ? '🎼' : '🎻'}
+                          {selectedLesson.difficulty === 'beginner' ? '🎹' : selectedLesson.difficulty === 'intermediate' ? '🎼' : '🎻'}
                         </span>
                       </div>
 
                       <div className="flex flex-col p-5">
-                        <span className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">{lesson.category}</span>
+                        <span className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">{selectedLesson.category}</span>
                         <div className="flex items-start gap-2">
-                          <h3 className="line-clamp-1 text-xl font-bold text-slate-900 dark:text-white">{lesson.title}</h3>
+                          <h3 className="line-clamp-1 text-xl font-bold text-slate-900 dark:text-white">{name}</h3>
                           {isFullSong && (
                             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
                               Full song
                             </span>
                           )}
                         </div>
+                        
+                        {/* Difficulty Tabs */}
+                        {variants.length > 1 && (
+                          <div className="mt-3 flex gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-700">
+                            {variants.map((variant) => (
+                              <button
+                                key={variant.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  startLesson(variant);
+                                }}
+                                className={`flex-1 rounded-md px-2 py-1 text-[10px] font-bold uppercase transition-all ${
+                                  variant.difficulty === selectedLesson.difficulty
+                                    ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-600 dark:text-white'
+                                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                }`}
+                              >
+                                {variant.difficulty}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
                         <div className="mt-2 flex flex-wrap gap-2">
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
@@ -526,39 +571,44 @@ export default function LessonLibraryPage() {
                             <ShieldCheck className="h-3 w-3" />
                             {rightsBadge.label}
                           </span>
-                          {lesson.notes.length > 0 && (
+                          {selectedLesson.notes.length > 0 && (
                             <button
-                              onClick={(e) => handlePreviewSong(lesson, e)}
+                              onClick={(e) => handlePreviewSong(selectedLesson, e)}
                               className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition-colors ${
-                                previewingLessonId === lesson.id
+                                previewingLessonId === selectedLesson.id
                                   ? 'bg-fuchsia-500 text-white'
                                   : 'bg-fuchsia-100 text-fuchsia-700 hover:bg-fuchsia-200 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 dark:hover:bg-fuchsia-900/50'
                               }`}
                             >
                               <Volume2 className="h-3 w-3" />
-                              {previewingLessonId === lesson.id ? 'Playing...' : 'Hear'}
+                              {previewingLessonId === selectedLesson.id ? 'Playing...' : 'Hear'}
                             </button>
                           )}
                         </div>
-                        <p className="mt-2 h-10 line-clamp-2 text-sm text-slate-500">{lesson.synopsis}</p>
+                        <p className="mt-2 h-10 line-clamp-2 text-sm text-slate-500">{selectedLesson.synopsis}</p>
 
                         <div className="mt-4">
-                          {progress ? (
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-xs font-bold text-emerald-600">
-                                <span>{progress.completed ? 'Completed' : 'In Progress'}</span>
-                                <span>{percent}%</span>
+                          <button
+                            onClick={() => startLesson(selectedLesson)}
+                            className="w-full"
+                          >
+                            {progress ? (
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs font-bold text-emerald-600">
+                                  <span>{progress.completed ? 'Completed' : 'In Progress'}</span>
+                                  <span>{percent}%</span>
+                                </div>
+                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                                  <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${percent}%` }} />
+                                </div>
                               </div>
-                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-                                <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${percent}%` }} />
+                            ) : (
+                              <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-400 transition-colors hover:text-emerald-600">
+                                <Play className="h-4 w-4 fill-current" />
+                                <span>Start Course</span>
                               </div>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 text-sm font-bold text-slate-400 transition-colors group-hover:text-emerald-600">
-                              <Play className="h-4 w-4 fill-current" />
-                              <span>Start Course</span>
-                            </div>
-                          )}
+                            )}
+                          </button>
                         </div>
                       </div>
                     </motion.div>
@@ -566,7 +616,7 @@ export default function LessonLibraryPage() {
                 })}
               </AnimatePresence>
 
-              {filteredLessons.length === 0 && (
+              {groupedLessons.length === 0 && (
                 <div className="col-span-full rounded-[2rem] bg-white p-12 text-center shadow-xl dark:bg-slate-800">
                   <div className="text-4xl">🔍</div>
                   <h3 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">No songs found</h3>
