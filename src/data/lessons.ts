@@ -4,7 +4,7 @@ import { popSongs } from './popSongs';
 // Tetris Theme (Korobeiniki) - BASIC level
 // From piano-keyboard-guide.com tutorial
 const tetrisBasic: Note[] = [
-  // Right hand melody only - adjusted durations for proper rhythm
+  // Right hand melody only - first part only for beginner
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
@@ -13,7 +13,6 @@ const tetrisBasic: Note[] = [
   { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
   { note: 'A4', duration: 1, finger: 1, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
@@ -28,16 +27,10 @@ const tetrisBasic: Note[] = [
 // Tetris Theme (Korobeiniki) - INTERMEDIATE level
 // From piano-keyboard-guide.com tutorial - right hand only
 const tetrisIntermediate: Note[] = [
-  // Right hand melody - first part - adjusted durations for proper rhythm
+  // Right hand melody - first part
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
-  { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
-  { note: 'A4', duration: 1, finger: 1, hand: 'right' },
-  { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
@@ -74,32 +67,15 @@ const tetrisIntermediate: Note[] = [
 // Tetris Theme (Korobeiniki) - ADVANCED level
 // From piano-keyboard-guide.com tutorial - right hand only
 const tetrisAdvanced: Note[] = [
-  // Right hand melody - main theme - adjusted durations for proper rhythm
+  // Right hand melody - main theme (from tutorial)
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
-  { note: 'A4', duration: 1, finger: 1, hand: 'right' },
-  { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
-  { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
-  { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
-  { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
-  { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
-  { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'A4', duration: 1, finger: 1, hand: 'right' },
-  // Repeat
-  { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
-  { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
-  { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
-  { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
-  { note: 'A4', duration: 1, finger: 1, hand: 'right' },
+  { note: 'A4', duration: 0.5, finger: 1, hand: 'right' },
+  { note: 'A4', duration: 0.5, finger: 1, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
@@ -109,27 +85,28 @@ const tetrisAdvanced: Note[] = [
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'A4', duration: 1, finger: 1, hand: 'right' },
-  // D F A G F section - hand position shift
+  { note: 'A4', duration: 0.5, finger: 1, hand: 'right' },
+  { note: 'A4', duration: 0.5, finger: 1, hand: 'right' },
+  // Second part with D F A G F
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'F5', duration: 0.5, finger: 4, hand: 'right' },
   { note: 'A5', duration: 0.5, finger: 5, hand: 'right' },
   { note: 'G5', duration: 0.5, finger: 4, hand: 'right' },
   { note: 'F5', duration: 0.5, finger: 4, hand: 'right' },
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
-  { note: 'D5', duration: 1, finger: 3, hand: 'right' },
-  { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'B4', duration: 1, finger: 1, hand: 'right' },
+  { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
+  { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
-  { note: 'A4', duration: 1, finger: 1, hand: 'right' },
-  // Bridge section with G#
+  { note: 'A4', duration: 0.5, finger: 1, hand: 'right' },
+  { note: 'A4', duration: 0.5, finger: 1, hand: 'right' },
+  // Bridge section with G# (Ab in tutorial)
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
@@ -137,7 +114,7 @@ const tetrisAdvanced: Note[] = [
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'A4', duration: 0.5, finger: 1, hand: 'right' },
   { note: 'G#4', duration: 0.5, finger: 1, hand: 'right' },
-  { note: 'B4', duration: 1, finger: 1, hand: 'right' },
+  { note: 'B4', duration: 0.5, finger: 1, hand: 'right' },
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'D5', duration: 0.5, finger: 3, hand: 'right' },
@@ -145,7 +122,7 @@ const tetrisAdvanced: Note[] = [
   { note: 'C5', duration: 0.5, finger: 2, hand: 'right' },
   { note: 'E5', duration: 0.5, finger: 3, hand: 'right' },
   { note: 'A4', duration: 0.5, finger: 1, hand: 'right' },
-  { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
+  { note: 'G#4', duration: 0.5, finger: 1, hand: 'right' },
 ];
 
 const janaGanaManaFinger: Record<string, FingerNumber> = {
