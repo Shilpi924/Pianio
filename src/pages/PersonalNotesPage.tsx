@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { Plus, Edit2, Trash2, Pin, PinOff, Search, X, Filter } from 'lucide-react';
+import { Plus, Edit2, Trash2, Pin, PinOff, Search, X, Filter, Image as ImageIcon, ZoomIn, XCircle } from 'lucide-react';
 import type { PersonalNote } from '../types';
 
 const categoryColors = {
@@ -31,7 +31,9 @@ export default function PersonalNotesPage() {
     category: 'general' as PersonalNote['category'],
     tags: '',
     color: '#3eb489',
+    images: [] as string[],
   });
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
 
   const filteredNotes = personalNotes
     .filter((note) => {
@@ -70,6 +72,7 @@ export default function PersonalNotesPage() {
       category: 'general',
       tags: '',
       color: '#3eb489',
+      images: [],
     });
     setIsCreating(false);
   };
@@ -82,6 +85,7 @@ export default function PersonalNotesPage() {
       category: note.category,
       tags: note.tags.join(', '),
       color: note.color,
+      images: note.images || [],
     });
     setIsCreating(true);
   };
@@ -169,6 +173,7 @@ export default function PersonalNotesPage() {
                       category: 'general',
                       tags: '',
                       color: '#3eb489',
+                      images: [],
                     });
                   }}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
@@ -253,6 +258,71 @@ export default function PersonalNotesPage() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Images
+                  </label>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="file"
+                        id="image-upload"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          files.forEach((file) => {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              if (event.target?.result) {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  images: [...prev.images, event.target!.result as string],
+                                }));
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          });
+                        }}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="image-upload"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 cursor-pointer hover:border-purple-500 dark:hover:border-purple-500 transition-colors"
+                      >
+                        <ImageIcon className="w-5 h-5 text-gray-400" />
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Upload Images</span>
+                      </label>
+                    </div>
+
+                    {formData.images.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {formData.images.map((image, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={image}
+                              alt={`Upload ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  images: prev.images.filter((_, i) => i !== index),
+                                }));
+                              }}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
@@ -271,6 +341,7 @@ export default function PersonalNotesPage() {
                         category: 'general',
                         tags: '',
                         color: '#3eb489',
+                        images: [],
                       });
                     }}
                     className="px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
@@ -349,6 +420,34 @@ export default function PersonalNotesPage() {
                     {note.content}
                   </p>
 
+                  {note.images && note.images.length > 0 && (
+                    <div className="mb-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        {note.images.slice(0, 4).map((image, index) => (
+                          <div
+                            key={index}
+                            className="relative group cursor-pointer"
+                            onClick={() => setViewingImage(image)}
+                          >
+                            <img
+                              src={image}
+                              alt={`Note image ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                              <ZoomIn className="w-6 h-6 text-white" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {note.images.length > 4 && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          +{note.images.length - 4} more images
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   {note.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">
                       {note.tags.map((tag, index) => (
@@ -368,6 +467,23 @@ export default function PersonalNotesPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Image Viewer Modal */}
+        {viewingImage && (
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+            <button
+              onClick={() => setViewingImage(null)}
+              className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <img
+              src={viewingImage}
+              alt="Full size"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            />
           </div>
         )}
       </div>

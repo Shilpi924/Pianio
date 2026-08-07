@@ -149,4 +149,5 @@ export interface PersonalNote {
   createdAt: Date;
   updatedAt: Date;
   pinned?: boolean;
+  images?: string[]; // Base64 encoded images
 }
