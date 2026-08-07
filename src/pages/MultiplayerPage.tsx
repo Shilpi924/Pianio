@@ -98,7 +98,7 @@ export default function MultiplayerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-6 flex flex-col">
+    <div className="min-h-screen bg-slate-900 text-slate-100 p-6 flex flex-col pb-24 md:pb-6">
       <header className="flex items-center justify-between mb-8 max-w-5xl mx-auto w-full">
         <button
           onClick={() => setCurrentView('home')}

@@ -7,6 +7,7 @@ import LessonPlayer from './components/LessonPlayer';
 import AIChatBot from './components/AIChatBot';
 import PwaBanner from './components/PwaBanner';
 import LevelUpAnimation from './components/LevelUpAnimation';
+import Navigation from './components/Navigation';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
 import { contentDatabaseService } from './services/contentDatabaseService';
@@ -159,6 +160,7 @@ function App() {
       case 'lesson':
         return currentLesson ? (
           <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-3 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 md:p-4">
+            <Navigation />
             <div className="max-w-7xl mx-auto">
               <LessonPlayer
                 lesson={currentLesson}
@@ -179,96 +181,112 @@ function App() {
           </div>
         ) : (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <LessonLibraryPage />
           </Suspense>
         );
       case 'practice':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <ChordTrainerPage />
           </Suspense>
         );
       case 'scales':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <ScalesTrainerPage />
           </Suspense>
         );
       case 'curriculum':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <CurriculumPage />
           </Suspense>
         );
       case 'ear-training':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <EarTrainingPage />
           </Suspense>
         );
       case 'note-naming':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <NoteNamingPage />
           </Suspense>
         );
       case 'sight-reading':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <SightReadingPage />
           </Suspense>
         );
       case 'hand-positioning':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <HandPositioningPage />
           </Suspense>
         );
       case 'performance':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <PerformanceModePage />
           </Suspense>
         );
       case 'interval-training':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <IntervalTrainingPage />
           </Suspense>
         );
       case 'rhythm-training':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <RhythmTrainingPage />
           </Suspense>
         );
       case 'vr-piano':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <VRPianoPage />
           </Suspense>
         );
       case 'multiplayer':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <MultiplayerPage />
           </Suspense>
         );
       case 'tutorials':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <TutorialsPage />
           </Suspense>
         );
       case 'song-upload':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <SongUploadPage />
           </Suspense>
         );
       case 'community-library':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <CommunityLibraryPage />
           </Suspense>
         );
@@ -284,36 +302,42 @@ function App() {
       case 'free-play':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <FreePlayPage />
           </Suspense>
         );
       case 'statistics':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <StatisticsPage />
           </Suspense>
         );
       case 'settings':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <SettingsPage />
           </Suspense>
         );
       case 'rewards-shop':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <RewardsShopPage />
           </Suspense>
         );
       case 'arcade':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <ArcadePage />
           </Suspense>
         );
       case 'personal-notes':
         return (
           <Suspense fallback={<LoadingFallback />}>
+            <Navigation />
             <PersonalNotesPage />
           </Suspense>
         );

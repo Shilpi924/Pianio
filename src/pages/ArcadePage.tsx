@@ -58,7 +58,7 @@ export default function ArcadePage() {
   const { setCurrentView } = useAppStore();
 
   return (
-    <div className="min-h-screen bg-slate-900 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.06)_1px,_transparent_0)] bg-[length:24px_24px] p-4 md:p-8">
+    <div className="min-h-screen bg-slate-900 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.06)_1px,_transparent_0)] bg-[length:24px_24px] p-4 md:p-8 pb-24 md:pb-8">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

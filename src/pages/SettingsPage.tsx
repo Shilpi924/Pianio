@@ -272,7 +272,7 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 md:p-8 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)]">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 md:p-8 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] pb-24 md:pb-8">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -407,7 +407,7 @@ export default function SettingsPage() {
               >
                 <div>
                   <div className="flex items-center gap-4">
-                    <div className="rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 p-3 shadow-lg shadow-violet-200 dark:shadow-none">
+                    <div className="rounded-2xl bg-white/20 p-3 backdrop-blur-sm">
                       <Sparkles className="h-6 w-6 text-white" />
                     </div>
                     <div>
