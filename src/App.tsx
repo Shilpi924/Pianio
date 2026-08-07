@@ -36,6 +36,7 @@ const CommunityLibraryPage = lazy(() => import('./pages/CommunityLibraryPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const RewardsShopPage = lazy(() => import('./pages/RewardsShopPage'));
 const ArcadePage = lazy(() => import('./pages/ArcadePage'));
+const PersonalNotesPage = lazy(() => import('./pages/PersonalNotesPage'));
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -308,6 +309,12 @@ function App() {
         return (
           <Suspense fallback={<LoadingFallback />}>
             <ArcadePage />
+          </Suspense>
+        );
+      case 'personal-notes':
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <PersonalNotesPage />
           </Suspense>
         );
       default:

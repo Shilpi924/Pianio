@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, Flame, ArrowRight } from 'lucide-react';
+import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, Flame, ArrowRight, StickyNote } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { getEnhancedLessons } from '../services/musicCatalogService';
@@ -197,6 +197,13 @@ export default function HomePage() {
             subtitle={t('home.progressDesc')}
             accent="success"
             onClick={() => setCurrentView('statistics')}
+          />
+          <SecondaryCard
+            icon={StickyNote}
+            title="Personal Notes"
+            subtitle="Capture your musical insights"
+            accent="primary"
+            onClick={() => setCurrentView('personal-notes')}
           />
         </section>
       </motion.main>

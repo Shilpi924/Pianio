@@ -42,6 +42,12 @@ interface AppStore extends AppState {
   // Audio
   audioEnabled: boolean;
   setAudioEnabled: (enabled: boolean) => void;
+
+  // Personal Notes
+  personalNotes: PersonalNote[];
+  addPersonalNote: (note: Omit<PersonalNote, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updatePersonalNote: (id: string, note: Partial<PersonalNote>) => void;
+  deletePersonalNote: (id: string) => void;
 }
 
 const defaultSettings: Settings = {
@@ -205,6 +211,31 @@ export const useAppStore = create<AppStore>()(
       // Audio
       audioEnabled: true,
       setAudioEnabled: (enabled) => set({ audioEnabled: enabled }),
+
+      // Personal Notes
+      personalNotes: [],
+      addPersonalNote: (note) =>
+        set((state) => ({
+          personalNotes: [
+            ...state.personalNotes,
+            {
+              ...note,
+              id: crypto.randomUUID(),
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ],
+        })),
+      updatePersonalNote: (id, updatedNote) =>
+        set((state) => ({
+          personalNotes: state.personalNotes.map((note) =>
+            note.id === id ? { ...note, ...updatedNote, updatedAt: new Date() } : note
+          ),
+        })),
+      deletePersonalNote: (id) =>
+        set((state) => ({
+          personalNotes: state.personalNotes.filter((note) => note.id !== id),
+        })),
     }),
     {
       name: 'pianio-storage',
@@ -215,6 +246,7 @@ export const useAppStore = create<AppStore>()(
         lessonProgress: state.lessonProgress,
         customLessons: state.customLessons,
         cloudLessons: state.cloudLessons,
+        personalNotes: state.personalNotes,
       }),
     }
   )

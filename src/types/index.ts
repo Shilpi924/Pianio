@@ -124,7 +124,7 @@ export interface RecommendedTrack {
 }
 
 export interface AppState {
-  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'community-library' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'rhythm-training' | 'vr-piano' | 'multiplayer' | 'rewards-shop' | 'arcade';
+  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'community-library' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'rhythm-training' | 'vr-piano' | 'multiplayer' | 'rewards-shop' | 'arcade' | 'personal-notes';
   currentLesson: Lesson | null;
   isPlaying: boolean;
   tempo: number;
@@ -137,4 +137,16 @@ export interface RhythmExercise {
   timeSignature: [number, number]; // e.g., [4, 4]
   tempo: number;
   sequence: { type: 'note' | 'rest'; duration: number }[]; // duration in beats (e.g., 1 for quarter, 0.5 for eighth)
+}
+
+export interface PersonalNote {
+  id: string;
+  title: string;
+  content: string;
+  category: 'practice' | 'theory' | 'technique' | 'repertoire' | 'general';
+  tags: string[];
+  color: string;
+  createdAt: Date;
+  updatedAt: Date;
+  pinned?: boolean;
 }
