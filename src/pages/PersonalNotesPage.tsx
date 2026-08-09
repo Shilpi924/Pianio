@@ -39,7 +39,7 @@ export default function PersonalNotesPage() {
     .filter((note) => {
       const matchesSearch = note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                          note.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesCategory = selectedCategory === 'all' || note.category === selectedCategory;
       return matchesSearch && matchesCategory;
     })
@@ -380,8 +380,8 @@ export default function PersonalNotesPage() {
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${categoryColors[note.category]}`}>
-                        {categoryLabels[note.category]}
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${categoryColors[note.category as keyof typeof categoryColors]}`}>
+                        {categoryLabels[note.category as keyof typeof categoryLabels]}
                       </span>
                       {note.pinned && (
                         <Pin className="w-4 h-4 text-purple-500" />
@@ -423,7 +423,7 @@ export default function PersonalNotesPage() {
                   {note.images && note.images.length > 0 && (
                     <div className="mb-3">
                       <div className="grid grid-cols-2 gap-2">
-                        {note.images.slice(0, 4).map((image, index) => (
+                        {note.images.slice(0, 4).map((image: string, index: number) => (
                           <div
                             key={index}
                             className="relative group cursor-pointer"
@@ -450,7 +450,7 @@ export default function PersonalNotesPage() {
 
                   {note.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {note.tags.map((tag, index) => (
+                      {note.tags.map((tag: string, index: number) => (
                         <span
                           key={index}
                           className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs"

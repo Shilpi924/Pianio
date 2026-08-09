@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AppState, Lesson, Settings, Statistics, MIDIDevice, LessonProgress } from '../types';
+import type { AppState, Lesson, Settings, Statistics, MIDIDevice, LessonProgress, PersonalNote } from '../types';
 import { contentDatabaseService } from '../services/contentDatabaseService';
 
 interface AppStore extends AppState {
