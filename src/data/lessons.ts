@@ -1277,5 +1277,108 @@ export const sampleLessons: Lesson[] = [
       { note: 'A3', duration: 4, finger: 5, hand: 'left' },
     ],
   },
+  {
+    id: 'tiranga',
+    title: 'Tiranga (YODHA)',
+    tempo: 88,
+    difficulty: 'intermediate',
+    category: 'Hindi',
+    source: 'public-domain',
+    sourceName: 'Tanishk Bagchi — B Praak — YODHA movie',
+    focus: ['Powerful melody', 'Emotional expression', 'Dynamic control'],
+    tags: ['patriotic', 'India', 'Bollywood', 'YODHA'],
+    synopsis: 'A powerful patriotic song from the movie YODHA, sung by B Praak and composed by Tanishk Bagchi.',
+    practiceTip: 'Play with power and emotion. Build up the dynamics gradually and let the melody soar in the chorus sections.',
+    ageBand: 'all',
+    notes: [
+      // Opening - gentle start
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'C5', duration: 2, finger: 1, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'G4', duration: 2, finger: 3, hand: 'right' },
+      
+      // Building up
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'C5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'D5', duration: 2, finger: 2, hand: 'right' },
+      { note: 'C5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'A4', duration: 2, finger: 4, hand: 'right' },
+      
+      // Main melody - Tiranga
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'C5', duration: 2, finger: 1, hand: 'right' },
+      { note: 'D5', duration: 1, finger: 2, hand: 'right' },
+      { note: 'E5', duration: 1, finger: 3, hand: 'right' },
+      { note: 'D5', duration: 2, finger: 2, hand: 'right' },
+      
+      // Climax section
+      { note: 'C5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'D5', duration: 1, finger: 2, hand: 'right' },
+      { note: 'E5', duration: 1, finger: 3, hand: 'right' },
+      { note: 'F#5', duration: 2, finger: 4, hand: 'right' },
+      { note: 'E5', duration: 1, finger: 3, hand: 'right' },
+      { note: 'D5', duration: 1, finger: 2, hand: 'right' },
+      { note: 'C5', duration: 2, finger: 1, hand: 'right' },
+      
+      // Emotional bridge
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'A4', duration: 2, finger: 4, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'C5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'B4', duration: 2, finger: 5, hand: 'right' },
+      
+      // Second verse - similar pattern
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'C5', duration: 2, finger: 1, hand: 'right' },
+      { note: 'D5', duration: 1, finger: 2, hand: 'right' },
+      { note: 'E5', duration: 1, finger: 3, hand: 'right' },
+      { note: 'D5', duration: 2, finger: 2, hand: 'right' },
+      
+      // Building to final climax
+      { note: 'C5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'D5', duration: 1, finger: 2, hand: 'right' },
+      { note: 'E5', duration: 1, finger: 3, hand: 'right' },
+      { note: 'F#5', duration: 2, finger: 4, hand: 'right' },
+      { note: 'G5', duration: 1, finger: 5, hand: 'right' },
+      { note: 'F#5', duration: 1, finger: 4, hand: 'right' },
+      { note: 'E5', duration: 2, finger: 3, hand: 'right' },
+      
+      // Final climax
+      { note: 'D5', duration: 1, finger: 2, hand: 'right' },
+      { note: 'E5', duration: 1, finger: 3, hand: 'right' },
+      { note: 'F#5', duration: 1, finger: 4, hand: 'right' },
+      { note: 'G5', duration: 2, finger: 5, hand: 'right' },
+      { note: 'A5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'G5', duration: 1, finger: 5, hand: 'right' },
+      { note: 'F#5', duration: 2, finger: 4, hand: 'right' },
+      
+      // Resolution
+      { note: 'E5', duration: 1, finger: 3, hand: 'right' },
+      { note: 'D5', duration: 1, finger: 2, hand: 'right' },
+      { note: 'C5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'B4', duration: 2, finger: 5, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'F#4', duration: 2, finger: 2, hand: 'right' },
+      
+      // Final ending
+      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
+      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
+      { note: 'C#4', duration: 2, finger: 1, hand: 'right' },
+      { note: 'B3', duration: 2, finger: 1, hand: 'left' },
+      { note: 'A3', duration: 4, finger: 5, hand: 'left' },
+    ],
+  },
   ...popSongs,
 ];
