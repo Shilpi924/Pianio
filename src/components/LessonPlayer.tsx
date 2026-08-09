@@ -607,6 +607,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
         if (useMicrophone) {
           clearAdvanceTimeout();
         }
+        setIsPlaying(false);
         recordNotePlayed(false);
         setCombo(0);
         
@@ -639,7 +640,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
               SoundEffects.playIncorrect();
             }
             setMascotMood('thinking');
-            setMascotMessage(waitModeEnabled ? 'Close. Try that note again.' : 'Missed it. Reset and listen for the pattern.');
+            setMascotMessage('Mistake! Playback stopped. Press Play to try again.');
           }
           return nextStreak;
         });
