@@ -801,38 +801,38 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
             </motion.button>
 
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => setUseFallingNotes(!useFallingNotes)}
-              className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-bold shadow-sm transition-colors ${
+              className={`inline-flex min-h-12 items-center justify-center rounded-2xl px-5 py-3 text-base font-black shadow-lg transition-colors ${
                 useFallingNotes
-                  ? 'bg-purple-500 text-white hover:bg-purple-600'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
+                  : 'bg-orange-200 text-orange-700 hover:bg-orange-300 dark:bg-orange-900/30 dark:text-orange-300 dark:hover:bg-orange-900/50'
               }`}
               title="Toggle Falling Notes"
             >
-              <Layers className="h-4 w-4" />
+              <Layers className="h-6 w-6" />
             </motion.button>
 
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => setShowSettings(true)}
-              className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-gray-200 px-4 py-2 text-sm font-semibold transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-400 to-yellow-400 px-5 py-3 text-base font-black text-white shadow-lg transition-colors hover:from-orange-500 hover:to-yellow-500"
               title="Settings"
             >
-              <Settings className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              <Settings className="h-6 w-6" />
             </motion.button>
 
             {onExit && (
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={onExit}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rose-100 px-4 py-2 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300"
+                className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-gradient-to-r from-pink-400 to-red-400 px-5 py-3 text-base font-black text-white shadow-lg transition-colors hover:from-pink-500 hover:to-red-500"
                 title="Back"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-6 w-6" />
                 <span className="hidden sm:inline">Back</span>
               </motion.button>
             )}
@@ -841,28 +841,28 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
 
         <div className="flex items-center gap-4">
           <div className="flex-1">
-            <div className="mb-2 flex justify-between text-sm font-medium text-gray-600 dark:text-gray-300">
-              <span>Notes Played: {currentNoteIndex} / {lesson.notes.length}</span>
+            <div className="mb-2 flex justify-between text-base font-black text-orange-700 dark:text-orange-300 font-kid">
+              <span>🎵 Notes: {currentNoteIndex} / {lesson.notes.length}</span>
               <span>{Math.round(progress)}%</span>
             </div>
-            <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+            <div className="h-4 w-full rounded-full bg-orange-200 dark:bg-orange-900/50 overflow-hidden shadow-inner">
               <motion.div
-                className="h-full bg-gradient-to-r from-blue-400 to-indigo-500"
+                className="h-full bg-gradient-to-r from-orange-400 via-yellow-400 to-pink-400 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}
               />
             </div>
           </div>
-          <div className="flex items-center gap-4 border-l border-gray-200 pl-4 dark:border-gray-700">
-            <div className="text-center">
-              <div className="text-sm font-bold text-green-500">{accuracy}%</div>
-              <div className="text-[10px] uppercase tracking-wider text-gray-500">Accuracy</div>
+          <div className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-green-400 to-emerald-400 px-4 py-2 shadow-lg">
+            <div className="text-lg font-black text-white font-kid">
+              {accuracy}%
             </div>
-            <div className="text-center">
-              <div className="text-sm font-bold text-orange-500">{combo}x</div>
-              <div className="text-[10px] uppercase tracking-wider text-gray-500">Combo</div>
-            </div>
+            <div className="text-xs font-bold text-white/80">Accuracy</div>
+          </div>
+          <div className="text-center">
+            <div className="text-sm font-bold text-orange-500">{combo}x</div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-500">Combo</div>
           </div>
         </div>
       </div>

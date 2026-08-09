@@ -43,7 +43,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] md:p-8 pb-24 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-orange-900/20 dark:to-pink-900/20 p-4 md:p-8 pb-24 md:pb-8 font-kid">
       <motion.main
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -57,34 +57,34 @@ export default function HomePage() {
               initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="mb-2 inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-1.5 text-sm font-bold text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+              className="mb-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-400 to-yellow-400 px-6 py-2 text-base font-black text-white shadow-lg animate-bounce-soft"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-5 w-5" />
               {t('home.tagline')}
             </motion.div>
-            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white md:text-6xl">
+            <h1 className="text-5xl font-black tracking-tight text-orange-600 dark:text-orange-300 md:text-7xl font-kid">
               {t('home.welcome', { name: userProfile?.name || 'Pianist' })}
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 md:justify-end">
-            <div className="flex items-center gap-3 rounded-full bg-white/80 backdrop-blur-md px-4 py-2 shadow-sm ring-1 ring-slate-200 dark:bg-gray-800/80 dark:ring-gray-700">
-              <div className="flex items-center gap-1.5 text-sm font-bold text-orange-500">
-                <Flame className="h-4 w-4" />
+          <div className="flex flex-wrap items-center justify-center gap-4 md:justify-end">
+            <div className="flex items-center gap-4 rounded-3xl bg-white/90 backdrop-blur-md px-6 py-3 shadow-xl ring-2 ring-orange-200 dark:bg-gray-800/90 dark:ring-orange-700">
+              <div className="flex items-center gap-2 text-lg font-black text-orange-500">
+                <Flame className="h-6 w-6 animate-pulse" />
                 {userProfile?.currentStreak ?? 0}
               </div>
-              <div className="h-4 w-px bg-slate-200 dark:bg-gray-700" />
-              <div className="flex items-center gap-1.5 text-sm font-bold text-violet-600 dark:text-violet-400">
-                <Sparkles className="h-4 w-4" />
+              <div className="h-6 w-px bg-orange-200 dark:bg-orange-700" />
+              <div className="flex items-center gap-2 text-lg font-black text-blue-500">
+                <Sparkles className="h-6 w-6 animate-bounce" />
                 {userProfile?.experiencePoints ?? 0} XP
               </div>
             </div>
             <div className="relative">
-              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-500" />
               <select
                 value={settings.language || 'en'}
                 onChange={handleLanguageChange}
-                className="appearance-none rounded-full bg-white/80 backdrop-blur-md pl-9 pr-8 py-2 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-gray-800/80 dark:text-gray-200 dark:ring-gray-700 dark:hover:bg-gray-800"
+                className="appearance-none rounded-3xl bg-white/90 backdrop-blur-md pl-12 pr-10 py-3 text-base font-black text-orange-700 shadow-xl ring-2 ring-orange-200 transition-all hover:bg-white hover:ring-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-500 dark:bg-gray-800/90 dark:text-orange-300 dark:ring-orange-700 dark:hover:bg-gray-800"
               >
                 <option value="en">EN</option>
                 <option value="zh">ZH</option>
@@ -93,13 +93,15 @@ export default function HomePage() {
                 <option value="es">ES</option>
               </select>
             </div>
-            <ProfileSwitcher />
+            <div className="transform hover:scale-110 transition-transform">
+              <ProfileSwitcher />
+            </div>
             <button
               onClick={() => setCurrentView('settings')}
               aria-label={t('home.settings')}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/80 backdrop-blur-md text-slate-600 shadow-sm ring-1 ring-slate-200 transition-all hover:bg-white hover:text-slate-900 dark:bg-gray-800/80 dark:text-gray-300 dark:ring-gray-700 dark:hover:bg-gray-800"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-white/90 backdrop-blur-md text-orange-600 shadow-xl ring-2 ring-orange-200 transition-all hover:bg-white hover:text-orange-700 hover:scale-110 dark:bg-gray-800/90 dark:text-orange-300 dark:ring-orange-700 dark:hover:bg-gray-800"
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-7 w-7" />
             </button>
           </div>
         </header>
