@@ -1198,6 +1198,7 @@ export const sampleLessons: Lesson[] = [
     practiceTip: 'Play with grace and dignity. Focus on smooth transitions between notes and maintain a steady, reverent tempo.',
     ageBand: 'all',
     notes: [
+      // First phrase - Vande Mataram
       { note: 'E4', duration: 1, finger: 1, hand: 'right' },
       { note: 'F#4', duration: 1, finger: 2, hand: 'right' },
       { note: 'G4', duration: 1, finger: 3, hand: 'right' },
@@ -1206,6 +1207,7 @@ export const sampleLessons: Lesson[] = [
       { note: 'F#4', duration: 1, finger: 2, hand: 'right' },
       { note: 'E4', duration: 2, finger: 1, hand: 'right' },
       
+      // Second phrase
       { note: 'D4', duration: 1, finger: 2, hand: 'right' },
       { note: 'E4', duration: 1, finger: 1, hand: 'right' },
       { note: 'F#4', duration: 1, finger: 2, hand: 'right' },
@@ -1214,6 +1216,7 @@ export const sampleLessons: Lesson[] = [
       { note: 'G4', duration: 1, finger: 3, hand: 'right' },
       { note: 'F#4', duration: 2, finger: 2, hand: 'right' },
       
+      // Third phrase
       { note: 'E4', duration: 1, finger: 1, hand: 'right' },
       { note: 'D4', duration: 1, finger: 2, hand: 'right' },
       { note: 'E4', duration: 1, finger: 1, hand: 'right' },
@@ -1222,12 +1225,56 @@ export const sampleLessons: Lesson[] = [
       { note: 'F#4', duration: 1, finger: 2, hand: 'right' },
       { note: 'E4', duration: 2, finger: 1, hand: 'right' },
       
+      // Fourth phrase - ending
       { note: 'D4', duration: 1, finger: 2, hand: 'right' },
       { note: 'C#4', duration: 1, finger: 1, hand: 'right' },
       { note: 'D4', duration: 2, finger: 2, hand: 'right' },
       { note: 'B3', duration: 1, finger: 1, hand: 'left' },
       { note: 'A3', duration: 1, finger: 5, hand: 'left' },
       { note: 'G3', duration: 2, finger: 4, hand: 'left' },
+      
+      // Fifth phrase - repeat with variation
+      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
+      { note: 'F#4', duration: 1, finger: 2, hand: 'right' },
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'A4', duration: 2, finger: 4, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'G4', duration: 2, finger: 3, hand: 'right' },
+      
+      // Sixth phrase - building up
+      { note: 'F#4', duration: 1, finger: 2, hand: 'right' },
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'B4', duration: 2, finger: 5, hand: 'right' },
+      { note: 'C5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'A4', duration: 2, finger: 4, hand: 'right' },
+      
+      // Seventh phrase - climax
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'B4', duration: 1, finger: 5, hand: 'right' },
+      { note: 'C5', duration: 2, finger: 1, hand: 'right' },
+      { note: 'D5', duration: 1, finger: 2, hand: 'right' },
+      { note: 'C5', duration: 1, finger: 1, hand: 'right' },
+      { note: 'B4', duration: 2, finger: 5, hand: 'right' },
+      
+      // Eighth phrase - resolution
+      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
+      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
+      { note: 'F#4', duration: 1, finger: 2, hand: 'right' },
+      { note: 'E4', duration: 2, finger: 1, hand: 'right' },
+      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
+      { note: 'C#4', duration: 1, finger: 1, hand: 'right' },
+      { note: 'D4', duration: 3, finger: 2, hand: 'right' },
+      
+      // Final ending
+      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
+      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
+      { note: 'C#4', duration: 2, finger: 1, hand: 'right' },
+      { note: 'B3', duration: 2, finger: 1, hand: 'left' },
+      { note: 'A3', duration: 4, finger: 5, hand: 'left' },
     ],
   },
   ...popSongs,
