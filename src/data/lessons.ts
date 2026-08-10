@@ -688,21 +688,6 @@ const darudeSandstormAdvancedNotes: Note[] = ([
 
 export const sampleLessons: Lesson[] = [
   {
-    id: 'jana-gana-mana',
-    title: 'Jana Gana Mana (Complete Anthem)',
-    tempo: 102,
-    difficulty: 'intermediate',
-    category: 'Hindi',
-    source: 'public-domain',
-    sourceName: 'Rabindranath Tagore — complete first stanza',
-    focus: ['Eighth-note timing', 'Sustained notes', 'Dignified phrasing'],
-    tags: ['national anthem', 'India', 'complete song'],
-    synopsis: 'The complete 52-second full version of India\'s national anthem.',
-    practiceTip: 'Follow the luminous hold beam carefully and keep the tempo steady and dignified.',
-    ageBand: 'all',
-    notes: janaGanaManaNotes,
-  },
-  {
     id: 'darude-sandstorm-beginner',
     title: 'Darude Sandstorm (Beginner)',
     tempo: 130,
@@ -746,6 +731,21 @@ export const sampleLessons: Lesson[] = [
     practiceTip: 'Master the intermediate version first, then tackle the fast sixteenth-note runs.',
     ageBand: 'teens',
     notes: darudeSandstormAdvancedNotes,
+  },
+  {
+    id: 'jana-gana-mana',
+    title: 'Jana Gana Mana (Complete Anthem)',
+    tempo: 102,
+    difficulty: 'intermediate',
+    category: 'Hindi',
+    source: 'public-domain',
+    sourceName: 'Rabindranath Tagore — complete first stanza',
+    focus: ['Eighth-note timing', 'Sustained notes', 'Dignified phrasing'],
+    tags: ['national anthem', 'India', 'complete song'],
+    synopsis: 'The complete 52-second full version of India\'s national anthem.',
+    practiceTip: 'Follow the luminous hold beam carefully and keep the tempo steady and dignified.',
+    ageBand: 'all',
+    notes: janaGanaManaNotes,
   },
   {
     id: 'tetris-basic',
