@@ -686,7 +686,58 @@ const darudeSandstormAdvancedNotes: Note[] = ([
   hand: 'right',
 }));
 
+// Darude Sandstorm - Easy / White Keys Only Version (letter-note transcription)
+const darudeSandstormEasyFinger: Record<string, FingerNumber> = {
+  'A4': 3,
+  'B4': 4,
+  'D4': 2,
+  'E4': 1,
+};
+
+const darudeSandstormEasyNotes: Note[] = ([
+  ['E4', 0.25], ['E4', 0.25], ['E4', 0.25], ['E4', 0.25], ['E4', 0.25], ['E4', 0.25],
+  ['E4', 0.25], ['D4', 0.25], ['D4', 0.25], ['D4', 0.25], ['D4', 0.25], ['D4', 0.25],
+  ['D4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['D4', 0.25], ['D4', 0.25], ['E4', 0.25], ['E4', 0.25], ['A4', 0.25],
+  ['A4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['E4', 0.25],
+  ['E4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['E4', 0.25], ['E4', 0.25], ['E4', 0.25],
+  ['E4', 0.25], ['E4', 0.25], ['E4', 0.25], ['E4', 0.25], ['D4', 0.25], ['D4', 0.25],
+  ['D4', 0.25], ['D4', 0.25], ['D4', 0.25], ['D4', 0.25], ['D4', 0.25], ['A4', 0.25],
+  ['A4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['E4', 0.25], ['E4', 0.25], ['E4', 0.25], ['E4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25], ['B4', 0.25],
+  ['B4', 0.25],
+] as Array<[string, number]>).map(([note, duration]) => ({
+  note,
+  duration,
+  finger: darudeSandstormEasyFinger[note],
+  hand: 'right',
+}));
+
 export const sampleLessons: Lesson[] = [
+  {
+    id: 'darude-sandstorm-easy',
+    title: 'Darude Sandstorm (Easy - White Keys Only)',
+    tempo: 130,
+    difficulty: 'beginner',
+    category: 'Electronic',
+    source: 'public-domain',
+    sourceName: 'Darude — simplified letter-note version (natural keys only)',
+    focus: ['White keys only', 'Repeating patterns', 'No sharps/flats'],
+    tags: ['electronic', 'dance', 'sandstorm', 'beginner', 'white-keys'],
+    synopsis: 'A simplified white-keys-only version of the Sandstorm riff using just E, D, B, and A - great for absolute beginners.',
+    practiceTip: 'Every note here is a natural (white) key, so you never have to think about sharps or flats. Focus on keeping the repeated notes even.',
+    ageBand: 'kids',
+    notes: darudeSandstormEasyNotes,
+  },
   {
     id: 'darude-sandstorm-beginner',
     title: 'Darude Sandstorm (Beginner)',
