@@ -24,18 +24,27 @@ class AudioService {
   private samplesLoaded = false;
   private volume = 0.7;
 
+  /**
+   * Returns true only when the AudioContext is actually running and able to
+   * make sound. Safe (and expected) to call on every user gesture.
+   *
+   * Important: Tone.start() does NOT throw when the browser's autoplay policy
+   * blocks audio — it resolves normally and leaves the context "suspended".
+   * So success has to be judged by the context state, never by the absence of
+   * an exception, or the app happily believes audio is live while every note
+   * goes into a dead context.
+   */
   async initialize(): Promise<boolean> {
     if (this.initialized) {
-      // Always try to resume audio context on iOS/iPad
       if (Tone.context.state !== 'running') {
         try {
-          await Tone.context.resume();
           await Tone.start();
+          await Tone.context.resume();
         } catch (e) {
           console.warn('Failed to resume audio context:', e);
         }
       }
-      return true;
+      return Tone.context.state === 'running';
     }
 
     // MUST call Tone.start() inside a user-gesture handler
@@ -47,9 +56,12 @@ class AudioService {
       }
     } catch (e) {
       console.warn('Failed to start Tone.js:', e);
-      // Don't mark as initialized — leave the door open for the next user
-      // gesture (e.g. another tap of Start) to retry Tone.start(), instead of
-      // silently and permanently leaving audio dead for the rest of the session.
+    }
+
+    if (Tone.context.state !== 'running') {
+      // Autoplay policy blocked us (no user gesture yet). Stay uninitialized
+      // so the next real tap retries, instead of leaving audio permanently
+      // dead for the rest of the session.
       return false;
     }
 

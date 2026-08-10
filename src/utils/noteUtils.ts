@@ -76,6 +76,40 @@ export function getNoteIndex(note: string): number {
   return midi - 21; // A0 is MIDI 21, the lowest key on 88-key piano
 }
 
+/**
+ * Pitch class (0-11) of a note name, ignoring octave and treating enharmonic
+ * spellings as equal, so 'Bb3' and 'A#5' both come back as 10.
+ * Returns null for anything unparseable.
+ */
+export function getPitchClass(note: string): number | null {
+  const match = note.match(/^([A-G](?:#|b)?)(-?\d+)?$/);
+  if (!match) return null;
+  const semitone = NOTE_TO_SEMITONE[match[1] as NoteName];
+  return semitone === undefined ? null : semitone;
+}
+
+/**
+ * Compare a played note against the expected note.
+ *
+ * `ignoreOctave` exists for microphone practice: autocorrelation pitch
+ * detection very commonly lands an octave off (it can lock onto a harmonic or
+ * a sub-harmonic), so demanding an exact octave match there rejects notes the
+ * learner actually played correctly. For MIDI and on-screen keys the octave is
+ * unambiguous, so those stay strict.
+ */
+export function notesMatch(playedNote: string, expectedNote: string, ignoreOctave = false): boolean {
+  if (playedNote === expectedNote) return true;
+
+  const playedClass = getPitchClass(playedNote);
+  const expectedClass = getPitchClass(expectedNote);
+  if (playedClass === null || expectedClass === null) return false;
+
+  if (ignoreOctave) return playedClass === expectedClass;
+
+  // Same pitch class and same octave, just spelled differently (Bb vs A#).
+  return playedClass === expectedClass && noteToMidi(playedNote) === noteToMidi(expectedNote);
+}
+
 
 
 export function getAllNotesInRange(minNote: string = 'A0', maxNote: string = 'C8'): string[] {

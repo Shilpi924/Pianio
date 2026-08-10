@@ -12,7 +12,7 @@ import { useKeyboardPiano } from '../hooks/useKeyboardPiano';
 
 import type { Lesson, PracticeMode } from '../types';
 import { audioService } from '../services/audioService';
-import { midiToNote } from '../utils/noteUtils';
+import { midiToNote, notesMatch } from '../utils/noteUtils';
 import { midiService, type MIDIMessage } from '../services/midiService';
 import { pitchDetectionService } from '../services/pitchDetectionService';
 import { SoundEffects } from '../services/soundEffects';
@@ -61,6 +61,10 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
   const [, setMistakeStreak] = useState(0);
   const [, setMascotMood] = useState<'happy' | 'excited' | 'thinking' | 'celebrating'>('happy');
   const [, setMascotMessage] = useState('');
+  // Mascot mood/message above are currently write-only (no mascot is rendered in
+  // this view), so anything urgent needs its own visible surface.
+  const [audioBlocked, setAudioBlocked] = useState(false);
+  const [midiDeviceCount, setMidiDeviceCount] = useState(0);
   const [isPreviewingSong, setIsPreviewingSong] = useState(false);
   const [isAdaptiveTraining, setIsAdaptiveTraining] = useState(false);
   const [adaptiveTargetNotes, setAdaptiveTargetNotes] = useState<number[]>([]);
@@ -100,7 +104,13 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
   }, [lesson.notes, tempo]);
   const previewDuration = previewTimeline.at(-1)?.end ?? 0;
   const inputMode = settings.inputMode ?? 'midi';
-  const useMicrophone = inputMode === 'microphone' || (inputMode === 'auto' && !midiService.isSupported());
+  // 'auto' used to fall back to the mic only when the Web MIDI *API* was
+  // missing — but Chrome supports the API even with nothing plugged in, so
+  // auto always chose MIDI and silently accepted no input. Key off whether a
+  // device is actually connected instead.
+  const useMicrophone =
+    inputMode === 'microphone' ||
+    (inputMode === 'auto' && (!midiService.isSupported() || midiDeviceCount === 0));
   const microphoneVisible = inputMode === 'microphone' || useMicrophone;
 
   // Find related lessons (same song, different difficulties)
@@ -408,13 +418,17 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Always call through to the service — never gate on isAudioInitialized.
+  // This runs from real user gestures (Start / Hear song), which is the only
+  // moment the browser will let a suspended AudioContext resume. Skipping the
+  // call because the flag was already set is exactly what left "Hear song"
+  // silent: the flag got set by the on-mount init, which the autoplay policy
+  // had blocked, so the context stayed suspended with nobody ever resuming it.
   const ensureAudio = async () => {
-    if (!isAudioInitialized) {
-      const started = await audioService.initialize();
-      if (started) {
-        setIsAudioInitialized(true);
-      }
-    }
+    const started = await audioService.initialize();
+    setIsAudioInitialized(started);
+    setAudioBlocked(!started);
+    return started;
   };
 
   const stopSongPreview = (resetPosition = true) => {
@@ -438,7 +452,11 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
       return;
     }
     stopSongPreview();
-    await ensureAudio();
+    const audioReady = await ensureAudio();
+    if (!audioReady) {
+      // Don't run a silent animation and pretend it worked.
+      return;
+    }
     setTempo(PREVIEW_TEMPO_BPM);
     setFallingNotesSpeed(PREVIEW_FALLING_NOTE_SPEED);
     setCurrentTime(-PREVIEW_LEAD_IN_SECONDS);
@@ -650,7 +668,9 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
         }
       };
 
-      if (playedNote === currentNote.note) {
+      // Microphone pitch detection is octave-unreliable, so accept the right
+      // pitch class in any octave when listening through the mic.
+      if (notesMatch(playedNote, currentNote.note, useMicrophone)) {
         if (useMicrophone || settings.requireNoteHoldDuration) {
           clearAdvanceTimeout();
           const holdMs = Math.max(0, holdDurationMs - (Date.now() - noteStartTime));
@@ -734,6 +754,19 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
     };
   }, [handleMIDIMessage]);
 
+  // Adding a listener isn't enough — without initialize() the service never
+  // requests MIDI access, so it's never subscribed to any device and a real
+  // MIDI keyboard produces nothing during a lesson. Request access once here.
+  useEffect(() => {
+    if (!midiService.isSupported()) return;
+    midiService
+      .initialize()
+      .then((ok) => setMidiDeviceCount(ok ? midiService.getDevices().length : 0))
+      .catch(() => setMidiDeviceCount(0));
+
+    midiService.onStateChange((devices) => setMidiDeviceCount(devices.length));
+  }, []);
+
   useEffect(() => {
     micNoteHandlerRef.current = handleNotePlayed;
   }, [handleNotePlayed]);
@@ -793,6 +826,13 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
 
   return (
     <div className="relative flex h-full flex-col bg-gray-50 p-2 dark:bg-gray-900 md:p-4">
+      {/* Browser blocked audio — tell the user instead of failing silently */}
+      {audioBlocked && (
+        <div className="z-20 mx-auto mb-3 w-full max-w-6xl rounded-2xl border-2 border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-bold text-amber-800 shadow-sm dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200">
+          🔇 Your browser is blocking sound. Click anywhere on this page, then press Start or Hear song again.
+        </div>
+      )}
+
       {/* Top Header / Progress (Always visible) */}
       <div className="z-10 mx-auto w-full max-w-6xl flex-none shrink-0 mb-4 rounded-3xl bg-white/70 p-4 shadow-sm backdrop-blur-xl dark:bg-gray-800/70 border border-white/20 dark:border-gray-700/30">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-4">
@@ -1125,12 +1165,34 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
                   <div className="font-semibold text-gray-900 dark:text-gray-100">Lesson Input</div>
                   <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
                     {inputMode === 'midi'
-                      ? 'MIDI keyboard mode is active.'
+                      ? 'MIDI keyboard mode is active. On-screen keys and your computer keyboard also work.'
                       : inputMode === 'microphone'
-                        ? 'Microphone pitch detection is active.'
+                        ? 'Microphone pitch detection is active — play or sing the note out loud.'
                         : useMicrophone
                         ? 'Auto mode is using the microphone fallback.'
                     : 'Auto mode is using MIDI input.'}
+                  </div>
+
+                  {/* Switchable right here — previously this panel only described
+                      the mode and told you to go to Settings to change it. */}
+                  <div className="mt-3 flex gap-2">
+                    {([
+                      { value: 'midi', label: 'MIDI / Keys' },
+                      { value: 'microphone', label: 'Microphone' },
+                      { value: 'auto', label: 'Auto' },
+                    ] as const).map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => updateSettings({ inputMode: option.value })}
+                        className={`flex-1 rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition-colors ${
+                          inputMode === option.value
+                            ? 'bg-blue-500 text-white shadow'
+                            : 'bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
                   </div>
                   {microphoneVisible && (
                     <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">
@@ -1150,7 +1212,8 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
                     </div>
                   )}
                   <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    Change this in Settings if the input you want is not working.
+                    In microphone mode the right note counts in any octave, since mic pitch
+                    detection often hears an octave off.
                   </div>
                 </div>
                 <CoachRow label="Show Finger Guide" description="Shows finger numbers next to target." enabled={showGhostHand} onToggle={() => setShowGhostHand(!showGhostHand)} />
