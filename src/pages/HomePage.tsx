@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, Flame, ArrowRight, StickyNote } from 'lucide-react';
+import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, Flame, ArrowRight, StickyNote, ChevronDown } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { getEnhancedLessons } from '../services/musicCatalogService';
@@ -14,6 +15,7 @@ export default function HomePage() {
   const { setCurrentView, setCurrentLesson, settings, updateSettings, lessonProgress, statistics } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
   const { t, i18n } = useTranslation();
+  const [showMore, setShowMore] = useState(false);
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const lang = e.target.value;
@@ -138,7 +140,8 @@ export default function HomePage() {
           </div>
         </motion.button>
 
-        {/* More ways to play */}
+        {/* Primary destinations — kept to just two so the home screen stays
+            uncluttered for a young learner. Everything else lives behind More. */}
         <section className="grid gap-4 sm:grid-cols-2">
           <SecondaryCard
             icon={Library}
@@ -149,73 +152,107 @@ export default function HomePage() {
             onClick={() => setCurrentView('lesson')}
           />
           <SecondaryCard
-            icon={Piano}
-            title={t('home.freePlay')}
-            subtitle={t('home.freePlayDesc')}
-            accent="sky"
-            index={1}
-            onClick={() => setCurrentView('free-play')}
-          />
-        </section>
-
-        {/* Secondary Options */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <SecondaryCard
-            icon={Gamepad2}
-            title={t('home.arcade')}
-            subtitle={t('home.arcadeDesc')}
-            accent="accent"
-            index={2}
-            onClick={() => setCurrentView('arcade')}
-          />
-          <SecondaryCard
-            icon={ShoppingBag}
-            title={t('home.rewards')}
-            subtitle={t('home.rewardsDesc')}
-            accent="pink"
-            index={3}
-            onClick={() => setCurrentView('rewards-shop')}
-          />
-          <SecondaryCard
-            icon={Users}
-            title={t('home.duet')}
-            subtitle={t('home.duetDesc')}
-            accent="sky"
-            index={4}
-            onClick={() => setCurrentView('multiplayer')}
-          />
-          <SecondaryCard
-            icon={Glasses}
-            title={t('home.webxr')}
-            subtitle={t('home.webxrDesc')}
-            accent="primary"
-            index={5}
-            onClick={() => setCurrentView('vr-piano')}
-          />
-          <SecondaryCard
-            icon={Play}
-            title={t('home.tutorials')}
-            subtitle={t('home.tutorialsDesc')}
-            accent="success"
-            index={6}
-            onClick={() => setCurrentView('tutorials')}
-          />
-          <SecondaryCard
             icon={Award}
             title={t('home.progress')}
             subtitle={t('home.progressDesc')}
             accent="accent"
-            index={7}
+            index={1}
             onClick={() => setCurrentView('statistics')}
           />
-          <SecondaryCard
-            icon={StickyNote}
-            title="Personal Notes"
-            subtitle="Capture your musical insights"
-            accent="pink"
-            index={8}
-            onClick={() => setCurrentView('personal-notes')}
-          />
+        </section>
+
+        {/* Everything else, collapsed by default */}
+        <section>
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => setShowMore((v) => !v)}
+            aria-expanded={showMore}
+            className="flex w-full items-center justify-between rounded-3xl bg-white/90 px-6 py-4 shadow-sm ring-2 ring-orange-200 transition-shadow hover:shadow-md dark:bg-slate-800/90 dark:ring-orange-800/60"
+          >
+            <span className="font-kid text-lg font-black text-orange-700 dark:text-orange-300">
+              {showMore ? 'Less' : 'More'}
+            </span>
+            <motion.span
+              animate={{ rotate: showMore ? 180 : 0 }}
+              transition={{ duration: 0.25 }}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-yellow-400 text-white shadow-md"
+            >
+              <ChevronDown className="h-5 w-5" />
+            </motion.span>
+          </motion.button>
+
+          <AnimatePresence initial={false}>
+            {showMore && (
+              <motion.div
+                key="more"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.28, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <SecondaryCard
+                    icon={Piano}
+                    title={t('home.freePlay')}
+                    subtitle={t('home.freePlayDesc')}
+                    accent="sky"
+                    index={0}
+                    onClick={() => setCurrentView('free-play')}
+                  />
+                  <SecondaryCard
+                    icon={Gamepad2}
+                    title={t('home.arcade')}
+                    subtitle={t('home.arcadeDesc')}
+                    accent="accent"
+                    index={1}
+                    onClick={() => setCurrentView('arcade')}
+                  />
+                  <SecondaryCard
+                    icon={ShoppingBag}
+                    title={t('home.rewards')}
+                    subtitle={t('home.rewardsDesc')}
+                    accent="pink"
+                    index={2}
+                    onClick={() => setCurrentView('rewards-shop')}
+                  />
+                  <SecondaryCard
+                    icon={Users}
+                    title={t('home.duet')}
+                    subtitle={t('home.duetDesc')}
+                    accent="sky"
+                    index={3}
+                    onClick={() => setCurrentView('multiplayer')}
+                  />
+                  <SecondaryCard
+                    icon={Glasses}
+                    title={t('home.webxr')}
+                    subtitle={t('home.webxrDesc')}
+                    accent="primary"
+                    index={4}
+                    onClick={() => setCurrentView('vr-piano')}
+                  />
+                  <SecondaryCard
+                    icon={Play}
+                    title={t('home.tutorials')}
+                    subtitle={t('home.tutorialsDesc')}
+                    accent="success"
+                    index={5}
+                    onClick={() => setCurrentView('tutorials')}
+                  />
+                  <SecondaryCard
+                    icon={StickyNote}
+                    title="Personal Notes"
+                    subtitle="Capture your musical insights"
+                    accent="pink"
+                    index={6}
+                    onClick={() => setCurrentView('personal-notes')}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </section>
       </motion.main>
 

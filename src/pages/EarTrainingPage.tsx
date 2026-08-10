@@ -69,7 +69,14 @@ export default function EarTrainingPage() {
   };
 
   const playInterval = async () => {
-    if (!isAudioInitialized || !currentInterval) return;
+    if (!currentInterval) return;
+    // Always initialise from the click itself: this gesture is the only moment
+    // the browser will let a suspended AudioContext resume. Bailing out on a
+    // flag set during page load leaves the button permanently dead.
+    const __ready = await audioService.initialize();
+    setIsAudioInitialized(__ready);
+    if (!__ready) return;
+
 
     await audioService.playNote(baseNote, '4n');
     setTimeout(async () => {
@@ -186,8 +193,7 @@ export default function EarTrainingPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={playInterval}
-              disabled={!isAudioInitialized}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Play className="w-5 h-5" />
               <span>Play Interval</span>

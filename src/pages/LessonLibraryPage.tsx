@@ -68,7 +68,7 @@ export default function LessonLibraryPage() {
   const [requestArtist, setRequestArtist] = useState('');
   const [requestNote, setRequestNote] = useState('');
   const [requestSaved, setRequestSaved] = useState<string | null>(null);
-  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+  const [, setIsAudioInitialized] = useState(false);
   const [previewingLessonId, setPreviewingLessonId] = useState<string | null>(null);
   const previewingRef = useRef<string | null>(null);
 
@@ -107,16 +107,20 @@ export default function LessonLibraryPage() {
       return;
     }
 
-    if (!isAudioInitialized) {
-      try {
-        console.log('Initializing audio...');
-        await audioService.initialize();
-        setIsAudioInitialized(true);
-        console.log('Audio initialized successfully');
-      } catch (err) {
-        console.error('Failed to initialize audio:', err);
+    // Always call through, never gate on isAudioInitialized. This click is a
+    // real user gesture, which is the only moment the browser will let a
+    // suspended AudioContext resume; skipping the call because a stale flag
+    // was set during page load is what leaves the preview silent.
+    try {
+      const started = await audioService.initialize();
+      setIsAudioInitialized(started);
+      if (!started) {
+        console.warn('Audio is blocked by the browser; tap the page and try again.');
         return;
       }
+    } catch (err) {
+      console.error('Failed to initialize audio:', err);
+      return;
     }
 
     if (previewingRef.current === lesson.id) {
