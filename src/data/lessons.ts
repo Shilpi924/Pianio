@@ -1,5 +1,10 @@
 import type { FingerNumber, Lesson, Note } from '../types';
 import { popSongs } from './popSongs';
+import {
+  buildThreeLevels,
+  TWINKLE, BAA_BAA, MARY, HAPPY_BIRTHDAY, JINGLE_BELLS, ROW_YOUR_BOAT,
+  LONDON_BRIDGE, OLD_MACDONALD, FRERE_JACQUES, AMAZING_GRACE, MOONLIGHT,
+} from './melodies';
 
 // ---------------------------------------------------------------------------
 // Tetris Theme (Korobeiniki), A minor.
@@ -177,20 +182,22 @@ const toPirateNotes = (pairs: Array<[string, number]>): Note[] =>
   }));
 
 // The famous opening: six drumming D's, then the rising answer.
+// Follows the letter-note transcription bar for bar:
+//   d d d d d d a c | d d d e f f f g | e e d c c d a c | d d d e f f f g | e e d c  d--
 const PIRATE_PHRASE_A: Array<[string, number]> = [
   ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['A3', 0.5], ['C4', 0.5],
-  ['D4', 1], ['D4', 0.5], ['E4', 0.5], ['F4', 1], ['F4', 0.5], ['G4', 0.5],
-  ['E4', 1], ['E4', 0.5], ['D4', 0.5], ['C4', 0.5], ['C4', 0.5], ['D4', 1],
-  ['A3', 0.5], ['C4', 0.5], ['D4', 1], ['D4', 1], ['D4', 1],
+  ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['E4', 0.5], ['F4', 0.5], ['F4', 0.5], ['F4', 0.5], ['G4', 0.5],
+  ['E4', 0.5], ['E4', 0.5], ['D4', 0.5], ['C4', 0.5], ['C4', 0.5], ['D4', 0.5], ['A3', 0.5], ['C4', 0.5],
+  ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['E4', 0.5], ['F4', 0.5], ['F4', 0.5], ['F4', 0.5], ['G4', 0.5],
+  ['E4', 0.5], ['E4', 0.5], ['D4', 0.5], ['C4', 0.5], ['D4', 2],
 ];
 
 // The continuation, climbing to B flat and settling back.
+// Continuation:  g g a A A a g a d | d e f f g a d | d f e e f d e
 const PIRATE_PHRASE_B: Array<[string, number]> = [
-  ['E4', 1], ['F4', 0.5], ['F4', 0.5], ['F4', 0.5], ['G4', 0.5], ['E4', 1],
-  ['E4', 1], ['D4', 0.5], ['C4', 0.5], ['D4', 2],
-  ['G4', 0.5], ['G4', 0.5], ['A4', 0.5], ['A#4', 0.5], ['A#4', 1], ['A4', 1],
-  ['G4', 0.5], ['A4', 0.5], ['D4', 1], ['D4', 0.5], ['E4', 0.5], ['F4', 1],
-  ['F4', 1], ['G4', 1], ['A4', 1], ['D4', 1],
+  ['G4', 0.5], ['G4', 0.5], ['A4', 0.5], ['A#4', 0.5], ['A#4', 0.5], ['A4', 0.5], ['G4', 0.5], ['A4', 0.5],
+  ['D4', 1], ['D4', 0.5], ['E4', 0.5], ['F4', 1], ['F4', 1],
+  ['G4', 1], ['A4', 1], ['D4', 2],
   ['D4', 0.5], ['F4', 0.5], ['E4', 1], ['E4', 1], ['F4', 0.5], ['D4', 0.5],
   ['E4', 2], ['D4', 2],
 ];
@@ -201,7 +208,25 @@ const piratesAdvancedNotes: Note[] = toPirateNotes([
   ...PIRATE_PHRASE_A, ...PIRATE_PHRASE_B, ...PIRATE_PHRASE_A, ...PIRATE_PHRASE_B,
 ]);
 
+// Songs written out as one verified melody each, expanded into the standard
+// beginner / intermediate / advanced trio. Several of these used to exist as a
+// single short fragment that did not amount to the tune named on the card.
+const generatedSongs: Lesson[] = [
+  ...buildThreeLevels(TWINKLE, { id: 'twinkle-twinkle', title: 'Twinkle Twinkle Little Star', category: 'Nursery Rhyme', tempo: 100, tags: ['nursery', 'classic'], synopsis: 'The first tune almost every pianist learns.', ageBand: 'kids' }),
+  ...buildThreeLevels(BAA_BAA, { id: 'baa-baa-black-sheep', title: 'Baa Baa Black Sheep', category: 'Nursery Rhyme', tempo: 100, tags: ['nursery'], synopsis: 'Same tune as Twinkle, with a bouncier rhythm.', ageBand: 'kids' }),
+  ...buildThreeLevels(MARY, { id: 'mary-had-little-lamb', title: 'Mary Had a Little Lamb', category: 'Nursery Rhyme', tempo: 100, tags: ['nursery'], synopsis: 'A five-finger tune that never leaves one hand position.', ageBand: 'kids' }),
+  ...buildThreeLevels(HAPPY_BIRTHDAY, { id: 'happy-birthday', title: 'Happy Birthday', category: 'Celebration', tempo: 110, tags: ['party', 'classic'], synopsis: 'The one tune worth knowing by heart.', ageBand: 'all' }),
+  ...buildThreeLevels(JINGLE_BELLS, { id: 'jingle-bells', title: 'Jingle Bells', category: 'Christmas', tempo: 120, tags: ['christmas', 'holiday'], synopsis: 'The full chorus, not just the opening line.', ageBand: 'all' }),
+  ...buildThreeLevels(ROW_YOUR_BOAT, { id: 'row-row-row-your-boat', title: 'Row Row Row Your Boat', category: 'Nursery Rhyme', tempo: 100, tags: ['nursery', 'round'], synopsis: 'A round — try it against a friend once you know it.', ageBand: 'kids' }),
+  ...buildThreeLevels(LONDON_BRIDGE, { id: 'london-bridge', title: 'London Bridge', category: 'Nursery Rhyme', tempo: 105, tags: ['nursery'], synopsis: 'Both halves of the playground favourite.', ageBand: 'kids' }),
+  ...buildThreeLevels(OLD_MACDONALD, { id: 'old-macdonald', title: 'Old MacDonald', category: 'Nursery Rhyme', tempo: 110, tags: ['nursery', 'farm'], synopsis: 'Verse and refrain, all the way through.', ageBand: 'kids' }),
+  ...buildThreeLevels(FRERE_JACQUES, { id: 'frere-jacques', title: 'Frere Jacques', category: 'Nursery Rhyme', tempo: 100, tags: ['nursery', 'round'], synopsis: 'All four phrases of the French round.', ageBand: 'kids' }),
+  ...buildThreeLevels(AMAZING_GRACE, { id: 'amazing-grace', title: 'Amazing Grace', category: 'Traditional', tempo: 80, tags: ['traditional', 'hymn'], synopsis: 'The complete hymn melody in three-four time.', ageBand: 'all' }),
+  ...buildThreeLevels(MOONLIGHT, { id: 'moonlight-sonata', title: 'Moonlight Sonata', category: 'Classical', tempo: 60, tags: ['classical', 'beethoven'], synopsis: 'The rippling arpeggios that open Beethoven\'s first movement.', sourceName: 'Beethoven, Piano Sonata No. 14', ageBand: 'all' }),
+];
+
 const rawLessons: Lesson[] = [
+  ...generatedSongs,
   {
     id: 'pirates-caribbean-beginner',
     title: "He's a Pirate (Beginner)",
@@ -357,120 +382,6 @@ const rawLessons: Lesson[] = [
     synopsis: 'The full eight-bar tune played through twice at speed - 74 notes without a break.',
     practiceTip: 'Master the intermediate version first. Keep the dotted quarter notes long; the tune loses its swing if you rush them.',
     ageBand: 'all',
-  },
-  {
-    id: 'twinkle-twinkle',
-    title: 'Twinkle Twinkle Little Star',
-    tempo: 80,
-    difficulty: 'beginner',
-    category: 'Nursery Rhymes',
-    source: 'public-domain',
-    notes: [
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'A4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'A4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'G4', duration: 2, finger: 4, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'C4', duration: 2, finger: 1, hand: 'right' },
-      
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 2, finger: 2, hand: 'right' },
-      
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 2, finger: 2, hand: 'right' },
-      
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'A4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'A4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'G4', duration: 2, finger: 4, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'C4', duration: 2, finger: 1, hand: 'right' },
-    ],
-  },
-  {
-    id: 'mary-had-little-lamb',
-    title: 'Mary Had a Little Lamb',
-    tempo: 70,
-    difficulty: 'beginner',
-    category: 'Nursery Rhymes',
-    source: 'public-domain',
-    notes: [
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 2, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'D4', duration: 2, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'G4', duration: 2, finger: 5, hand: 'right' },
-      
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'C4', duration: 2, finger: 1, hand: 'right' },
-    ],
-  },
-  {
-    id: 'happy-birthday',
-    title: 'Happy Birthday',
-    tempo: 75,
-    difficulty: 'beginner',
-    category: 'Celebration',
-    source: 'public-domain',
-    notes: [
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'E4', duration: 2, finger: 3, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 5, hand: 'right' },
-      { note: 'F4', duration: 2, finger: 4, hand: 'right' },
-    ],
   },
   {
     id: 'ode-to-joy',
@@ -629,172 +540,6 @@ const rawLessons: Lesson[] = [
       { note: 'B2', duration: 0.5, finger: 1, hand: 'right' },
       { note: 'A2', duration: 0.5, finger: 1, hand: 'right' },
       { note: 'G2', duration: 0.5, finger: 1, hand: 'right' },
-    ],
-  },
-  {
-    id: 'jingle-bells',
-    title: 'Jingle Bells',
-    tempo: 100,
-    difficulty: 'beginner',
-    category: 'Holiday',
-    source: 'public-domain',
-    notes: [
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 2, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 2, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 2, finger: 1, hand: 'right' },
-    ],
-  },
-  {
-    id: 'amazing-grace',
-    title: 'Amazing Grace',
-    tempo: 70,
-    difficulty: 'beginner',
-    category: 'Hymns',
-    source: 'public-domain',
-    notes: [
-      { note: 'G4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'A3', duration: 1, finger: 5, hand: 'left' },
-      { note: 'G3', duration: 1, finger: 4, hand: 'left' },
-    ],
-  },
-  {
-    id: 'moonlight-sonata',
-    title: 'Moonlight Sonata',
-    tempo: 55,
-    difficulty: 'advanced',
-    category: 'Classical',
-    source: 'public-domain',
-    notes: [
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G#4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 2, hand: 'right' },
-    ],
-  },
-  {
-    id: 'baa-baa-black-sheep',
-    title: 'Baa Baa Black Sheep',
-    tempo: 75,
-    difficulty: 'beginner',
-    category: 'Nursery Rhymes',
-    source: 'public-domain',
-    notes: [
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'G4', duration: 2, finger: 3, hand: 'right' },
-    ],
-  },
-  {
-    id: 'row-row-row-your-boat',
-    title: 'Row Row Row Your Boat',
-    tempo: 80,
-    difficulty: 'beginner',
-    category: 'Nursery Rhymes',
-    source: 'public-domain',
-    notes: [
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'G4', duration: 2, finger: 5, hand: 'right' },
-    ],
-  },
-  {
-    id: 'london-bridge',
-    title: 'London Bridge',
-    tempo: 85,
-    difficulty: 'beginner',
-    category: 'Nursery Rhymes',
-    source: 'public-domain',
-    notes: [
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'G4', duration: 2, finger: 3, hand: 'right' },
-    ],
-  },
-  {
-    id: 'old-macdonald',
-    title: 'Old MacDonald',
-    tempo: 90,
-    difficulty: 'beginner',
-    category: 'Nursery Rhymes',
-    source: 'public-domain',
-    notes: [
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'A4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'G4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 1, hand: 'right' },
-    ],
-  },
-  {
-    id: 'frere-jacques',
-    title: 'Frère Jacques',
-    tempo: 80,
-    difficulty: 'beginner',
-    category: 'Nursery Rhymes',
-    source: 'public-domain',
-    notes: [
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'D4', duration: 1, finger: 2, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'C4', duration: 1, finger: 1, hand: 'right' },
-      { note: 'E4', duration: 1, finger: 3, hand: 'right' },
-      { note: 'F4', duration: 1, finger: 4, hand: 'right' },
-      { note: 'G4', duration: 2, finger: 5, hand: 'right' },
     ],
   },
   {
@@ -1394,4 +1139,72 @@ function makePlayable(lesson: Lesson): Lesson {
   return notes === lesson.notes ? lesson : { ...lesson, notes };
 }
 
-export const sampleLessons: Lesson[] = rawLessons.map(makePlayable);
+// ---------------------------------------------------------------------------
+// Every song offers all three levels.
+//
+// Where a song only shipped at one difficulty, the missing levels are derived
+// from the melody it already has — first half slowed down for beginner, the
+// whole thing for intermediate, twice through and faster for advanced. Nothing
+// is invented: a derived level is always the same music as the original entry,
+// which matters for the songs whose melodies we have no verified source for.
+// ---------------------------------------------------------------------------
+const DIFFICULTIES: Array<Lesson['difficulty']> = ['beginner', 'intermediate', 'advanced'];
+
+function baseTitle(title: string): string {
+  return title.replace(/\s*\(?(Basic|Beginner|Intermediate|Advanced|Complete Song|Full)\)?\s*$/i, '').trim();
+}
+
+function firstHalf(notes: Note[]): Note[] {
+  const total = notes.reduce((sum, n) => sum + n.duration, 0);
+  let beats = 0;
+  for (let i = 0; i < notes.length; i += 1) {
+    beats += notes[i].duration;
+    if (beats >= total / 2 && beats % 4 === 0) return notes.slice(0, i + 1);
+  }
+  return notes.slice(0, Math.max(1, Math.ceil(notes.length / 2)));
+}
+
+function deriveLevel(source: Lesson, difficulty: Lesson['difficulty'], name: string): Lesson {
+  const notes =
+    difficulty === 'beginner' ? firstHalf(source.notes)
+    : difficulty === 'advanced' ? [...source.notes, ...source.notes]
+    : source.notes;
+  const tempoScale = difficulty === 'beginner' ? 0.75 : difficulty === 'advanced' ? 1.35 : 1;
+  const label = difficulty[0].toUpperCase() + difficulty.slice(1);
+
+  return {
+    ...source,
+    id: `${source.id}-${difficulty}`,
+    title: `${name} (${label})`,
+    difficulty,
+    tempo: Math.max(40, Math.round(source.tempo * tempoScale)),
+    tags: [...(source.tags ?? []).filter((t) => !DIFFICULTIES.includes(t as Lesson['difficulty'])), difficulty],
+    notes,
+  };
+}
+
+function ensureThreeLevels(lessons: Lesson[]): Lesson[] {
+  const groups = new Map<string, Lesson[]>();
+  for (const lesson of lessons) {
+    const name = baseTitle(lesson.title);
+    if (!groups.has(name)) groups.set(name, []);
+    groups.get(name)!.push(lesson);
+  }
+
+  const out = [...lessons];
+  for (const [name, group] of groups) {
+    const present = new Set(group.map((l) => l.difficulty));
+    if (DIFFICULTIES.every((d) => present.has(d))) continue;
+
+    // Derive from the fullest version of the song we have.
+    const source = [...group].sort((a, b) => b.notes.length - a.notes.length)[0];
+    for (const difficulty of DIFFICULTIES) {
+      if (present.has(difficulty)) continue;
+      const derived = deriveLevel(source, difficulty, name);
+      if (!out.some((l) => l.id === derived.id)) out.push(derived);
+    }
+  }
+  return out;
+}
+
+export const sampleLessons: Lesson[] = ensureThreeLevels(rawLessons.map(makePlayable));
