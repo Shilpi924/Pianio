@@ -613,7 +613,11 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
         
         setMistakeStreak((prev) => {
           const nextStreak = prev + 1;
-          if (!isQuietMicPractice && nextStreak >= 3 && !canUseAdaptiveTraining) {
+          // Increase threshold for touch devices (iPad/mobile) to prevent frequent resets
+          const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+          const adaptiveThreshold = isTouchDevice ? 5 : 3;
+          
+          if (!isQuietMicPractice && nextStreak >= adaptiveThreshold && !canUseAdaptiveTraining) {
             setIsAdaptiveTraining(true);
             setOriginalTempo(tempo);
             setTempo(Math.max(40, Math.round(tempo * 0.7))); // Slow down by 30%
@@ -632,7 +636,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
             setMascotMessage('Smart Tutor activated! Let\'s slow down and practice just this small part until you master it.');
             SoundEffects.playLevelUp(); 
             return 0; // Reset streak
-          } else if (!isQuietMicPractice && nextStreak >= 3) {
+          } else if (!isQuietMicPractice && nextStreak >= adaptiveThreshold) {
             setMascotMood('thinking');
             setMascotMessage('Keep trying this section. You can do it!');
           } else {
