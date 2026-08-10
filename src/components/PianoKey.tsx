@@ -94,6 +94,11 @@ export default function PianoKey({
         </div>
       )}
 
+      {/* Blue dot indicator for highlighted notes */}
+      {state === 'highlighted' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-blue-500 shadow-lg animate-pulse z-10" />
+      )}
+
       {/* Finger Placement Guide */}
       {finger && !showComputerKey && (
         <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full text-xs font-black text-white shadow-md z-20 ${finger.hand === 'right' ? 'bg-blue-500' : 'bg-red-500'}`}>
