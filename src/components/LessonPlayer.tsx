@@ -243,7 +243,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
   }, [metronomeEnabled, isPlaying, tempo, isAudioInitialized]);
 
   useEffect(() => {
-    if ((!isPlaying && !isPreviewingSong) || !useFallingNotes) {
+    if (!isPlaying && !isPreviewingSong) {
       lastFrameTimeRef.current = null;
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
