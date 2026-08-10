@@ -115,12 +115,12 @@ export default function LessonLibraryPage() {
       const started = await audioService.initialize();
       setIsAudioInitialized(started);
       if (!started) {
-        console.warn('Audio is blocked by the browser; tap the page and try again.');
-        return;
+        // Warn but continue: iOS often reports the context as not running for
+        // a moment before it starts, and bailing here silences the iPad.
+        console.warn('Audio context not reporting as running yet; playing anyway.');
       }
     } catch (err) {
       console.error('Failed to initialize audio:', err);
-      return;
     }
 
     if (previewingRef.current === lesson.id) {

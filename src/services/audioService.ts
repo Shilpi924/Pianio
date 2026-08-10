@@ -26,14 +26,28 @@ class AudioService {
   private iosUnlocked = false;
 
   /**
-   * Returns true only when the AudioContext is actually running and able to
-   * make sound. Safe (and expected) to call on every user gesture.
+   * True when the context can be expected to make sound.
    *
-   * Important: Tone.start() does NOT throw when the browser's autoplay policy
-   * blocks audio — it resolves normally and leaves the context "suspended".
-   * So success has to be judged by the context state, never by the absence of
-   * an exception, or the app happily believes audio is live while every note
-   * goes into a dead context.
+   * iOS/iPadOS is the reason this is not just `state === 'running'`:
+   *  - Safari has an 'interrupted' state (after a call, another app taking
+   *    audio, or a screen lock) which is perfectly recoverable.
+   *  - resume() frequently resolves *before* the state flips to 'running',
+   *    so sampling the state right after awaiting it reports a stale value.
+   * Treating anything other than a hard 'suspended' as usable avoids
+   * declaring a healthy iPad dead.
+   */
+  private isContextUsable(): boolean {
+    const state = String(Tone.context.state);
+    return state !== 'suspended' && state !== 'closed';
+  }
+
+  /**
+   * Sets up the audio graph and tries to start the context. Safe (and
+   * expected) to call on every user gesture.
+   *
+   * Note: Tone.start() does NOT throw when the browser's autoplay policy
+   * blocks audio — it resolves and leaves the context suspended — so the
+   * return value reflects context state rather than absence of an exception.
    */
   /**
    * iOS/iPadOS will not let a WebAudio context start from an async
@@ -74,7 +88,7 @@ class AudioService {
           console.warn('Failed to resume audio context:', e);
         }
       }
-      return Tone.context.state === 'running';
+      return this.isContextUsable();
     }
 
     // MUST call Tone.start() inside a user-gesture handler
@@ -88,13 +102,12 @@ class AudioService {
       console.warn('Failed to start Tone.js:', e);
     }
 
-    if (Tone.context.state !== 'running') {
-      // Autoplay policy blocked us (no user gesture yet). Stay uninitialized
-      // so the next real tap retries, instead of leaving audio permanently
-      // dead for the rest of the session.
-      return false;
-    }
-
+    // Build the audio graph unconditionally, even if the context has not
+    // reported 'running' yet. Refusing to build here is what broke iPad:
+    // iOS commonly still reads 'suspended'/'interrupted' at this instant, so
+    // no instruments were ever created and every later gesture found nothing
+    // to play through. With the graph in place, sound simply starts working
+    // the moment the context does.
     this.reverb = new Tone.Reverb({ decay: 1.5, wet: 0.2 }).toDestination();
 
     // Start the fallback synth immediately so first keypress is never silent
@@ -123,7 +136,7 @@ class AudioService {
       },
     });
 
-    return true;
+    return this.isContextUsable();
   }
 
   private _setVolumeOnInstrument(inst: Tone.PolySynth | Tone.Sampler) {

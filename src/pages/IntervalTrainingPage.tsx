@@ -66,9 +66,10 @@ export default function IntervalTrainingPage() {
     // Always initialise from the click itself: this gesture is the only moment
     // the browser will let a suspended AudioContext resume. Bailing out on a
     // flag set during page load leaves the button permanently dead.
+    // Continue even if the context has not reported 'running' yet — iOS
+    // routinely does that for a moment and then plays fine.
     const __ready = await audioService.initialize();
     setIsAudioInitialized(__ready);
-    if (!__ready) return;
 
     
     await audioService.playNote(rootNote, '4n');

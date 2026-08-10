@@ -461,11 +461,10 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
       return;
     }
     stopSongPreview();
-    const audioReady = await ensureAudio();
-    if (!audioReady) {
-      // Don't run a silent animation and pretend it worked.
-      return;
-    }
+    // Surface a warning if audio looks blocked, but still go ahead: on iOS the
+    // context often reports not-running for a moment and then starts fine, so
+    // refusing here is what left the iPad silent.
+    await ensureAudio();
     setTempo(PREVIEW_TEMPO_BPM);
     setFallingNotesSpeed(PREVIEW_FALLING_NOTE_SPEED);
     setCurrentTime(-PREVIEW_LEAD_IN_SECONDS);
