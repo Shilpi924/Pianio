@@ -545,6 +545,147 @@ const janaGanaManaNotes: Note[] = ([
   hand: 'right',
 }));
 
+// Darude Sandstorm - Beginner Version (Simplified main theme)
+const darudeSandstormBeginnerFinger: Record<string, FingerNumber> = {
+  'F#4': 2,
+  'G#4': 3,
+  'A4': 4,
+  'E4': 2,
+  'D#4': 1,
+  'B4': 5,
+  'C#5': 1,
+};
+
+const darudeSandstormBeginnerNotes: Note[] = ([
+  // Main theme simplified
+  ['F#4', 0.5], ['G#4', 0.5], ['A4', 0.5], ['G#4', 0.5],
+  ['F#4', 0.5], ['E4', 0.5], ['D#4', 0.5], ['E4', 0.5],
+  ['F#4', 0.5], ['G#4', 0.5], ['A4', 0.5], ['G#4', 0.5],
+  ['F#4', 0.5], ['E4', 0.5], ['D#4', 1],
+  
+  ['F#4', 0.5], ['G#4', 0.5], ['A4', 0.5], ['G#4', 0.5],
+  ['F#4', 0.5], ['E4', 0.5], ['D#4', 0.5], ['E4', 0.5],
+  ['F#4', 0.5], ['G#4', 0.5], ['A4', 0.5], ['B4', 0.5],
+  ['C#5', 0.5], ['B4', 0.5], ['A4', 0.5], ['G#4', 1],
+  
+  ['F#4', 0.5], ['G#4', 0.5], ['A4', 0.5], ['G#4', 0.5],
+  ['F#4', 0.5], ['E4', 0.5], ['D#4', 0.5], ['E4', 0.5],
+  ['F#4', 0.5], ['G#4', 0.5], ['A4', 0.5], ['G#4', 0.5],
+  ['F#4', 0.5], ['E4', 0.5], ['D#4', 2],
+] as Array<[string, number]>).map(([note, duration]) => ({
+  note,
+  duration,
+  finger: darudeSandstormBeginnerFinger[note],
+  hand: 'right',
+}));
+
+// Darude Sandstorm - Intermediate Version (Complete main theme)
+const darudeSandstormIntermediateFinger: Record<string, FingerNumber> = {
+  'F#4': 2,
+  'G#4': 3,
+  'A4': 4,
+  'E4': 2,
+  'D#4': 1,
+  'B4': 5,
+  'C#5': 1,
+  'D5': 2,
+  'E5': 3,
+};
+
+const darudeSandstormIntermediateNotes: Note[] = ([
+  // Main theme with more detail
+  ['F#4', 0.25], ['G#4', 0.25], ['A4', 0.5], ['G#4', 0.25], ['F#4', 0.25],
+  ['E4', 0.25], ['D#4', 0.25], ['E4', 0.5], ['F#4', 0.25], ['G#4', 0.25],
+  ['A4', 0.5], ['G#4', 0.25], ['F#4', 0.25], ['E4', 0.25], ['D#4', 0.5],
+  
+  ['F#4', 0.25], ['G#4', 0.25], ['A4', 0.5], ['G#4', 0.25], ['F#4', 0.25],
+  ['E4', 0.25], ['D#4', 0.25], ['E4', 0.5], ['F#4', 0.25], ['G#4', 0.25],
+  ['A4', 0.25], ['B4', 0.25], ['C#5', 0.5], ['B4', 0.25], ['A4', 0.25],
+  ['G#4', 0.25], ['F#4', 0.5],
+  
+  ['F#4', 0.25], ['G#4', 0.25], ['A4', 0.5], ['G#4', 0.25], ['F#4', 0.25],
+  ['E4', 0.25], ['D#4', 0.25], ['E4', 0.5], ['F#4', 0.25], ['G#4', 0.25],
+  ['A4', 0.5], ['G#4', 0.25], ['F#4', 0.25], ['E4', 0.25], ['D#4', 0.5],
+  
+  ['F#4', 0.25], ['G#4', 0.25], ['A4', 0.25], ['B4', 0.25], ['C#5', 0.25], ['D5', 0.25],
+  ['E5', 0.5], ['D5', 0.25], ['C#5', 0.25], ['B4', 0.25], ['A4', 0.25],
+  ['G#4', 0.5], ['F#4', 0.25], ['E4', 0.25], ['D#4', 0.5],
+  
+  ['F#4', 0.25], ['G#4', 0.25], ['A4', 0.5], ['G#4', 0.25], ['F#4', 0.25],
+  ['E4', 0.25], ['D#4', 0.25], ['E4', 0.5], ['F#4', 0.25], ['G#4', 0.25],
+  ['A4', 0.5], ['G#4', 0.25], ['F#4', 0.25], ['E4', 0.25], ['D#4', 0.5],
+] as Array<[string, number]>).map(([note, duration]) => ({
+  note,
+  duration,
+  finger: darudeSandstormIntermediateFinger[note],
+  hand: 'right',
+}));
+
+// Darude Sandstorm - Advanced Version (Full complexity with variations)
+const darudeSandstormAdvancedFinger: Record<string, FingerNumber> = {
+  'F#4': 2,
+  'G#4': 3,
+  'A4': 4,
+  'E4': 2,
+  'D#4': 1,
+  'B4': 5,
+  'C#5': 1,
+  'D5': 2,
+  'E5': 3,
+  'F#5': 4,
+  'G#5': 5,
+  'A5': 1,
+};
+
+const darudeSandstormAdvancedNotes: Note[] = ([
+  // Full main theme with variations
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125],
+  ['E4', 0.125], ['D#4', 0.125], ['E4', 0.25], ['F#4', 0.125], ['G#4', 0.125],
+  ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125], ['E4', 0.125], ['D#4', 0.25],
+  
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125],
+  ['E4', 0.125], ['D#4', 0.125], ['E4', 0.25], ['F#4', 0.125], ['G#4', 0.125],
+  ['A4', 0.125], ['B4', 0.125], ['C#5', 0.25], ['B4', 0.125], ['A4', 0.125],
+  ['G#4', 0.125], ['F#4', 0.25],
+  
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125],
+  ['E4', 0.125], ['D#4', 0.125], ['E4', 0.25], ['F#4', 0.125], ['G#4', 0.125],
+  ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125], ['E4', 0.125], ['D#4', 0.25],
+  
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.125], ['B4', 0.125], ['C#5', 0.125], ['D5', 0.125],
+  ['E5', 0.25], ['D5', 0.125], ['C#5', 0.125], ['B4', 0.125], ['A4', 0.125],
+  ['G#4', 0.25], ['F#4', 0.125], ['E4', 0.125], ['D#4', 0.25],
+  
+  // Build-up section
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.125], ['B4', 0.125], ['C#5', 0.125], ['D5', 0.125],
+  ['E5', 0.125], ['F#5', 0.125], ['G#5', 0.125], ['A5', 0.25], ['G#5', 0.125], ['F#5', 0.125],
+  ['E5', 0.125], ['D5', 0.125], ['C#5', 0.125], ['B4', 0.125], ['A4', 0.125], ['G#4', 0.125],
+  ['F#4', 0.25],
+  
+  // Drop section - main theme with more energy
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125],
+  ['E4', 0.125], ['D#4', 0.125], ['E4', 0.25], ['F#4', 0.125], ['G#4', 0.125],
+  ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125], ['E4', 0.125], ['D#4', 0.25],
+  
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125],
+  ['E4', 0.125], ['D#4', 0.125], ['E4', 0.25], ['F#4', 0.125], ['G#4', 0.125],
+  ['A4', 0.125], ['B4', 0.125], ['C#5', 0.25], ['B4', 0.125], ['A4', 0.125],
+  ['G#4', 0.125], ['F#4', 0.25],
+  
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125],
+  ['E4', 0.125], ['D#4', 0.125], ['E4', 0.25], ['F#4', 0.125], ['G#4', 0.125],
+  ['A4', 0.25], ['G#4', 0.125], ['F#4', 0.125], ['E4', 0.125], ['D#4', 0.25],
+  
+  ['F#4', 0.125], ['G#4', 0.125], ['A4', 0.125], ['B4', 0.125], ['C#5', 0.125], ['D5', 0.125],
+  ['E5', 0.25], ['D5', 0.125], ['C#5', 0.125], ['B4', 0.125], ['A4', 0.125],
+  ['G#4', 0.25], ['F#4', 0.125], ['E4', 0.125], ['D#4', 0.5],
+] as Array<[string, number]>).map(([note, duration]) => ({
+  note,
+  duration,
+  finger: darudeSandstormAdvancedFinger[note],
+  hand: 'right',
+}));
+
 export const sampleLessons: Lesson[] = [
   {
     id: 'jana-gana-mana',
@@ -560,6 +701,51 @@ export const sampleLessons: Lesson[] = [
     practiceTip: 'Follow the luminous hold beam carefully and keep the tempo steady and dignified.',
     ageBand: 'all',
     notes: janaGanaManaNotes,
+  },
+  {
+    id: 'darude-sandstorm-beginner',
+    title: 'Darude Sandstorm (Beginner)',
+    tempo: 130,
+    difficulty: 'beginner',
+    category: 'Electronic',
+    source: 'public-domain',
+    sourceName: 'Darude — simplified main theme',
+    focus: ['Simple melody', 'Quarter notes', 'Repeating patterns'],
+    tags: ['electronic', 'dance', 'sandstorm', 'beginner'],
+    synopsis: 'The iconic electronic dance anthem simplified for beginners - learn the famous main theme.',
+    practiceTip: 'Focus on the repeating F#-G#-A pattern and keep the rhythm steady.',
+    ageBand: 'all',
+    notes: darudeSandstormBeginnerNotes,
+  },
+  {
+    id: 'darude-sandstorm-intermediate',
+    title: 'Darude Sandstorm (Intermediate)',
+    tempo: 140,
+    difficulty: 'intermediate',
+    category: 'Electronic',
+    source: 'public-domain',
+    sourceName: 'Darude — complete main theme',
+    focus: ['Eighth notes', 'Faster tempo', 'Melodic variations'],
+    tags: ['electronic', 'dance', 'sandstorm', 'intermediate'],
+    synopsis: 'The full main theme with eighth-note details and melodic variations.',
+    practiceTip: 'Practice the eighth-note runs separately before playing at full tempo.',
+    ageBand: 'all',
+    notes: darudeSandstormIntermediateNotes,
+  },
+  {
+    id: 'darude-sandstorm-advanced',
+    title: 'Darude Sandstorm (Advanced)',
+    tempo: 150,
+    difficulty: 'advanced',
+    category: 'Electronic',
+    source: 'public-domain',
+    sourceName: 'Darude — full complexity with build-up and drop',
+    focus: ['Sixteenth notes', 'Fast tempo', 'Complex variations', 'Build-up sections'],
+    tags: ['electronic', 'dance', 'sandstorm', 'advanced'],
+    synopsis: 'The complete version with build-up sections, drops, and full complexity.',
+    practiceTip: 'Master the intermediate version first, then tackle the fast sixteenth-note runs.',
+    ageBand: 'teens',
+    notes: darudeSandstormAdvancedNotes,
   },
   {
     id: 'tetris-basic',
