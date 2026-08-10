@@ -1,6 +1,7 @@
 import { useAppStore } from '../store/useAppStore';
 import { Home, ArrowLeft, Menu, X, Music, Gamepad2, StickyNote, Dumbbell } from 'lucide-react';
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const navItems = [
   { id: 'home', label: 'Home', icon: Home, color: 'bg-orange-500' },
@@ -44,17 +45,38 @@ export default function Navigation() {
             {currentView.replace(/-/g, ' ')}
           </h1>
         </div>
-        <button
-          onClick={handleHome}
-          className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold text-lg shadow-lg transition-all transform hover:scale-105 ${
-            isHome
-              ? 'bg-orange-500 text-white hover:bg-orange-600'
-              : 'bg-white dark:bg-gray-800 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-          }`}
-        >
-          <Home className="w-6 h-6" />
-          <span>Home</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {navItems.filter((item) => item.id !== 'home').map((item) => (
+            <motion.button
+              key={item.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setCurrentView(item.id as any)}
+              title={item.label}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-md transition-colors ${
+                currentView === item.id
+                  ? `${item.color} text-white`
+                  : 'bg-white dark:bg-gray-800 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+              }`}
+            >
+              <item.icon className="w-5 h-5" />
+              <span className="hidden lg:inline">{item.label}</span>
+            </motion.button>
+          ))}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleHome}
+            className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold text-lg shadow-lg transition-colors ${
+              isHome
+                ? 'bg-orange-500 text-white hover:bg-orange-600'
+                : 'bg-white dark:bg-gray-800 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+            }`}
+          >
+            <Home className="w-6 h-6" />
+            <span>Home</span>
+          </motion.button>
+        </div>
       </nav>
 
       {/* Mobile Bottom Navigation */}
@@ -94,29 +116,42 @@ export default function Navigation() {
         </div>
 
         {/* Mobile Menu Dropdown */}
-        {mobileMenuOpen && (
-          <div className="absolute bottom-full left-0 right-0 bg-white dark:bg-gray-800 border-t-4 border-orange-400 p-4 space-y-3 rounded-t-3xl shadow-2xl">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setCurrentView(item.id as any);
-                  setMobileMenuOpen(false);
-                }}
-                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-bold text-lg shadow-md hover:shadow-lg transform hover:scale-102 ${
-                  currentView === item.id
-                    ? `${item.color} text-white`
-                    : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
-                }`}
-              >
-                <div className={`p-2 rounded-xl ${currentView === item.id ? 'bg-white/20' : item.color} text-white`}>
-                  <item.icon className="w-6 h-6" />
-                </div>
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+              className="absolute bottom-full left-0 right-0 bg-white dark:bg-gray-800 border-t-4 border-orange-400 p-4 space-y-3 rounded-t-3xl shadow-2xl"
+            >
+              {navItems.map((item, index) => (
+                <motion.button
+                  key={item.id}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.04 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    setCurrentView(item.id as any);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-colors font-bold text-lg shadow-md hover:shadow-lg ${
+                    currentView === item.id
+                      ? `${item.color} text-white`
+                      : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
+                  }`}
+                >
+                  <div className={`p-2 rounded-xl ${currentView === item.id ? 'bg-white/20' : item.color} text-white`}>
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <span>{item.label}</span>
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
     </>
   );

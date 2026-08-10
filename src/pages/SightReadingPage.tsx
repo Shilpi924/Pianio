@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, CheckCircle, XCircle, RotateCcw, Play } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { audioService } from '../services/audioService';
+import { SoundEffects } from '../services/soundEffects';
 import SheetMusic from '../components/SheetMusic';
 import PianoKeyboard from '../components/PianoKeyboard';
 import type { Note } from '../types';
@@ -46,11 +47,16 @@ export default function SightReadingPage() {
   const [currentMelody, setCurrentMelody] = useState<Note[]>(SIMPLE_MELODIES[0]);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [correctNotes, setCorrectNotes] = useState<Set<number>>(new Set());
+  const [, setCorrectNotes] = useState<Set<number>>(new Set());
   const [score, setScore] = useState(0);
   const [totalAttempts, setTotalAttempts] = useState(0);
   const [melodyIndex, setMelodyIndex] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [wrongFlash, setWrongFlash] = useState(false);
+  // Synchronous flag (a ref, not state) so the completion check inside
+  // handleNotePlayed sees an up-to-date value in the same call, rather than
+  // racing a React state update.
+  const hasMistakeRef = useRef(false);
 
   useEffect(() => {
     const initAudio = async () => {
@@ -69,7 +75,7 @@ export default function SightReadingPage() {
 
     if (playedNote === currentNote.note) {
       setCorrectNotes((prev) => new Set(prev).add(currentNoteIndex));
-      
+
       if (isAudioInitialized) {
         audioService.playNote(currentNote.note, '4n');
       }
@@ -79,11 +85,19 @@ export default function SightReadingPage() {
       } else {
         // Melody complete
         setIsPlaying(false);
-        const melodyCorrect = correctNotes.size === currentMelody.length - 1;
+        const melodyCorrect = !hasMistakeRef.current;
         setScore((prev) => prev + (melodyCorrect ? 1 : 0));
         setTotalAttempts((prev) => prev + 1);
         setShowFeedback(true);
       }
+    } else {
+      // Wrong note — give real feedback instead of silently ignoring it.
+      // Previously this branch didn't exist at all, so mistakes were never
+      // counted and "Good effort! Try again" could never actually show.
+      hasMistakeRef.current = true;
+      SoundEffects.playIncorrect();
+      setWrongFlash(true);
+      setTimeout(() => setWrongFlash(false), 400);
     }
   };
 
@@ -92,6 +106,7 @@ export default function SightReadingPage() {
     setCorrectNotes(new Set());
     setIsPlaying(true);
     setShowFeedback(false);
+    hasMistakeRef.current = false;
   };
 
   const nextMelody = () => {
@@ -102,6 +117,7 @@ export default function SightReadingPage() {
     setCorrectNotes(new Set());
     setIsPlaying(false);
     setShowFeedback(false);
+    hasMistakeRef.current = false;
   };
 
   const resetMelody = () => {
@@ -109,6 +125,7 @@ export default function SightReadingPage() {
     setCorrectNotes(new Set());
     setIsPlaying(false);
     setShowFeedback(false);
+    hasMistakeRef.current = false;
   };
 
   const accuracy = totalAttempts > 0 ? Math.round((score / totalAttempts) * 100) : 0;
@@ -206,12 +223,12 @@ export default function SightReadingPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`p-4 rounded-lg text-center ${
-                correctNotes.size === currentMelody.length
+                !hasMistakeRef.current
                   ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
                   : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200'
               }`}
             >
-              {correctNotes.size === currentMelody.length ? (
+              {!hasMistakeRef.current ? (
                 <>
                   <CheckCircle className="w-6 h-6 mx-auto mb-2" />
                   <span className="font-semibold">Perfect! You played all notes correctly!</span>
@@ -225,6 +242,20 @@ export default function SightReadingPage() {
             </motion.div>
           )}
         </div>
+
+        {/* Wrong-note flash toast */}
+        <AnimatePresence>
+          {wrongFlash && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-red-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg"
+            >
+              Not quite — try {currentNote?.note}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Piano Keyboard */}
         <div className="card">

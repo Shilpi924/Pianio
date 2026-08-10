@@ -30,6 +30,12 @@ class PitchDetectionService {
   private readonly notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
   private lastDetectedNote: string | null = null;
   private noteHoldCounter: number = 0;
+  // A candidate note must be seen for a couple consecutive frames before it's
+  // confirmed and fired — debounces single-frame noise/harmonic misreads
+  // without blocking legitimate legato note changes.
+  private pendingNote: string | null = null;
+  private pendingCount: number = 0;
+  private readonly framesToConfirm = 2;
 
   // Adaptive noise threshold
   private noiseLevelHistory: number[] = [];
@@ -247,28 +253,41 @@ class PitchDetectionService {
     // Improved detection logic with confidence threshold
     if (frequency !== -1 && confidence > 0.3) {
       const noteName = this.frequencyToNote(frequency);
-      
-      // Improved debounce logic with hold counter
-      if (noteName !== this.lastDetectedNote) {
-        // Only trigger if we've held the previous note long enough or it's the first note
-        if (this.noteHoldCounter < 3 || this.lastDetectedNote === null) {
+
+      if (noteName === this.lastDetectedNote) {
+        // Same note still sounding — nothing new to report.
+        this.noteHoldCounter++;
+        this.pendingNote = null;
+        this.pendingCount = 0;
+      } else if (noteName === this.pendingNote) {
+        // Seeing the same candidate again — once it's stable for a couple
+        // frames, commit and fire it. This is what actually confirms a
+        // genuine note change (previously this fired only for the very
+        // first note ever played, because the debounce was keyed off how
+        // long the *old* note had been held instead of how stable the *new*
+        // one is).
+        this.pendingCount++;
+        if (this.pendingCount >= this.framesToConfirm || this.lastDetectedNote === null) {
           this.lastDetectedNote = noteName;
           this.noteHoldCounter = 0;
+          this.pendingNote = null;
+          this.pendingCount = 0;
           console.log(`[Pitch Detection] Note detected: ${noteName} (${frequency.toFixed(1)}Hz, confidence: ${confidence.toFixed(3)})`);
           if (this.callback) {
             this.callback(noteName, frequency);
           }
-        } else {
-          // Note changed too quickly, ignore
-          this.lastDetectedNote = noteName;
-          this.noteHoldCounter = 0;
         }
       } else {
-        this.noteHoldCounter++;
+        // A fresh candidate, different from both the confirmed note and
+        // whatever was pending — start tracking it.
+        this.pendingNote = noteName;
+        this.pendingCount = 1;
       }
     } else {
       this.lastDetectedNote = null;
       this.noteHoldCounter = 0;
+      this.pendingNote = null;
+      this.pendingCount = 0;
     }
 
     this.animationFrameId = requestAnimationFrame(this.tick);

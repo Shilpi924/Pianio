@@ -94,9 +94,12 @@ export default function IntervalTrainingPage() {
     setPlayedNotes(prev => [...prev, note]);
     
     if (playedNotes.length === 0) {
-      // First note should be the root
-      if (note === rootNote) {
-        // Correct root note
+      // First note should be the root — reject immediately instead of
+      // silently accepting any note and grading the second key press as if
+      // the root had been correct.
+      if (note !== rootNote) {
+        setFeedback('incorrect');
+        setTotalAttempts(prev => prev + 1);
       }
     } else if (playedNotes.length === 1) {
       // Second note should be the target
@@ -245,7 +248,11 @@ export default function IntervalTrainingPage() {
               ) : (
                 <>
                   <XCircle className="w-6 h-6 mx-auto mb-2" />
-                  <span className="font-semibold">Incorrect. The correct note was {calculateTargetNote(rootNote, currentInterval.semitones)}</span>
+                  <span className="font-semibold">
+                    {playedNotes.length === 1
+                      ? `Not quite — start with the root note, ${rootNote}.`
+                      : `Incorrect. The correct note was ${calculateTargetNote(rootNote, currentInterval.semitones)}`}
+                  </span>
                 </>
               )}
             </motion.div>

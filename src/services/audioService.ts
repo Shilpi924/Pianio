@@ -24,7 +24,7 @@ class AudioService {
   private samplesLoaded = false;
   private volume = 0.7;
 
-  async initialize(): Promise<void> {
+  async initialize(): Promise<boolean> {
     if (this.initialized) {
       // Always try to resume audio context on iOS/iPad
       if (Tone.context.state !== 'running') {
@@ -35,7 +35,7 @@ class AudioService {
           console.warn('Failed to resume audio context:', e);
         }
       }
-      return;
+      return true;
     }
 
     // MUST call Tone.start() inside a user-gesture handler
@@ -47,6 +47,10 @@ class AudioService {
       }
     } catch (e) {
       console.warn('Failed to start Tone.js:', e);
+      // Don't mark as initialized — leave the door open for the next user
+      // gesture (e.g. another tap of Start) to retry Tone.start(), instead of
+      // silently and permanently leaving audio dead for the rest of the session.
+      return false;
     }
 
     this.reverb = new Tone.Reverb({ decay: 1.5, wet: 0.2 }).toDestination();
@@ -76,6 +80,8 @@ class AudioService {
         this.samplesLoaded = false;
       },
     });
+
+    return true;
   }
 
   private _setVolumeOnInstrument(inst: Tone.PolySynth | Tone.Sampler) {

@@ -29,6 +29,7 @@ export interface UserProfile {
   experiencePoints: number;
   achievements: string[];
   badges: string[];
+  unlockedItems?: string[];
   practiceGoals: {
     dailyMinutes: number;
     weeklySongs: number;

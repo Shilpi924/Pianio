@@ -183,9 +183,16 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
     const initAudio = async () => {
       if (!isAudioInitialized) {
         try {
-          await audioService.initialize();
+          const started = await audioService.initialize();
+          if (!started) {
+            // Browser blocked autoplay outside a user gesture — leave
+            // isAudioInitialized false so the next Start/Hear-song tap retries.
+            setMascotMood('thinking');
+            setMascotMessage('Tap a sound button to turn on piano sound.');
+            return;
+          }
           setIsAudioInitialized(true);
-          
+
           // Poll until samples are loaded
           if (!audioService.isSamplesLoaded()) {
             const interval = setInterval(() => {
@@ -330,9 +337,13 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
       if (elapsedSeconds > 0) {
         incrementPracticeTime(elapsedSeconds);
         const durationMins = Math.floor(elapsedSeconds / 60);
-        addPracticeTime(durationMins);
+        // addPracticeSession already adds `duration` onto totalPracticeTime
+        // itself (and records history) — calling addPracticeTime as well
+        // was double-counting every session of a minute or more.
         if (durationMins > 0) {
           addPracticeSession({ lessonId: lesson.id, duration: durationMins, score: accuracy });
+        } else {
+          addPracticeTime(durationMins);
         }
       }
       practiceStartedAtRef.current = null;
@@ -399,8 +410,10 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
 
   const ensureAudio = async () => {
     if (!isAudioInitialized) {
-      await audioService.initialize();
-      setIsAudioInitialized(true);
+      const started = await audioService.initialize();
+      if (started) {
+        setIsAudioInitialized(true);
+      }
     }
   };
 

@@ -1,5 +1,7 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import Mascot from '../components/Mascot';
@@ -42,7 +44,24 @@ const SHOP_ITEMS = [
 export default function RewardsShopPage() {
   const { setCurrentView } = useAppStore();
   const userProfile = useUserProfileStore((state) => state.profiles[state.activeProfileId]);
+  const purchaseItem = useUserProfileStore((state) => state.purchaseItem);
   const currentXp = userProfile?.experiencePoints || 0;
+  const unlockedItems = userProfile?.unlockedItems || [];
+  const [justUnlocked, setJustUnlocked] = useState<string | null>(null);
+
+  const handleBuy = (itemId: string, cost: number) => {
+    const success = purchaseItem(itemId, cost);
+    if (success) {
+      setJustUnlocked(itemId);
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#f97316', '#f43f5e', '#facc15', '#22c55e'],
+      });
+      setTimeout(() => setJustUnlocked(null), 1500);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-slate-900 dark:via-orange-900/20 dark:to-slate-900 p-4 md:p-8">
@@ -82,19 +101,36 @@ export default function RewardsShopPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
           {SHOP_ITEMS.map((item, index) => {
             const canAfford = currentXp >= item.cost;
-            // Mock unlocked status for now - in a real app, we'd check userProfile.unlockedItems
-            const isUnlocked = false; 
+            const isUnlocked = unlockedItems.includes(item.id);
 
             return (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                animate={{
+                  opacity: 1,
+                  scale: justUnlocked === item.id ? [1, 1.06, 1] : 1,
+                }}
                 transition={{ delay: index * 0.1 }}
                 className={`relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-white p-6 shadow-xl transition-transform hover:-translate-y-1 dark:bg-slate-800 ${
                   isUnlocked ? 'ring-4 ring-emerald-500' : ''
                 }`}
               >
+                <AnimatePresence>
+                  {justUnlocked === item.id && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-emerald-500/90 text-white"
+                    >
+                      <div className="text-center">
+                        <div className="text-4xl">🎉</div>
+                        <div className="mt-1 text-xl font-black">Unlocked!</div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-4xl dark:bg-orange-900/30">
                     {item.icon}
@@ -124,9 +160,7 @@ export default function RewardsShopPage() {
                       ? 'bg-gradient-to-r from-orange-400 to-rose-500 hover:scale-[1.02] active:scale-[0.98]'
                       : 'bg-slate-300 shadow-none cursor-not-allowed dark:bg-slate-700 dark:text-slate-500'
                   }`}
-                  onClick={() => {
-                    alert('Purchasing logic will be added here!');
-                  }}
+                  onClick={() => handleBuy(item.id, item.cost)}
                 >
                   {isUnlocked ? 'Equipped' : canAfford ? 'Buy Now' : 'Need More XP'}
                 </button>

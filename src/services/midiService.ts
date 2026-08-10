@@ -11,6 +11,11 @@ export type MIDIEventListener = (message: MIDIMessage) => void;
 class MIDIService {
   private midiAccess: any = null;
   private inputs: Map<string, any> = new Map();
+  // Track the exact bound handler used per input so removeEventListener can
+  // actually find and remove it — passing a fresh arrow function to
+  // removeEventListener silently no-ops since it never matches the original.
+  private inputHandlers: Map<string, (event: any) => void> = new Map();
+  private boundHandleStateChange = () => this.handleStateChange();
   private listeners: Set<MIDIEventListener> = new Set();
   private onStateChangeCallback: ((devices: MIDIDevice[]) => void) | null = null;
 
@@ -22,10 +27,8 @@ class MIDIService {
 
     try {
       this.midiAccess = await navigator.requestMIDIAccess();
-      
-      this.midiAccess.addEventListener('statechange', () => {
-        this.handleStateChange();
-      });
+
+      this.midiAccess.addEventListener('statechange', this.boundHandleStateChange);
 
       // Connect to existing devices
       this.connectToDevices();
@@ -49,16 +52,22 @@ class MIDIService {
   private connectInput(input: any): void {
     if (this.inputs.has(input.id)) return;
 
-    input.addEventListener('midimessage', (event: any) => this.handleMIDIMessage(event));
+    const handler = (event: any) => this.handleMIDIMessage(event);
+    input.addEventListener('midimessage', handler);
     this.inputs.set(input.id, input);
-    
+    this.inputHandlers.set(input.id, handler);
+
     console.log(`Connected to MIDI device: ${input.name}`);
   }
 
   private disconnectInput(input: any): void {
-    input.removeEventListener('midimessage', (event: any) => this.handleMIDIMessage(event));
+    const handler = this.inputHandlers.get(input.id);
+    if (handler) {
+      input.removeEventListener('midimessage', handler);
+      this.inputHandlers.delete(input.id);
+    }
     this.inputs.delete(input.id);
-    
+
     console.log(`Disconnected from MIDI device: ${input.name}`);
   }
 
@@ -129,15 +138,19 @@ class MIDIService {
     this.listeners.clear();
     this.inputs.forEach((input) => {
       try {
-        input.removeEventListener('midimessage', (event: any) => this.handleMIDIMessage(event));
+        const handler = this.inputHandlers.get(input.id);
+        if (handler) {
+          input.removeEventListener('midimessage', handler);
+        }
       } catch (e) {
         console.error('Error removing MIDI listener:', e);
       }
     });
     this.inputs.clear();
+    this.inputHandlers.clear();
     if (this.midiAccess) {
       try {
-        this.midiAccess.removeEventListener('statechange', () => this.handleStateChange());
+        this.midiAccess.removeEventListener('statechange', this.boundHandleStateChange);
       } catch (e) {
         console.error('Error removing state change listener:', e);
       }

@@ -53,14 +53,15 @@ export default function PianoKey({
     }
   };
 
+  // Always release on mouseup/leave, even if `disabled` flipped true while the
+  // key was held (e.g. practice paused mid-press) — otherwise the note is left
+  // sustaining forever with no way for the player to stop it.
   const handleMouseUp = () => {
-    if (!disabled) {
-      onReleased();
-    }
+    onReleased();
   };
 
   const handleMouseLeave = () => {
-    if (!disabled && state === 'pressed') {
+    if (state === 'pressed') {
       onReleased();
     }
   };

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Gamepad2, Brain, Activity, Target, AlignCenterVertical, BookOpen } from 'lucide-react';
+import { ArrowLeft, Gamepad2, Brain, Activity, Target, AlignCenterVertical, BookOpen, Ear, Hand, Mic2 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import Mascot from '../components/Mascot';
 
@@ -51,6 +51,30 @@ const ARCADE_GAMES = [
     icon: Gamepad2,
     color: 'from-sky-500 to-blue-500',
     view: 'practice'
+  },
+  {
+    id: 'interval-training',
+    name: 'Interval Detective',
+    description: 'Play the root note, then nail the matching interval.',
+    icon: Ear,
+    color: 'from-fuchsia-500 to-pink-500',
+    view: 'interval-training'
+  },
+  {
+    id: 'hand-positioning',
+    name: 'Hand Position Coach',
+    description: 'Learn proper posture and hand shape before you play.',
+    icon: Hand,
+    color: 'from-lime-500 to-green-500',
+    view: 'hand-positioning'
+  },
+  {
+    id: 'performance-mode',
+    name: 'Performance Stage',
+    description: 'Play along and rack up a session score.',
+    icon: Mic2,
+    color: 'from-orange-500 to-red-500',
+    view: 'performance'
   }
 ];
 

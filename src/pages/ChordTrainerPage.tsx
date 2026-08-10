@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play, Pause, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import PianoKeyboard from '../components/PianoKeyboard';
+import { audioService } from '../services/audioService';
 
 interface Chord {
   name: string;
@@ -54,14 +55,38 @@ export default function ChordTrainerPage() {
   const [totalAttempts, setTotalAttempts] = useState(0);
   const [useProgression, setUseProgression] = useState(false);
   const [selectedProgression, setSelectedProgression] = useState(0);
+  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+
+  useEffect(() => {
+    const initAudio = async () => {
+      if (!isAudioInitialized) {
+        const started = await audioService.initialize();
+        if (started) setIsAudioInitialized(true);
+      }
+    };
+    initAudio();
+  }, [isAudioInitialized]);
 
   const filteredChords = chords.filter((chord) => chord.difficulty === selectedDifficulty);
   const currentChord = useProgression
     ? chords.find((c) => c.name === chordProgressions[selectedProgression].chords[currentChordIndex])
     : filteredChords[currentChordIndex];
 
+  const playCurrentChord = async () => {
+    if (!currentChord) return;
+    if (!isAudioInitialized) {
+      const started = await audioService.initialize();
+      if (started) setIsAudioInitialized(true);
+    }
+    audioService.playNotes(currentChord.notes, '2n');
+  };
+
   const handleNoteOn = (note: string) => {
     if (!isPlaying || !currentChord) return;
+
+    if (isAudioInitialized) {
+      audioService.startNote(note);
+    }
 
     setPlayedNotes((prev) => new Set(prev).add(note));
 
@@ -76,6 +101,12 @@ export default function ChordTrainerPage() {
       // Move to next chord
       const nextIndex = (currentChordIndex + 1) % (useProgression ? chordProgressions[selectedProgression].chords.length : filteredChords.length);
       setCurrentChordIndex(nextIndex);
+    }
+  };
+
+  const handleNoteOff = (note: string) => {
+    if (isAudioInitialized) {
+      audioService.stopNote(note);
     }
   };
 
@@ -276,6 +307,17 @@ export default function ChordTrainerPage() {
                 >
                   Skip
                 </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={playCurrentChord}
+                  disabled={!currentChord}
+                  className="p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors shadow-lg disabled:opacity-50"
+                  title="Hear this chord"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </motion.button>
               </div>
             </div>
 
@@ -309,6 +351,7 @@ export default function ChordTrainerPage() {
               </h2>
               <PianoKeyboard
                 onNoteOn={handleNoteOn}
+                onNoteOff={handleNoteOff}
                 highlightedNotes={currentChord?.notes || []}
                 disabled={!isPlaying}
               />

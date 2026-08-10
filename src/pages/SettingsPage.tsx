@@ -622,7 +622,11 @@ export default function SettingsPage() {
                     darkMode: false,
                     inputMode: 'midi',
                     selectedMIDIDevice: null,
-                    audioVolume: 0.7,
+                    // Stored on the 0-100 scale App.tsx expects; the old 0.7
+                    // value here was the corrupted 0-1 scale App.tsx has a
+                    // special-case normalizer for, so "reset to defaults"
+                    // was quietly re-introducing the exact bug that patch fixed.
+                    audioVolume: 70,
                     animationSpeed: 1,
                     fingerColors: {
                       thumb: '#ef4444',

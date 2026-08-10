@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play, Pause, RotateCcw, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Play, Pause, RotateCcw, TrendingUp, Volume2 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import PianoKeyboard from '../components/PianoKeyboard';
+import { audioService } from '../services/audioService';
 
 interface Scale {
   name: string;
@@ -53,6 +54,17 @@ export default function ScalesTrainerPage() {
   const [correctScales, setCorrectScales] = useState(0);
   const [totalAttempts, setTotalAttempts] = useState(0);
   const [direction, setDirection] = useState<'up' | 'down'>('up');
+  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+
+  useEffect(() => {
+    const initAudio = async () => {
+      if (!isAudioInitialized) {
+        const started = await audioService.initialize();
+        if (started) setIsAudioInitialized(true);
+      }
+    };
+    initAudio();
+  }, [isAudioInitialized]);
 
   const filteredScales = scales.filter(
     (scale) =>
@@ -63,8 +75,24 @@ export default function ScalesTrainerPage() {
   const currentScale = filteredScales[currentScaleIndex];
   const currentNote = currentScale?.notes[currentNoteIndex];
 
+  const playCurrentScale = async () => {
+    if (!currentScale) return;
+    if (!isAudioInitialized) {
+      const started = await audioService.initialize();
+      if (started) setIsAudioInitialized(true);
+    }
+    const secondsPerNote = 0.35;
+    currentScale.notes.forEach((note, i) => {
+      setTimeout(() => audioService.playNote(note, '8n'), i * secondsPerNote * 1000);
+    });
+  };
+
   const handleNoteOn = (note: string) => {
     if (!isPlaying || !currentScale || !currentNote) return;
+
+    if (isAudioInitialized) {
+      audioService.startNote(note);
+    }
 
     if (note === currentNote) {
       setPlayedNotes((prev) => new Set(prev).add(currentNoteIndex));
@@ -92,6 +120,12 @@ export default function ScalesTrainerPage() {
       }
 
       setCurrentNoteIndex(nextNoteIndex);
+    }
+  };
+
+  const handleNoteOff = (note: string) => {
+    if (isAudioInitialized) {
+      audioService.stopNote(note);
     }
   };
 
@@ -264,6 +298,17 @@ export default function ScalesTrainerPage() {
                 >
                   Skip
                 </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={playCurrentScale}
+                  disabled={!currentScale}
+                  className="p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors shadow-lg disabled:opacity-50"
+                  title="Hear this scale"
+                >
+                  <Volume2 className="w-5 h-5" />
+                </motion.button>
               </div>
             </div>
 
@@ -297,6 +342,7 @@ export default function ScalesTrainerPage() {
               </h2>
               <PianoKeyboard
                 onNoteOn={handleNoteOn}
+                onNoteOff={handleNoteOff}
                 highlightedNotes={currentScale?.notes || []}
                 disabled={!isPlaying}
               />

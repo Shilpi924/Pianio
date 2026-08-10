@@ -25,6 +25,7 @@ interface UserProfileState {
   addPracticeTime: (minutes: number) => void;
   addPracticeSession: (session: { lessonId: string; duration: number; score?: number }) => void;
   updateStreak: () => void;
+  purchaseItem: (itemId: string, cost: number) => boolean;
 }
 
 const createDefaultProfile = (id: string, name: string = 'Learner'): UserProfile => ({
@@ -45,6 +46,7 @@ const createDefaultProfile = (id: string, name: string = 'Learner'): UserProfile
   experiencePoints: 0,
   achievements: [],
   badges: [],
+  unlockedItems: [],
   practiceGoals: {
     dailyMinutes: 15,
     weeklySongs: 3,
@@ -160,7 +162,32 @@ export const useUserProfileStore = create<UserProfileState>()(
           };
         });
       },
-      
+
+      purchaseItem: (itemId, cost) => {
+        const state = get();
+        const active = state.profiles[state.activeProfileId];
+        if (!active) return false;
+        if (active.unlockedItems?.includes(itemId)) return false;
+        if (active.experiencePoints < cost) return false;
+
+        set((s) => {
+          const current = s.profiles[s.activeProfileId];
+          return {
+            profiles: {
+              ...s.profiles,
+              [s.activeProfileId]: {
+                ...current,
+                experiencePoints: current.experiencePoints - cost,
+                // Spending XP on a cosmetic shouldn't demote the player's
+                // level — level is a high-water mark, not a live balance.
+                unlockedItems: [...(current.unlockedItems || []), itemId],
+              }
+            }
+          };
+        });
+        return true;
+      },
+
       addCompletedLesson: (lessonId) => {
         set((state) => {
           const active = state.profiles[state.activeProfileId];
