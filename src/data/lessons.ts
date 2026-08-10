@@ -150,7 +150,106 @@ const darudeSandstormIntermediateNotes: Note[] = buildSandstormRiff(8, 0.5);
 // Advanced: sixteenth notes at full tempo, played through twice.
 const darudeSandstormAdvancedNotes: Note[] = buildSandstormRiff(16, 0.25, 2);
 
-export const sampleLessons: Lesson[] = [
+// ---------------------------------------------------------------------------
+// He's a Pirate (Pirates of the Caribbean), D minor.
+// Right hand melody only — the lesson format is a sequential list of notes
+// with no start times, so it cannot sound an accompaniment underneath.
+// Transcribed from the widely used letter-note version of the main theme.
+// Every bar sums to 4 beats.
+// ---------------------------------------------------------------------------
+const pirateFinger: Record<string, FingerNumber> = {
+  'A3': 1,
+  'C4': 2,
+  'D4': 3,
+  'E4': 4,
+  'F4': 5,
+  'G4': 1,
+  'A4': 2,
+  'A#4': 3,
+};
+
+const toPirateNotes = (pairs: Array<[string, number]>): Note[] =>
+  pairs.map(([note, duration]) => ({
+    note,
+    duration,
+    finger: pirateFinger[note],
+    hand: 'right' as const,
+  }));
+
+// The famous opening: six drumming D's, then the rising answer.
+const PIRATE_PHRASE_A: Array<[string, number]> = [
+  ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['D4', 0.5], ['A3', 0.5], ['C4', 0.5],
+  ['D4', 1], ['D4', 0.5], ['E4', 0.5], ['F4', 1], ['F4', 0.5], ['G4', 0.5],
+  ['E4', 1], ['E4', 0.5], ['D4', 0.5], ['C4', 0.5], ['C4', 0.5], ['D4', 1],
+  ['A3', 0.5], ['C4', 0.5], ['D4', 1], ['D4', 1], ['D4', 1],
+];
+
+// The continuation, climbing to B flat and settling back.
+const PIRATE_PHRASE_B: Array<[string, number]> = [
+  ['E4', 1], ['F4', 0.5], ['F4', 0.5], ['F4', 0.5], ['G4', 0.5], ['E4', 1],
+  ['E4', 1], ['D4', 0.5], ['C4', 0.5], ['D4', 2],
+  ['G4', 0.5], ['G4', 0.5], ['A4', 0.5], ['A#4', 0.5], ['A#4', 1], ['A4', 1],
+  ['G4', 0.5], ['A4', 0.5], ['D4', 1], ['D4', 0.5], ['E4', 0.5], ['F4', 1],
+  ['F4', 1], ['G4', 1], ['A4', 1], ['D4', 1],
+  ['D4', 0.5], ['F4', 0.5], ['E4', 1], ['E4', 1], ['F4', 0.5], ['D4', 0.5],
+  ['E4', 2], ['D4', 2],
+];
+
+const piratesBeginnerNotes: Note[] = toPirateNotes(PIRATE_PHRASE_A);
+const piratesIntermediateNotes: Note[] = toPirateNotes([...PIRATE_PHRASE_A, ...PIRATE_PHRASE_B]);
+const piratesAdvancedNotes: Note[] = toPirateNotes([
+  ...PIRATE_PHRASE_A, ...PIRATE_PHRASE_B, ...PIRATE_PHRASE_A, ...PIRATE_PHRASE_B,
+]);
+
+const rawLessons: Lesson[] = [
+  {
+    id: 'pirates-caribbean-beginner',
+    title: "He's a Pirate (Beginner)",
+    tempo: 90,
+    difficulty: 'beginner',
+    category: 'Movies',
+    source: 'public-domain',
+    sourceName: 'Pirates of the Caribbean main theme — simplified melody',
+    focus: ['Repeated notes', 'Steady eighth notes', 'D minor five-finger'],
+    tags: ['pirates', 'movie', 'beginner', 'hans zimmer'],
+    questTrack: 'songs',
+    synopsis: 'The famous Pirates of the Caribbean theme — the drumming opening and its rising answer.',
+    practiceTip: 'Right hand only. Rest your thumb near A and keep the six repeated Ds perfectly even; that steady pulse is what makes it sound like the film.',
+    ageBand: 'all',
+    notes: piratesBeginnerNotes,
+  },
+  {
+    id: 'pirates-caribbean-intermediate',
+    title: "He's a Pirate (Intermediate)",
+    tempo: 120,
+    difficulty: 'intermediate',
+    category: 'Movies',
+    source: 'public-domain',
+    sourceName: 'Pirates of the Caribbean main theme',
+    focus: ['Full theme', 'Hand position shift', 'B flat'],
+    tags: ['pirates', 'movie', 'intermediate', 'hans zimmer'],
+    questTrack: 'songs',
+    synopsis: 'The complete main theme, including the climb to B flat and the run back down.',
+    practiceTip: 'Watch for the black key (B flat) in the second half — shift your hand up so your thumb lands on G before it arrives.',
+    ageBand: 'all',
+    notes: piratesIntermediateNotes,
+  },
+  {
+    id: 'pirates-caribbean-advanced',
+    title: "He's a Pirate (Advanced)",
+    tempo: 145,
+    difficulty: 'advanced',
+    category: 'Movies',
+    source: 'public-domain',
+    sourceName: 'Pirates of the Caribbean main theme',
+    focus: ['Full theme twice', 'Fast tempo', 'Endurance'],
+    tags: ['pirates', 'movie', 'advanced', 'hans zimmer'],
+    questTrack: 'songs',
+    synopsis: 'The whole theme played through twice at film tempo.',
+    practiceTip: 'Keep the repeated notes light and from the fingertip — at this speed a heavy hand tires out before the second time through.',
+    ageBand: 'teens',
+    notes: piratesAdvancedNotes,
+  },
   {
     id: 'darude-sandstorm-beginner',
     title: 'Darude Sandstorm (Beginner)',
@@ -1244,3 +1343,55 @@ export const sampleLessons: Lesson[] = [
   },
   ...popSongs,
 ];
+
+// ---------------------------------------------------------------------------
+// Playability normalisation, applied to every lesson.
+//
+// Two constraints come from the player itself rather than from the music:
+//
+//  1. A lesson is a flat list of notes with no start times, so it is played
+//     strictly one after another. A lesson that mixes hands therefore does not
+//     sound like melody-over-accompaniment — it sounds like the melody with
+//     bass notes wedged between its notes. Keeping only the melody is the
+//     honest reduction until the format grows real timing.
+//
+//  2. The on-screen keyboard renders C3-C6. A note outside that span has no
+//     key to fall onto, so it can never line up or be played. Such notes are
+//     folded by octaves into range, which preserves the tune's shape.
+// ---------------------------------------------------------------------------
+const KEYBOARD_LOW_MIDI = 48;  // C3
+const KEYBOARD_HIGH_MIDI = 84; // C6
+
+const SEMITONES: Record<string, number> = {
+  C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5,
+  'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11,
+};
+const SHARP_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function foldIntoKeyboardRange(note: string): string {
+  const match = note.match(/^([A-G](?:#|b)?)(-?\d+)$/);
+  if (!match) return note;
+  const semitone = SEMITONES[match[1]];
+  if (semitone === undefined) return note;
+
+  let midi = (parseInt(match[2], 10) + 1) * 12 + semitone;
+  while (midi < KEYBOARD_LOW_MIDI) midi += 12;
+  while (midi > KEYBOARD_HIGH_MIDI) midi -= 12;
+
+  return `${SHARP_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`;
+}
+
+function makePlayable(lesson: Lesson): Lesson {
+  const hasBothHands =
+    lesson.notes.some((n) => n.hand === 'left') && lesson.notes.some((n) => n.hand === 'right');
+
+  const kept = hasBothHands ? lesson.notes.filter((n) => n.hand === 'right') : lesson.notes;
+  const notes = kept.map((n) => {
+    const inRange = foldIntoKeyboardRange(n.note);
+    return inRange === n.note ? n : { ...n, note: inRange };
+  });
+
+  return notes === lesson.notes ? lesson : { ...lesson, notes };
+}
+
+export const sampleLessons: Lesson[] = rawLessons.map(makePlayable);
