@@ -145,13 +145,15 @@ export default function HomePage() {
             title={t('home.library')}
             subtitle={t('home.libraryDesc')}
             accent="primary"
+            index={0}
             onClick={() => setCurrentView('lesson')}
           />
           <SecondaryCard
             icon={Piano}
             title={t('home.freePlay')}
             subtitle={t('home.freePlayDesc')}
-            accent="primary"
+            accent="sky"
+            index={1}
             onClick={() => setCurrentView('free-play')}
           />
         </section>
@@ -163,20 +165,23 @@ export default function HomePage() {
             title={t('home.arcade')}
             subtitle={t('home.arcadeDesc')}
             accent="accent"
+            index={2}
             onClick={() => setCurrentView('arcade')}
           />
           <SecondaryCard
             icon={ShoppingBag}
             title={t('home.rewards')}
             subtitle={t('home.rewardsDesc')}
-            accent="accent"
+            accent="pink"
+            index={3}
             onClick={() => setCurrentView('rewards-shop')}
           />
           <SecondaryCard
             icon={Users}
             title={t('home.duet')}
             subtitle={t('home.duetDesc')}
-            accent="primary"
+            accent="sky"
+            index={4}
             onClick={() => setCurrentView('multiplayer')}
           />
           <SecondaryCard
@@ -184,6 +189,7 @@ export default function HomePage() {
             title={t('home.webxr')}
             subtitle={t('home.webxrDesc')}
             accent="primary"
+            index={5}
             onClick={() => setCurrentView('vr-piano')}
           />
           <SecondaryCard
@@ -191,20 +197,23 @@ export default function HomePage() {
             title={t('home.tutorials')}
             subtitle={t('home.tutorialsDesc')}
             accent="success"
+            index={6}
             onClick={() => setCurrentView('tutorials')}
           />
           <SecondaryCard
             icon={Award}
             title={t('home.progress')}
             subtitle={t('home.progressDesc')}
-            accent="success"
+            accent="accent"
+            index={7}
             onClick={() => setCurrentView('statistics')}
           />
           <SecondaryCard
             icon={StickyNote}
             title="Personal Notes"
             subtitle="Capture your musical insights"
-            accent="primary"
+            accent="pink"
+            index={8}
             onClick={() => setCurrentView('personal-notes')}
           />
         </section>
@@ -218,10 +227,34 @@ export default function HomePage() {
   );
 }
 
+// Each tile gets its own colour from the kid rainbow palette so the grid reads
+// as a playful set of destinations rather than a row of identical grey cards.
 const ACCENT_STYLES = {
-  primary: 'bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
-  success: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
-  accent: 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+  primary: {
+    icon: 'bg-gradient-to-br from-violet-400 to-fuchsia-500 text-white',
+    ring: 'ring-violet-200 dark:ring-violet-800/60',
+    glow: 'group-hover:shadow-violet-200/70 dark:group-hover:shadow-violet-900/40',
+  },
+  success: {
+    icon: 'bg-gradient-to-br from-emerald-400 to-teal-500 text-white',
+    ring: 'ring-emerald-200 dark:ring-emerald-800/60',
+    glow: 'group-hover:shadow-emerald-200/70 dark:group-hover:shadow-emerald-900/40',
+  },
+  accent: {
+    icon: 'bg-gradient-to-br from-amber-400 to-orange-500 text-white',
+    ring: 'ring-amber-200 dark:ring-amber-800/60',
+    glow: 'group-hover:shadow-amber-200/70 dark:group-hover:shadow-amber-900/40',
+  },
+  pink: {
+    icon: 'bg-gradient-to-br from-pink-400 to-rose-500 text-white',
+    ring: 'ring-pink-200 dark:ring-pink-800/60',
+    glow: 'group-hover:shadow-pink-200/70 dark:group-hover:shadow-pink-900/40',
+  },
+  sky: {
+    icon: 'bg-gradient-to-br from-sky-400 to-blue-500 text-white',
+    ring: 'ring-sky-200 dark:ring-sky-800/60',
+    glow: 'group-hover:shadow-sky-200/70 dark:group-hover:shadow-sky-900/40',
+  },
 } as const;
 
 function SecondaryCard({
@@ -230,25 +263,37 @@ function SecondaryCard({
   subtitle,
   accent,
   onClick,
+  index = 0,
 }: {
   icon: any;
   title: string;
   subtitle: string;
   accent: keyof typeof ACCENT_STYLES;
   onClick: () => void;
+  index?: number;
 }) {
+  const style = ACCENT_STYLES[accent];
   return (
-    <button
+    <motion.button
+      initial={{ opacity: 0, y: 14, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: Math.min(index, 8) * 0.04, type: 'spring', stiffness: 320, damping: 26 }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className="group flex items-center gap-4 rounded-3xl bg-white p-6 text-left shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
+      className={`group flex items-center gap-4 rounded-3xl bg-white p-6 text-left shadow-sm ring-2 transition-shadow hover:shadow-xl dark:bg-slate-800 ${style.ring} ${style.glow}`}
     >
-      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-transform group-hover:scale-105 ${ACCENT_STYLES[accent]}`}>
-        <Icon className="h-6 w-6" />
-      </div>
+      <motion.div
+        whileHover={{ rotate: [0, -8, 8, -4, 0] }}
+        transition={{ duration: 0.45 }}
+        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-md ${style.icon}`}
+      >
+        <Icon className="h-7 w-7" />
+      </motion.div>
       <div>
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h3>
+        <h3 className="font-kid text-lg font-black text-slate-900 dark:text-white">{title}</h3>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{subtitle}</p>
       </div>
-    </button>
+    </motion.button>
   );
 }

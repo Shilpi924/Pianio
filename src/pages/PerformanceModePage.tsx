@@ -1,18 +1,42 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Play, Pause, RotateCcw, Music, Volume2 } from 'lucide-react';
+import * as Tone from 'tone';
 import { useAppStore } from '../store/useAppStore';
 import { audioService } from '../services/audioService';
+import { beatService, type DrumStyle } from '../services/beatService';
 import PianoKeyboard from '../components/PianoKeyboard';
 
-const BACKING_TRACKS = [
+interface BackingTrack {
+  id: string;
+  name: string;
+  tempo: number;
+  key: string;
+  difficulty: string;
+  description: string;
+  drums: DrumStyle;
+  /** One chord per bar; the progression loops. */
+  chords: string[][];
+  /** Notes that sound good over this progression, shown as a hint. */
+  scaleNotes: string[];
+}
+
+const BACKING_TRACKS: BackingTrack[] = [
   {
     id: 'pop-ballad',
     name: 'Pop Ballad',
     tempo: 80,
     key: 'C Major',
     difficulty: 'Beginner',
-    description: 'Slow and steady pop backing track',
+    description: 'Slow and steady pop backing track (I–V–vi–IV)',
+    drums: 'ambient',
+    chords: [
+      ['C3', 'E3', 'G3'],
+      ['G2', 'B2', 'D3'],
+      ['A2', 'C3', 'E3'],
+      ['F2', 'A2', 'C3'],
+    ],
+    scaleNotes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
   },
   {
     id: 'jazz-standard',
@@ -20,7 +44,15 @@ const BACKING_TRACKS = [
     tempo: 100,
     key: 'F Major',
     difficulty: 'Intermediate',
-    description: 'Classic jazz progression',
+    description: 'Classic ii–V–I jazz progression',
+    drums: 'hiphop',
+    chords: [
+      ['G2', 'Bb2', 'D3', 'F3'],
+      ['C3', 'E3', 'G3', 'Bb3'],
+      ['F2', 'A2', 'C3', 'E3'],
+      ['F2', 'A2', 'C3', 'E3'],
+    ],
+    scaleNotes: ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'],
   },
   {
     id: 'rock-anthem',
@@ -28,15 +60,31 @@ const BACKING_TRACKS = [
     tempo: 120,
     key: 'G Major',
     difficulty: 'Intermediate',
-    description: 'Energetic rock backing track',
+    description: 'Energetic rock backing track (I–IV–V)',
+    drums: 'rock',
+    chords: [
+      ['G2', 'B2', 'D3'],
+      ['G2', 'B2', 'D3'],
+      ['C3', 'E3', 'G3'],
+      ['D3', 'F#3', 'A3'],
+    ],
+    scaleNotes: ['G', 'A', 'B', 'C', 'D', 'E', 'F#'],
   },
   {
-    id: 'classical-piece',
-    name: 'Classical Piece',
-    tempo: 70,
-    key: 'D Major',
-    difficulty: 'Advanced',
-    description: 'Elegant classical accompaniment',
+    id: 'dance-floor',
+    name: 'Dance Floor',
+    tempo: 128,
+    key: 'A Minor',
+    difficulty: 'Intermediate',
+    description: 'Four-on-the-floor club groove (vi–IV–I–V)',
+    drums: 'dance',
+    chords: [
+      ['A2', 'C3', 'E3'],
+      ['F2', 'A2', 'C3'],
+      ['C3', 'E3', 'G3'],
+      ['G2', 'B2', 'D3'],
+    ],
+    scaleNotes: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
   },
 ];
 
@@ -52,8 +100,8 @@ export default function PerformanceModePage() {
   useEffect(() => {
     const initAudio = async () => {
       if (!isAudioInitialized) {
-        await audioService.initialize();
-        setIsAudioInitialized(true);
+        const started = await audioService.initialize();
+        if (started) setIsAudioInitialized(true);
       }
     };
     initAudio();
@@ -73,21 +121,55 @@ export default function PerformanceModePage() {
     };
   }, [isPlaying]);
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+  // Keep the backing-track level in sync with the slider. This control used to
+  // be entirely dead — it set state that nothing ever read.
+  useEffect(() => {
+    beatService.setVolume(volume <= 0 ? -Infinity : Tone.gainToDb(volume));
+  }, [volume]);
+
+  // Never leave the loop running after navigating away.
+  useEffect(() => {
+    return () => {
+      beatService.stop();
+      audioService.stopAllNotes();
+    };
+  }, []);
+
+  const togglePlay = async () => {
+    if (isPlaying) {
+      beatService.stop();
+      setIsPlaying(false);
+      return;
+    }
+
+    await audioService.initialize();
+    await beatService.initialize();
+    beatService.setVolume(volume <= 0 ? -Infinity : Tone.gainToDb(volume));
+    beatService.playBackingTrack({
+      tempo: selectedTrack.tempo,
+      drums: selectedTrack.drums,
+      chords: selectedTrack.chords,
+    });
+    setIsAudioInitialized(true);
+    setIsPlaying(true);
   };
 
   const resetSession = () => {
+    beatService.stop();
     setIsPlaying(false);
     setNotesPlayed(0);
     setSessionTime(0);
   };
 
   const handleNoteOn = (note: string) => {
-    if (isPlaying && isAudioInitialized) {
-      audioService.playNote(note, '4n');
-      setNotesPlayed((prev) => prev + 1);
-    }
+    // Let the learner noodle even before starting the track — silencing the
+    // keyboard until playback begins just makes the page feel broken.
+    audioService.startNote(note);
+    setNotesPlayed((prev) => prev + 1);
+  };
+
+  const handleNoteOff = (note: string) => {
+    audioService.stopNote(note);
   };
 
   const formatTime = (seconds: number): string => {
@@ -132,8 +214,19 @@ export default function PerformanceModePage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
-                  setSelectedTrack(track);
+                  const wasPlaying = isPlaying;
                   resetSession();
+                  setSelectedTrack(track);
+                  if (wasPlaying) {
+                    // Switch the loop over immediately rather than silently
+                    // stopping and making the user press play again.
+                    beatService.playBackingTrack({
+                      tempo: track.tempo,
+                      drums: track.drums,
+                      chords: track.chords,
+                    });
+                    setIsPlaying(true);
+                  }
                 }}
                 className={`p-4 rounded-xl text-left transition-colors ${
                   selectedTrack.id === track.id
@@ -228,10 +321,23 @@ export default function PerformanceModePage() {
 
         {/* Piano Keyboard */}
         <div className="card">
+          <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-semibold text-gray-700 dark:text-gray-300">
+              Notes that fit {selectedTrack.key}:
+            </span>
+            {selectedTrack.scaleNotes.map((n) => (
+              <span
+                key={n}
+                className="rounded-lg bg-emerald-100 px-2.5 py-1 font-mono font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+              >
+                {n}
+              </span>
+            ))}
+          </div>
           <PianoKeyboard
             onNoteOn={handleNoteOn}
+            onNoteOff={handleNoteOff}
             highlightedNotes={[]}
-            disabled={!isPlaying}
           />
         </div>
 

@@ -2,6 +2,41 @@ import * as Tone from 'tone';
 
 export type BeatType = 'hiphop' | 'dance' | 'rock' | 'ambient' | 'none';
 
+export type DrumStyle = Exclude<BeatType, 'none'>;
+
+export interface BackingTrackConfig {
+  tempo: number;
+  drums: DrumStyle;
+  /** One chord (as an array of note names) per bar. The loop is chords.length bars long. */
+  chords: string[][];
+}
+
+/** One bar of drum hits per style, as [beat, sixteenth, instrument]. */
+const DRUM_PATTERNS: Record<DrumStyle, Array<[number, number, 'kick' | 'snare' | 'hihat']>> = {
+  dance: [
+    [0, 0, 'kick'], [0, 2, 'hihat'],
+    [1, 0, 'kick'], [1, 2, 'hihat'],
+    [2, 0, 'kick'], [2, 2, 'hihat'],
+    [3, 0, 'kick'], [3, 2, 'hihat'],
+  ],
+  hiphop: [
+    [0, 0, 'kick'], [0, 2, 'hihat'],
+    [1, 0, 'snare'], [1, 2, 'hihat'], [1, 3, 'kick'],
+    [2, 0, 'kick'], [2, 2, 'hihat'],
+    [3, 0, 'snare'], [3, 2, 'hihat'],
+  ],
+  rock: [
+    [0, 0, 'kick'], [0, 2, 'kick'],
+    [1, 0, 'snare'], [1, 2, 'hihat'],
+    [2, 0, 'kick'], [2, 2, 'hihat'],
+    [3, 0, 'snare'], [3, 2, 'hihat'],
+  ],
+  ambient: [
+    [0, 0, 'kick'],
+    [2, 0, 'kick'],
+  ],
+};
+
 class BeatService {
   private kick: Tone.MembraneSynth | null = null;
   private snare: Tone.NoiseSynth | null = null;
@@ -145,6 +180,54 @@ class BeatService {
 
     this.currentPart.loop = true;
     this.currentPart.loopEnd = '1m';
+    Tone.Transport.start();
+  }
+
+  /**
+   * Play a looping backing track: a drum pattern plus one chord per bar.
+   * This is what Performance Mode plays along to — previously the track
+   * buttons there only started a timer and never produced any audio.
+   */
+  playBackingTrack(config: BackingTrackConfig) {
+    if (!this.isInitialized) return;
+
+    if (this.currentPart) {
+      this.currentPart.stop();
+      this.currentPart.dispose();
+      this.currentPart = null;
+    }
+
+    Tone.Transport.stop();
+    Tone.Transport.cancel(0);
+    Tone.Transport.bpm.value = config.tempo;
+
+    const bars = Math.max(1, config.chords.length);
+    const events: Array<{ time: string; inst: string; note?: string; chord?: string[] }> = [];
+
+    for (let bar = 0; bar < bars; bar += 1) {
+      for (const [beat, sixteenth, inst] of DRUM_PATTERNS[config.drums]) {
+        events.push({ time: `${bar}:${beat}:${sixteenth}`, inst });
+      }
+      const chord = config.chords[bar];
+      if (chord?.length) {
+        // Sustain the chord across the bar, and add a soft off-beat push so
+        // the harmony doesn't feel static under the learner's playing.
+        events.push({ time: `${bar}:0`, inst: 'chord', chord });
+        events.push({ time: `${bar}:2`, inst: 'chord', chord });
+      }
+    }
+
+    this.currentPart = new Tone.Part((time, event: any) => {
+      if (event.inst === 'kick') this.kick?.triggerAttackRelease('C1', '8n', time);
+      if (event.inst === 'snare') this.snare?.triggerAttackRelease('8n', time);
+      if (event.inst === 'hihat') this.hihat?.triggerAttackRelease('32n', time);
+      if (event.inst === 'chord' && event.chord) {
+        this.synth?.triggerAttackRelease(event.chord, '2n', time);
+      }
+    }, events).start(0);
+
+    this.currentPart.loop = true;
+    this.currentPart.loopEnd = `${bars}m`;
     Tone.Transport.start();
   }
 

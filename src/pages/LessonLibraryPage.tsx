@@ -331,7 +331,7 @@ export default function LessonLibraryPage() {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 md:p-8 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] pb-24 md:pb-8">
+    <div className="font-kid min-h-screen w-full overflow-x-hidden bg-[linear-gradient(180deg,_#f7fbff_0%,_#fef7ed_100%)] p-4 md:p-8 dark:bg-[linear-gradient(180deg,_#111827_0%,_#0f172a_100%)] pb-24 md:pb-8">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -501,31 +501,46 @@ export default function LessonLibraryPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       key={name}
-                      className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-white text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800"
+                      whileHover={{ y: -6, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`group relative flex w-full flex-col overflow-hidden rounded-3xl bg-white text-left shadow-md ring-2 transition-shadow hover:shadow-2xl dark:bg-slate-800 ${
+                        selectedLesson.difficulty === 'beginner'
+                          ? 'ring-emerald-200 dark:ring-emerald-800/60'
+                          : selectedLesson.difficulty === 'intermediate'
+                            ? 'ring-amber-200 dark:ring-amber-800/60'
+                            : 'ring-sky-200 dark:ring-sky-800/60'
+                      }`}
                     >
                       <div
-                        className={`relative flex h-24 w-full items-center justify-center p-4 ${
+                        className={`relative flex h-24 w-full items-center justify-center overflow-hidden p-4 ${
                           selectedLesson.difficulty === 'beginner'
-                            ? 'bg-emerald-100 dark:bg-emerald-900/30'
+                            ? 'bg-gradient-to-br from-emerald-300 via-teal-300 to-cyan-300 dark:from-emerald-900/50 dark:via-teal-900/40 dark:to-cyan-900/40'
                             : selectedLesson.difficulty === 'intermediate'
-                              ? 'bg-amber-100 dark:bg-amber-900/30'
-                              : 'bg-sky-100 dark:bg-sky-900/30'
+                              ? 'bg-gradient-to-br from-amber-300 via-orange-300 to-pink-300 dark:from-amber-900/50 dark:via-orange-900/40 dark:to-pink-900/40'
+                              : 'bg-gradient-to-br from-sky-300 via-indigo-300 to-fuchsia-300 dark:from-sky-900/50 dark:via-indigo-900/40 dark:to-fuchsia-900/40'
                         }`}
                       >
+                        {/* Soft moving sheen so cards feel alive on hover */}
+                        <div className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(105deg,transparent_30%,rgba(255,255,255,0.55)_50%,transparent_70%)] transition-transform duration-700 group-hover:translate-x-full" />
+
                         {isRecommended && (
-                          <div className="absolute right-2 top-2 rounded bg-emerald-500 px-2 py-1 text-[10px] font-bold text-white shadow-sm">
-                            RECOMMENDED
+                          <div className="absolute right-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-700 shadow-sm dark:bg-slate-900/80 dark:text-emerald-300">
+                            ⭐ Pick for you
                           </div>
                         )}
-                        <span className="text-5xl transition-transform duration-300 group-hover:scale-110">
+                        <motion.span
+                          className="text-5xl drop-shadow-sm"
+                          whileHover={{ rotate: [0, -10, 10, -6, 0], scale: 1.15 }}
+                          transition={{ duration: 0.5 }}
+                        >
                           {selectedLesson.difficulty === 'beginner' ? '🎹' : selectedLesson.difficulty === 'intermediate' ? '🎼' : '🎻'}
-                        </span>
+                        </motion.span>
                       </div>
 
                       <div className="flex flex-col p-5">
                         <span className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">{selectedLesson.category}</span>
                         <div className="flex items-start gap-2">
-                          <h3 className="line-clamp-1 text-xl font-bold text-slate-900 dark:text-white">{name}</h3>
+                          <h3 className="font-kid line-clamp-1 text-xl font-black text-slate-900 dark:text-white">{name}</h3>
                           {isFullSong && (
                             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
                               Full song
