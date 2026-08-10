@@ -26,14 +26,28 @@ class AudioService {
 
   async initialize(): Promise<void> {
     if (this.initialized) {
+      // Always try to resume audio context on iOS/iPad
       if (Tone.context.state !== 'running') {
-        await Tone.start();
+        try {
+          await Tone.context.resume();
+          await Tone.start();
+        } catch (e) {
+          console.warn('Failed to resume audio context:', e);
+        }
       }
       return;
     }
 
     // MUST call Tone.start() inside a user-gesture handler
-    await Tone.start();
+    try {
+      await Tone.start();
+      // Ensure audio context is running (critical for iOS/iPad)
+      if (Tone.context.state !== 'running') {
+        await Tone.context.resume();
+      }
+    } catch (e) {
+      console.warn('Failed to start Tone.js:', e);
+    }
 
     this.reverb = new Tone.Reverb({ decay: 1.5, wet: 0.2 }).toDestination();
 
