@@ -404,12 +404,12 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
   }, []);
 
   useEffect(() => {
-    if (isPlaying) {
-      requestFullscreenSafe();
-    } else {
+    // Entering fullscreen is done from the click handler itself (it needs the
+    // click's user activation); this only handles leaving it.
+    if (!isPlaying) {
       exitFullscreenSafe();
     }
-  }, [isPlaying, requestFullscreenSafe, exitFullscreenSafe]);
+  }, [isPlaying, exitFullscreenSafe]);
 
   useEffect(() => {
     return () => {
@@ -469,6 +469,14 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
   };
 
   const togglePractice = async () => {
+    // Request fullscreen synchronously, before any await. The browser only
+    // grants requestFullscreen() while the click still holds transient user
+    // activation, and awaiting audio init first consumes it — which is why
+    // starting a song stopped going fullscreen once audio init became async.
+    if (!isPlaying) {
+      requestFullscreenSafe();
+    }
+
     if (isPreviewingSong) {
       stopSongPreview(true);
     }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, Flame, ArrowRight, StickyNote, ChevronDown } from 'lucide-react';
+import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, ArrowRight, StickyNote, ChevronDown } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { getEnhancedLessons } from '../services/musicCatalogService';
@@ -70,17 +70,6 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 md:justify-end">
-            <div className="flex items-center gap-4 rounded-3xl bg-white/90 backdrop-blur-md px-6 py-3 shadow-xl ring-2 ring-orange-200 dark:bg-gray-800/90 dark:ring-orange-700">
-              <div className="flex items-center gap-2 text-lg font-black text-orange-500">
-                <Flame className="h-6 w-6 animate-pulse" />
-                {userProfile?.currentStreak ?? 0}
-              </div>
-              <div className="h-6 w-px bg-orange-200 dark:bg-orange-700" />
-              <div className="flex items-center gap-2 text-lg font-black text-blue-500">
-                <Sparkles className="h-6 w-6 animate-bounce" />
-                {userProfile?.experiencePoints ?? 0} XP
-              </div>
-            </div>
             <div className="relative">
               <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-orange-500" />
               <select
