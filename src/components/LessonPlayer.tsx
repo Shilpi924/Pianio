@@ -607,7 +607,8 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
         if (useMicrophone) {
           clearAdvanceTimeout();
         }
-        setIsPlaying(false);
+        // Don't stop playback on wrong note - just record the mistake
+        // setIsPlaying(false);
         recordNotePlayed(false);
         setCombo(0);
         
@@ -644,7 +645,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
               SoundEffects.playIncorrect();
             }
             setMascotMood('thinking');
-            setMascotMessage('Mistake! Playback stopped. Press Play to try again.');
+            setMascotMessage('Try again! Keep going.');
           }
           return nextStreak;
         });
