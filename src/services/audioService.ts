@@ -23,6 +23,7 @@ class AudioService {
   private initialized = false;
   private samplesLoaded = false;
   private volume = 0.7;
+  private iosUnlocked = false;
 
   /**
    * Returns true only when the AudioContext is actually running and able to
@@ -34,7 +35,36 @@ class AudioService {
    * an exception, or the app happily believes audio is live while every note
    * goes into a dead context.
    */
+  /**
+   * iOS/iPadOS will not let a WebAudio context start from an async
+   * continuation, and it stays locked until something is actually rendered
+   * through it. Resuming synchronously and pushing one silent buffer inside
+   * the gesture is what unlocks it. Cheap and harmless on other platforms.
+   */
+  private unlockIOS(): void {
+    try {
+      const raw = Tone.context.rawContext as unknown as AudioContext;
+      if (!raw) return;
+      // Kick off resume without awaiting — the call itself must happen inside
+      // the gesture; awaiting it first is what iOS refuses.
+      raw.resume?.();
+      if (!this.iosUnlocked) {
+        const buffer = raw.createBuffer(1, 1, 22050);
+        const source = raw.createBufferSource();
+        source.buffer = buffer;
+        source.connect(raw.destination);
+        source.start(0);
+        this.iosUnlocked = true;
+      }
+    } catch {
+      // Non-fatal: this is a best-effort unlock.
+    }
+  }
+
   async initialize(): Promise<boolean> {
+    // Do this first and synchronously, before any await.
+    this.unlockIOS();
+
     if (this.initialized) {
       if (Tone.context.state !== 'running') {
         try {

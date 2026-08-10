@@ -120,6 +120,29 @@ function App() {
     audioService.setVolume(normalizedVol / 100);
   }, [settings.audioVolume]);
 
+  // Unlock audio on the very first touch/click anywhere in the app, rather than
+  // waiting until the learner reaches a Start or Hear song button. iOS/iPadOS
+  // only lets a WebAudio context start from inside a real gesture, so the
+  // earliest possible gesture is the most reliable one to use — by the time a
+  // lesson is opened, sound is already live.
+  useEffect(() => {
+    const unlock = () => {
+      audioService.initialize().finally(() => {
+        document.removeEventListener('pointerdown', unlock);
+        document.removeEventListener('touchend', unlock);
+        document.removeEventListener('keydown', unlock);
+      });
+    };
+    document.addEventListener('pointerdown', unlock);
+    document.addEventListener('touchend', unlock);
+    document.addEventListener('keydown', unlock);
+    return () => {
+      document.removeEventListener('pointerdown', unlock);
+      document.removeEventListener('touchend', unlock);
+      document.removeEventListener('keydown', unlock);
+    };
+  }, []);
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
