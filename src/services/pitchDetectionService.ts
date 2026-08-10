@@ -229,7 +229,7 @@ class PitchDetectionService {
     if (!this.isRunning || !this.analyzer) return;
 
     this.analyzer.getFloatTimeDomainData(this.buffer as any);
-    const { frequency, rms } = this.autoCorrelate(this.buffer, this.sampleRate);
+    const { frequency, rms, confidence } = this.autoCorrelate(this.buffer, this.sampleRate);
     
     // Update adaptive threshold based on noise level
     this.updateAdaptiveThreshold(rms);
@@ -241,19 +241,27 @@ class PitchDetectionService {
     
     // Log detection info every 30 frames (approx 0.5 seconds)
     if (this.calibrationFrames % 30 === 0) {
-      console.log(`[Pitch Detection] RMS: ${rms.toFixed(4)}, Threshold: ${this.adaptiveThreshold.toFixed(4)}, Frequency: ${frequency.toFixed(1)}Hz, Note: ${frequency !== -1 ? this.frequencyToNote(frequency) : 'none'}`);
+      console.log(`[Pitch Detection] RMS: ${rms.toFixed(4)}, Threshold: ${this.adaptiveThreshold.toFixed(4)}, Frequency: ${frequency.toFixed(1)}Hz, Confidence: ${confidence.toFixed(3)}, Note: ${frequency !== -1 ? this.frequencyToNote(frequency) : 'none'}`);
     }
     
-    if (frequency !== -1) {
+    // Improved detection logic with confidence threshold
+    if (frequency !== -1 && confidence > 0.3) {
       const noteName = this.frequencyToNote(frequency);
       
-      // Debounce logic: trigger on first detection of each note
+      // Improved debounce logic with hold counter
       if (noteName !== this.lastDetectedNote) {
-        this.lastDetectedNote = noteName;
-        this.noteHoldCounter = 0;
-        console.log(`[Pitch Detection] Note detected: ${noteName} (${frequency.toFixed(1)}Hz)`);
-        if (this.callback) {
-          this.callback(noteName, frequency);
+        // Only trigger if we've held the previous note long enough or it's the first note
+        if (this.noteHoldCounter < 3 || this.lastDetectedNote === null) {
+          this.lastDetectedNote = noteName;
+          this.noteHoldCounter = 0;
+          console.log(`[Pitch Detection] Note detected: ${noteName} (${frequency.toFixed(1)}Hz, confidence: ${confidence.toFixed(3)})`);
+          if (this.callback) {
+            this.callback(noteName, frequency);
+          }
+        } else {
+          // Note changed too quickly, ignore
+          this.lastDetectedNote = noteName;
+          this.noteHoldCounter = 0;
         }
       } else {
         this.noteHoldCounter++;
@@ -321,7 +329,7 @@ class PitchDetectionService {
     return this.calibrationFrames / this.calibrationDuration;
   }
 
-  private autoCorrelate(buf: Float32Array, sampleRate: number): { frequency: number; rms: number } {
+  private autoCorrelate(buf: Float32Array, sampleRate: number): { frequency: number; rms: number; confidence: number } {
     let size = buf.length;
     let rms = 0;
 
@@ -333,7 +341,7 @@ class PitchDetectionService {
     
     // Use adaptive threshold after calibration - further lowered for better iPad sensitivity
     const threshold = this.calibrationFrames >= this.calibrationDuration ? this.adaptiveThreshold : 0.008;
-    if (rms < threshold) return { frequency: -1, rms };
+    if (rms < threshold) return { frequency: -1, rms, confidence: 0 };
 
     // Improved signal preprocessing - apply windowing to reduce spectral leakage
     const windowedBuf = new Float32Array(size);
@@ -351,7 +359,7 @@ class PitchDetectionService {
       if (Math.abs(windowedBuf[size - i]) < thres) { r2 = size - i; break; }
 
     // Ensure we have enough signal
-    if (r2 - r1 < size * 0.1) return { frequency: -1, rms };
+    if (r2 - r1 < size * 0.1) return { frequency: -1, rms, confidence: 0 };
 
     const trimmedBuf = windowedBuf.slice(r1, r2);
     const trimmedSize = trimmedBuf.length;
@@ -376,7 +384,7 @@ class PitchDetectionService {
     }
 
     let T0 = maxpos;
-    if (T0 <= 0) return { frequency: -1, rms };
+    if (T0 <= 0) return { frequency: -1, rms, confidence: 0 };
 
     // Parabolic interpolation for sub-sample accuracy
     if (T0 > 0 && T0 < trimmedSize - 1) {
@@ -388,13 +396,16 @@ class PitchDetectionService {
 
     const frequency = sampleRate / T0;
     
+    // Calculate confidence based on peak strength relative to signal
+    const confidence = maxval / c[0];
+    
     // Validate frequency is in piano range (C2-C8: ~65Hz-4186Hz)
-    if (frequency < 65 || frequency > 4200) return { frequency: -1, rms };
+    if (frequency < 65 || frequency > 4200) return { frequency: -1, rms, confidence: 0 };
     
     // Additional validation: check if the peak is significant enough
-    if (maxval < c[0] * 0.3) return { frequency: -1, rms };
+    if (maxval < c[0] * 0.3) return { frequency: -1, rms, confidence: 0 };
     
-    return { frequency, rms };
+    return { frequency, rms, confidence };
   }
 
   private frequencyToNote(frequency: number): string {
