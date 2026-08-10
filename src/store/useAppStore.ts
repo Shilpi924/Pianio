@@ -70,7 +70,10 @@ const defaultSettings: Settings = {
   claudeApiKey: '',
   backgroundMusic: true,
   language: 'en',
-  requireNoteHoldDuration: false, // Default to false for better beginner experience
+  // On by default: the falling bars show how long each note lasts, so the
+  // lesson has to actually require that hold — otherwise the visuals teach a
+  // rule the game never enforces, which is just confusing.
+  requireNoteHoldDuration: true,
 };
 
 const defaultStatistics: Statistics = {

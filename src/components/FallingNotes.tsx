@@ -9,6 +9,10 @@ interface FallingNoteData {
   finger: number;
   heightPx: number;
   topPx: number;
+  /** Height still left to play. While the note is being held this shrinks to
+   *  zero, so the bar visibly gets eaten by the keyboard line. */
+  renderHeightPx: number;
+  renderTopPx: number;
   leftPct: number;
   widthPct: number;
   isBlack: boolean;
@@ -220,6 +224,12 @@ export default function FallingNotes({
         if (layout) {
           const isHolding = playhead >= start && playhead < end;
           const holdProgress = Math.min(100, Math.max(0, ((playhead - start) / duration) * 100));
+          // Once the bar reaches the line it stops sliding past and is instead
+          // consumed by it: the bottom stays pinned to the line and the bar
+          // shrinks away. "Hold until it's gone" then needs no explanation.
+          const consumedPx = Math.max(0, Math.min(heightPx, bottomY - TRAVEL));
+          const renderHeightPx = Math.max(2, heightPx - consumedPx);
+          const renderTopPx = Math.min(bottomY, TRAVEL) - renderHeightPx;
           const isShort = heightPx < 28;
           const displayLabel = formatDisplayLabel(n.note);
           visible.push({
@@ -230,6 +240,8 @@ export default function FallingNotes({
             finger: n.finger,
             heightPx,
             topPx,
+            renderHeightPx,
+            renderTopPx,
             leftPct: layout.leftPct,
             widthPct: layout.widthPct,
             isBlack: layout.isBlack,
@@ -338,8 +350,8 @@ export default function FallingNotes({
                 left:   `calc(${fn.leftPct}% + 1px)`,
                 width:  `calc(${fn.widthPct}% - 2px)`,
                 top:    0,
-                height: fn.heightPx,
-                minHeight: fn.isShort ? 24 : 0,
+                height: fn.renderHeightPx,
+                minHeight: 0,
                 borderRadius: fn.isShort ? 999 : 10,
                 background:   fn.isHolding
                   ? 'linear-gradient(145deg, #06b6d4 0%, #6366f1 52%, #d946ef 100%)'
@@ -355,7 +367,7 @@ export default function FallingNotes({
                   : fn.isShort
                   ? `0 0 12px 3px ${colors.glow}, inset 0 1px 0 rgba(255,255,255,0.32)`
                   : `0 0 10px 2px ${colors.glow}, inset 0 1px 0 rgba(255,255,255,0.36)`,
-                transform: `translate3d(0, ${fn.topPx}px, 0)`,
+                transform: `translate3d(0, ${fn.renderTopPx}px, 0)`,
                 willChange: 'transform',
                 backfaceVisibility: 'hidden',
                 zIndex: fn.isBlack ? 10 : 5,
@@ -363,25 +375,16 @@ export default function FallingNotes({
               >
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,transparent_20%,rgba(255,255,255,0.28)_45%,transparent_68%)]" />
 
-              {/* The fill and its luminous leading edge travel upward together.
-                  Release when the moving beam meets the white top cap. */}
-              {fn.holdProgress > 0 && (
-                <div
-                  className={`absolute bottom-0 left-0 right-0 ${fn.isShort ? 'bg-white/35' : 'bg-white/25'}`}
-                  style={{
-                    height: fn.isShort ? '100%' : `${fn.holdProgress}%`,
-                    opacity: fn.isShort ? 0.68 : 1,
-                  }}
-                />
-              )}
+              {/* The bar is consumed at its bottom edge, so the old upward-
+                  filling overlay is gone — it read as the note filling up,
+                  the opposite of what is happening. What is left is a bright
+                  cut edge riding the line while the note is being eaten. */}
               {fn.isHolding && (
                 <div
                   data-testid="note-hold-beam"
-                  className="absolute left-0 right-0 z-20 h-px bg-white"
+                  className="absolute bottom-0 left-0 right-0 z-20 h-[3px] bg-white"
                   style={{
-                    bottom: fn.isShort ? 0 : `calc(${fn.holdProgress}% - 1px)`,
-                    boxShadow: '0 0 4px 1px #ffffff, 0 0 10px 3px #22d3ee, 0 0 15px 4px rgba(217,70,239,0.7)',
-                    transition: 'bottom 45ms linear',
+                    boxShadow: '0 0 6px 2px #ffffff, 0 0 12px 4px #22d3ee, 0 0 18px 6px rgba(217,70,239,0.7)',
                   }}
                 />
               )}
@@ -440,7 +443,7 @@ export default function FallingNotes({
       {/* Status overlay */}
       {!isPlaying && (
         <div className="absolute inset-x-4 top-3 z-20 rounded-2xl bg-black/70 px-4 py-2.5 text-center text-sm font-bold text-white backdrop-blur-md border border-white/10">
-          🎹 Longer bar = longer hold · release when the glow reaches the top
+          🎹 Hold each key until its bar disappears
         </div>
       )}
 

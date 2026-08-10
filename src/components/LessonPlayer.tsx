@@ -65,6 +65,9 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
   // this view), so anything urgent needs its own visible surface.
   const [audioBlocked, setAudioBlocked] = useState(false);
   const [midiDeviceCount, setMidiDeviceCount] = useState(0);
+  const [releasedEarly, setReleasedEarly] = useState(false);
+  // The hold currently in progress, so an early release can cancel it.
+  const pendingHoldRef = useRef<{ note: string; index: number; requiredMs: number; startedAt: number } | null>(null);
   const [isPreviewingSong, setIsPreviewingSong] = useState(false);
   const [isAdaptiveTraining, setIsAdaptiveTraining] = useState(false);
   const [adaptiveTargetNotes, setAdaptiveTargetNotes] = useState<number[]>([]);
@@ -313,7 +316,13 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
       
       setCurrentTime((prev) => {
         let newTime = prev + deltaSeconds;
-        if (!isPreviewingSong && waitModeEnabled && practiceMode === 'guided') {
+        // Wait mode parks the clock at the current note until it is played.
+        // While a key is actually being held, let the clock run so the bar
+        // drains in step with the hold the child is being asked to sustain —
+        // otherwise "hold until the bar disappears" is impossible to obey,
+        // because the bar sits frozen at the line.
+        const holding = pendingHoldRef.current !== null;
+        if (!isPreviewingSong && waitModeEnabled && practiceMode === 'guided' && !holding) {
           let targetBeat = 0;
           for (let i = 0; i < currentNoteIndexRef.current; i++) {
             targetBeat += lesson.notes[i].duration;
@@ -504,8 +513,31 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
       if (isAudioInitialized) {
         audioService.stopNote(playedNote);
       }
+
+      const pending = pendingHoldRef.current;
+      if (!pending || pending.note !== playedNote) return;
+
+      const heldMs = Date.now() - pending.startedAt;
+      // 15% grace: a child letting go a hair early should still count, but a
+      // genuine early release should not advance the song.
+      if (heldMs < pending.requiredMs * 0.85) {
+        clearAdvanceTimeout();
+        pendingHoldRef.current = null;
+        // Rewind the clock to the start of this note so its bar is restored to
+        // full length. Otherwise the retry starts from a half-eaten bar while
+        // still demanding a full-length hold, and the visual stops matching
+        // what the child actually has to do.
+        let targetBeat = 0;
+        for (let i = 0; i < currentNoteIndexRef.current; i++) {
+          targetBeat += lesson.notes[i].duration;
+        }
+        setCurrentTime((targetBeat * 60) / tempo);
+        setReleasedEarly(true);
+        window.setTimeout(() => setReleasedEarly(false), 1400);
+      }
+      // Released close enough to the end: leave the timer to finish the note.
     },
-    [isAudioInitialized]
+    [clearAdvanceTimeout, isAudioInitialized, lesson.notes, tempo]
   );
 
   const handleNotePlayed = useCallback(
@@ -681,13 +713,28 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
       if (notesMatch(playedNote, currentNote.note, useMicrophone)) {
         if (useMicrophone || settings.requireNoteHoldDuration) {
           clearAdvanceTimeout();
-          const holdMs = Math.max(0, holdDurationMs - (Date.now() - noteStartTime));
+          // Time the hold from the key press, not from when the note first
+          // appeared. Measuring from the note's arrival meant a child who
+          // waited a moment before pressing had to hold for essentially no
+          // time at all, so "hold it" was never really tested.
+          const waitMs = Math.max(holdDurationMs, 120);
+          setReleasedEarly(false);
+          // Remember this hold so letting go too soon can cancel it. Without
+          // this the note advanced on a timer whether or not the key was still
+          // down, which made the whole hold mechanic decorative.
+          pendingHoldRef.current = {
+            note: playedNote,
+            index: currentNoteIndex,
+            requiredMs: waitMs,
+            startedAt: Date.now(),
+          };
           advanceTimeoutRef.current = window.setTimeout(() => {
             advanceTimeoutRef.current = null;
+            pendingHoldRef.current = null;
             if (!isPlayingRef.current) return;
             if (currentNoteIndexRef.current !== currentNoteIndex) return;
             advanceCorrectNote();
-          }, Math.max(holdMs, 120));
+          }, waitMs);
           setMascotMood('happy');
           setMascotMessage(`Hold ${currentNote.note} until the bar finishes.`);
           return;
@@ -1076,6 +1123,20 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
               </div>
             </motion.div>
           </div>
+        )}
+
+        {/* Letting go too soon has to say so, or the note simply stops
+            advancing and the child has no idea why. */}
+        {releasedEarly && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="pointer-events-none absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-amber-400 px-6 py-4 text-center shadow-2xl"
+          >
+            <div className="text-3xl">✋</div>
+            <div className="font-kid text-xl font-black text-amber-950">Keep holding!</div>
+            <div className="text-sm font-bold text-amber-900">Wait until the bar disappears</div>
+          </motion.div>
         )}
 
         {(useFallingNotes || showSheetMusic) && (
