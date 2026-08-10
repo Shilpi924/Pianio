@@ -20,7 +20,7 @@ interface PianoKeyProps {
 const keyStateStyles: Record<KeyState, string> = {
   idle: '',
   highlighted: 'bg-blue-200 dark:bg-blue-800',
-  pressed: 'bg-blue-300 dark:bg-blue-700 brightness-90',
+  pressed: 'bg-blue-400 dark:bg-blue-600 brightness-75 shadow-blue-500/50 shadow-lg scale-105',
   correct: 'bg-green-300 dark:bg-green-700 shadow-glow',
   incorrect: 'bg-red-300 dark:bg-red-700 animate-shake',
   disabled: 'opacity-50 cursor-not-allowed',
