@@ -34,8 +34,8 @@ class PitchDetectionService {
   // Adaptive noise threshold
   private noiseLevelHistory: number[] = [];
   private readonly noiseHistorySize = 100;
-  private adaptiveThreshold: number = 0.008; // Lowered for better iPad sensitivity
-  private readonly minThreshold = 0.002; // Lowered minimum for quiet environments
+  private adaptiveThreshold: number = 0.005; // Further lowered for better iPad sensitivity
+  private readonly minThreshold = 0.001; // Further lowered minimum for quiet environments
   private readonly maxThreshold = 0.05;
   private calibrationFrames = 0;
   private calibrationDuration = 60; // frames to calibrate
@@ -68,7 +68,7 @@ class PitchDetectionService {
       this.lastDetectedNote = null;
       this.noteHoldCounter = 0;
       this.noiseLevelHistory = [];
-      this.adaptiveThreshold = 0.008; // Lowered for better iPad sensitivity
+      this.adaptiveThreshold = 0.005; // Further lowered for better iPad sensitivity
       this.calibrationFrames = 0;
       this.isManualCalibration = false;
       this.calibrationCallback = calibrationCallback || null;
@@ -105,11 +105,17 @@ class PitchDetectionService {
       this.analyzer.fftSize = 2048;
       this.buffer = new Float32Array(this.analyzer.frequencyBinCount);
       this.analyzer.smoothingTimeConstant = 0.1;
-      this.analyzer.minDecibels = -100;
+      this.analyzer.minDecibels = -90; // Increased sensitivity for iPad
       this.analyzer.maxDecibels = -30;
       
       this.mediaStreamSource.connect(this.analyzer);
       this.isRunning = true;
+      
+      // Force audio context to running state for iOS/iPad
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      
       this.tick();
     } catch (err) {
       console.error("Error accessing microphone:", err);
@@ -325,8 +331,8 @@ class PitchDetectionService {
     }
     rms = Math.sqrt(rms / size);
     
-    // Use adaptive threshold after calibration - lowered for better sensitivity
-    const threshold = this.calibrationFrames >= this.calibrationDuration ? this.adaptiveThreshold : 0.01;
+    // Use adaptive threshold after calibration - further lowered for better iPad sensitivity
+    const threshold = this.calibrationFrames >= this.calibrationDuration ? this.adaptiveThreshold : 0.008;
     if (rms < threshold) return { frequency: -1, rms };
 
     // Improved signal preprocessing - apply windowing to reduce spectral leakage
