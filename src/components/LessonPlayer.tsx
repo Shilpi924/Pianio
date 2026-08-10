@@ -81,6 +81,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
   const advanceTimeoutRef = useRef<number | null>(null);
   const micNoteHandlerRef = useRef<(note: string) => void>(() => undefined);
   const prevUseMicrophoneRef = useRef(false);
+  const immersiveStageRef = useRef<HTMLDivElement>(null);
 
   const currentNote = lesson.notes[currentNoteIndex];
   const progress = ((currentNoteIndex + 1) / lesson.notes.length) * 100;
@@ -346,6 +347,55 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
       setHighlightedNotes([]);
     }
   }, [isPlaying, isPreviewingSong, currentNote, currentNoteIndex, isAudioInitialized, practiceMode, tempo, waitModeEnabled]);
+
+  // Immersive full-screen mode: while a song is actively playing, take over the
+  // whole screen with just the falling notes + keyboard so kids aren't distracted
+  // by chrome/navigation. Falls back gracefully if the Fullscreen API is unavailable
+  // (Safari on iOS, some in-app webviews) - the CSS-based fixed overlay still applies.
+  const requestFullscreenSafe = useCallback(() => {
+    const el = immersiveStageRef.current as (HTMLDivElement & {
+      webkitRequestFullscreen?: () => Promise<void>;
+      mozRequestFullScreen?: () => Promise<void>;
+      msRequestFullscreen?: () => Promise<void>;
+    }) | null;
+    if (!el) return;
+    const request = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (request) {
+      request.call(el)?.catch?.(() => undefined);
+    }
+  }, []);
+
+  const exitFullscreenSafe = useCallback(() => {
+    const doc = document as Document & {
+      webkitFullscreenElement?: Element;
+      webkitExitFullscreen?: () => Promise<void>;
+      mozFullScreenElement?: Element;
+      mozCancelFullScreen?: () => Promise<void>;
+      msFullscreenElement?: Element;
+      msExitFullscreen?: () => Promise<void>;
+    };
+    const activeFullscreenEl = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+    if (!activeFullscreenEl) return;
+    const exit = document.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+    if (exit) {
+      exit.call(document)?.catch?.(() => undefined);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isPlaying) {
+      requestFullscreenSafe();
+    } else {
+      exitFullscreenSafe();
+    }
+  }, [isPlaying, requestFullscreenSafe, exitFullscreenSafe]);
+
+  useEffect(() => {
+    return () => {
+      exitFullscreenSafe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const ensureAudio = async () => {
     if (!isAudioInitialized) {
@@ -773,12 +823,12 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
           <div className="flex flex-wrap items-center gap-2">
             {!isPlaying ? (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={togglePractice}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-500 px-5 py-2 text-sm font-bold text-white shadow-md transition-colors hover:bg-blue-600"
+                className="animate-pulse-glow inline-flex min-h-12 items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 px-6 py-3 text-base font-black text-white shadow-lg transition-all hover:from-emerald-500 hover:via-cyan-500 hover:to-blue-600"
               >
-                <Play className="h-5 w-5" />
+                <Play className="h-6 w-6" />
                 <span>Start</span>
               </motion.button>
             ) : (
@@ -833,7 +883,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={onExit}
+                onClick={() => { exitFullscreenSafe(); onExit(); }}
                 className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-gradient-to-r from-pink-400 to-red-400 px-5 py-3 text-base font-black text-white shadow-lg transition-colors hover:from-pink-500 hover:to-red-500"
                 title="Back"
               >
@@ -872,20 +922,92 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
         </div>
       </div>
 
-      {/* Main Play Area (Dynamic Sizing) */}
-      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col overflow-hidden rounded-3xl bg-slate-900/5 shadow-inner dark:bg-black/20">
-        
+      {/* Main Play Area — becomes an immersive full-screen stage the moment
+          practice starts, so kids see nothing but falling notes + keyboard. */}
+      <div
+        ref={immersiveStageRef}
+        className={
+          isPlaying
+            ? 'fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col overflow-hidden bg-gradient-to-br from-[#0b0620] via-[#1a0b3d] to-[#050414]'
+            : 'relative mx-auto flex w-full max-w-6xl flex-1 flex-col overflow-hidden rounded-3xl bg-slate-900/5 shadow-inner dark:bg-black/20'
+        }
+      >
+        {/* Ambient floating glow blobs — purely decorative, kid-friendly sparkle */}
+        {isPlaying && (
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="animate-float absolute -left-16 top-6 h-64 w-64 rounded-full bg-fuchsia-500/25 blur-3xl" />
+            <div className="animate-float absolute right-[-4rem] top-1/4 h-80 w-80 rounded-full bg-cyan-400/20 blur-3xl" style={{ animationDelay: '1.6s' }} />
+            <div className="animate-float absolute bottom-24 left-1/3 h-72 w-72 rounded-full bg-amber-400/15 blur-3xl" style={{ animationDelay: '3.2s' }} />
+          </div>
+        )}
+
+        {/* Compact floating control bar (only visible in immersive mode) */}
+        {isPlaying && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute left-1/2 top-3 z-30 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2"
+          >
+            <div className="relative flex items-center justify-between gap-3 rounded-3xl border border-white/15 bg-white/10 px-4 py-2.5 shadow-2xl backdrop-blur-xl">
+              <span className="truncate font-fun text-sm font-black text-white sm:text-base">
+                🎹 {lesson.title}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="hidden items-center gap-1 rounded-full bg-emerald-400/20 px-3 py-1 sm:flex">
+                  <span className="text-xs font-black text-emerald-300">{accuracy}% ✨</span>
+                </div>
+                {combo > 1 && (
+                  <div className="animate-pulse-glow flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-400 to-pink-500 px-3 py-1 shadow-lg">
+                    <span className="text-xs font-black text-white">{combo}x 🔥</span>
+                  </div>
+                )}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={togglePractice}
+                  className="rounded-full bg-white/15 p-2.5 text-white hover:bg-white/25"
+                  title="Pause"
+                >
+                  <Pause className="h-5 w-5" />
+                </motion.button>
+                {onExit && (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => { exitFullscreenSafe(); onExit(); }}
+                    className="rounded-full bg-white/15 p-2.5 text-white hover:bg-red-500/70"
+                    title="Exit"
+                  >
+                    <X className="h-5 w-5" />
+                  </motion.button>
+                )}
+              </div>
+              <div className="absolute -bottom-1.5 left-3 right-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-amber-300"
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Render Finger Hint */}
         {isPlaying && currentNote && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+          <div className={`absolute left-1/2 -translate-x-1/2 z-20 pointer-events-none ${isPlaying ? 'top-20' : 'top-4'}`}>
              <motion.div
               initial={{ opacity: 0, scale: 0.96, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="flex items-center justify-center gap-6 rounded-2xl bg-white/80 p-4 shadow-xl backdrop-blur-md dark:bg-gray-800/80"
+              className={
+                isPlaying
+                  ? 'flex items-center justify-center gap-6 rounded-2xl border border-white/15 bg-white/10 p-4 shadow-xl backdrop-blur-xl'
+                  : 'flex items-center justify-center gap-6 rounded-2xl bg-white/80 p-4 shadow-xl backdrop-blur-md dark:bg-gray-800/80'
+              }
             >
               <div className="text-center">
-                <div className="mb-1 text-sm font-semibold text-gray-600 dark:text-gray-300">Target Note</div>
-                <div className="text-4xl font-black text-blue-600 dark:text-blue-400">{currentNote.note}</div>
+                <div className={`mb-1 text-sm font-semibold ${isPlaying ? 'text-white/70' : 'text-gray-600 dark:text-gray-300'}`}>Target Note</div>
+                <div className={`text-4xl font-black ${isPlaying ? 'text-cyan-300' : 'text-blue-600 dark:text-blue-400'}`}>{currentNote.note}</div>
               </div>
               <div className="relative inline-block h-20 w-20">
                 <FingerHint finger={currentNote.finger} hand={currentNote.hand} show={showGhostHand} />
@@ -895,7 +1017,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
         )}
 
         {(useFallingNotes || showSheetMusic) && (
-          <div className="relative flex min-h-[280px] w-full flex-1">
+          <div className={`relative flex min-h-[280px] w-full flex-1 items-center ${isPlaying ? 'justify-center px-2 pt-16' : ''}`}>
             {useFallingNotes && (
               <div className="relative w-full">
                 <FallingNotes
@@ -912,10 +1034,10 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
             )}
             {showSheetMusic && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm dark:bg-gray-900/50">
-                <SheetMusic 
-                  notes={lesson.notes} 
-                  currentNoteIndex={currentNoteIndex} 
-                  title={lesson.title} 
+                <SheetMusic
+                  notes={lesson.notes}
+                  currentNoteIndex={currentNoteIndex}
+                  title={lesson.title}
                   currentTime={currentTime}
                   tempo={tempo}
                   isPlaying={isPlaying}
@@ -924,9 +1046,9 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
             )}
           </div>
         )}
-        
+
         {/* Piano Keyboard (Always at bottom) */}
-        <div className="relative z-10 shrink-0">
+        <div className={`relative z-10 shrink-0 ${isPlaying ? 'pb-[env(safe-area-inset-bottom)]' : ''}`}>
           <PianoKeyboard
             onNoteOn={(note) => handleNotePlayed(note)}
             onNoteOff={(note) => handleNoteReleased(note)}

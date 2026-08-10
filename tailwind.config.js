@@ -86,6 +86,9 @@ export default {
         'wiggle': 'wiggle 0.5s ease-in-out',
         'pop': 'pop 0.3s ease-out',
         'rainbow': 'rainbow 3s linear infinite',
+        'pulse-glow': 'pulse-glow 2.2s ease-in-out infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'float-fast': 'float 3.5s ease-in-out infinite',
       },
       keyframes: {
         'bounce-soft': {
@@ -117,6 +120,14 @@ export default {
         'rainbow': {
           '0%': { backgroundPosition: '0% 50%' },
           '100%': { backgroundPosition: '100% 50%' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 0px 0px rgba(34,211,238,0.0)', transform: 'scale(1)' },
+          '50%': { boxShadow: '0 0 30px 8px rgba(34,211,238,0.55)', transform: 'scale(1.03)' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0) translateX(0)' },
+          '50%': { transform: 'translateY(-18px) translateX(8px)' },
         },
       },
     },
