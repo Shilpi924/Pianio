@@ -19,7 +19,7 @@ interface PianoKeyProps {
 
 const keyStateStyles: Record<KeyState, string> = {
   idle: '',
-  highlighted: 'bg-blue-200 dark:bg-blue-800',
+  highlighted: 'bg-gradient-to-b from-blue-400 to-blue-200 dark:from-blue-600 dark:to-blue-800',
   pressed: 'bg-blue-400 dark:bg-blue-600 brightness-75 shadow-blue-500/50 shadow-lg scale-105',
   correct: 'bg-green-300 dark:bg-green-700 shadow-glow',
   incorrect: 'bg-red-300 dark:bg-red-700 animate-shake',
@@ -92,6 +92,16 @@ export default function PianoKey({
         <div className={`absolute ${isBlack ? 'top-10' : 'bottom-8'} left-1/2 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-md border-b-2 border-gray-300 bg-gray-100 text-[10px] font-bold uppercase text-gray-700 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300`}>
           {computerKey}
         </div>
+      )}
+
+      {/* Falling color animation for highlighted notes */}
+      {state === 'highlighted' && (
+        <motion.div
+          initial={{ y: '-100%', opacity: 0.8 }}
+          animate={{ y: '100%', opacity: 0.8 }}
+          transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0 bg-gradient-to-b from-blue-400/50 to-blue-200/50 dark:from-blue-600/50 dark:to-blue-800/50 pointer-events-none z-10"
+        />
       )}
 
       {/* Blue dot indicator for highlighted notes */}
