@@ -29,6 +29,10 @@ interface FallingNotesProps {
   speed: number;
   activeNotes?: string[];
   sectionMarkers?: Array<{ index: number; label: string }>;
+  /** Stretch to fill the parent instead of using the fixed clamp height.
+   *  Used by the immersive full-screen stage, where a fixed height leaves a
+   *  large dead gap between the notes and the keyboard. */
+  fillHeight?: boolean;
 }
 
 // ── Note helpers ──────────────────────────────────────────────────────────────
@@ -75,6 +79,21 @@ function buildKeyboard(notes: Note[]) {
   }
   const whiteKeys = keys.filter(k => !k.isBlack);
   return { keys, whiteKeys, startMidi, endMidi };
+}
+
+/** Exact key list between two notes, with no octave padding. Used to mirror
+ *  PianoKeyboard's fixed C3-C6 range in immersive mode. */
+function buildKeyboardRange(fromNote: string, toNote: string) {
+  const from = parseNote(fromNote);
+  const to = parseNote(toNote);
+  const keys: { midi: number; name: string; isBlack: boolean }[] = [];
+  if (!from || !to) return { keys, whiteKeys: keys };
+  for (let m = from.midi; m <= to.midi; m++) {
+    const oct = Math.floor(m / 12) - 1;
+    const name = CHROMATIC[m % 12] + oct;
+    keys.push({ midi: m, name, isBlack: BLACK_SET.has(CHROMATIC[m % 12]) });
+  }
+  return { keys, whiteKeys: keys.filter((k) => !k.isBlack) };
 }
 
 function getLayout(
@@ -127,6 +146,7 @@ export default function FallingNotes({
   speed = 1,
   activeNotes = [],
   sectionMarkers = [],
+  fillHeight = false,
 }: FallingNotesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerH, setContainerH] = useState(360);
@@ -140,13 +160,22 @@ export default function FallingNotes({
     return () => ro.disconnect();
   }, []);
 
-  // Build keyboard layout dynamically from the actual lesson notes
+  // Build keyboard layout dynamically from the actual lesson notes.
+  // In immersive mode we instead mirror the real PianoKeyboard's fixed C3-C6
+  // range, so a falling note lands directly above the key you have to press.
+  // (Deriving the range from the lesson's own notes made the lanes drift out
+  // of alignment with the keys underneath.)
   const { keys, whiteKeys } = useMemo(() => {
     if (!notes.length) return { keys: [], whiteKeys: [] };
+    if (fillHeight) return buildKeyboardRange('C3', 'C6');
     return buildKeyboard(notes);
-  }, [notes]);
+  }, [notes, fillHeight]);
 
   const totalWhite = whiteKeys.length;
+  // PianoKeyboard lays out 48px per white key inside a centred, scrollable
+  // container; match that geometry so the lanes sit exactly over the keys.
+  const KEY_W = 48;
+  const laneWidthPx = totalWhite * KEY_W;
 
   const timeline = useMemo(() => {
     const secondsPerBeat = 60 / tempo;
@@ -164,7 +193,10 @@ export default function FallingNotes({
   const fallingNotes = useMemo((): FallingNoteData[] => {
     if (!notes.length || !totalWhite) return [];
 
-    const HIT_H   = 60;
+    // In immersive mode the real piano keyboard sits directly beneath this
+    // stage, so we skip the built-in mini keyboard and let notes fall all the
+    // way to the bottom edge (which is exactly where the real keys begin).
+    const HIT_H   = fillHeight ? 0 : 60;
     const TRAVEL  = containerH - HIT_H;
     // Keep the travel time comfortable and consistent at every song tempo.
     // Tempo controls the music; this setting only controls how far ahead the
@@ -213,7 +245,7 @@ export default function FallingNotes({
     });
 
     return visible;
-  }, [containerH, currentTime, isPlaying, notes.length, speed, timeline, totalWhite, whiteKeys]);
+  }, [containerH, currentTime, fillHeight, isPlaying, notes.length, speed, timeline, totalWhite, whiteKeys]);
 
   const heldNote = fallingNotes.find(note => note.isHolding);
 
@@ -221,9 +253,9 @@ export default function FallingNotes({
     <div
       ref={containerRef}
       data-testid="falling-note-stage"
-      className="relative w-full overflow-hidden rounded-xl shadow-2xl select-none"
+      className={`relative w-full overflow-hidden shadow-2xl select-none ${fillHeight ? 'h-full rounded-none' : 'rounded-xl'}`}
       style={{
-        height: 'clamp(280px, 44vh, 440px)',
+        height: fillHeight ? '100%' : 'clamp(280px, 44vh, 440px)',
         background: [
           'radial-gradient(circle at 14% 18%, rgba(217,70,239,0.24), transparent 27%)',
           'radial-gradient(circle at 84% 30%, rgba(34,211,238,0.2), transparent 30%)',
@@ -231,11 +263,22 @@ export default function FallingNotes({
         ].join(','),
       }}
     >
+      {/* In immersive mode every lane-positioned child lives inside this
+          centred, fixed-width box so the percentage-based lanes map exactly
+          onto the real keyboard's 48px-per-white-key layout below. */}
+      <div
+        className="absolute inset-y-0"
+        style={
+          fillHeight
+            ? { width: `${laneWidthPx}px`, left: '50%', transform: 'translateX(-50%)' }
+            : { left: 0, right: 0 }
+        }
+      >
       {/* Lane guides */}
       {whiteKeys.map((_, i) => (
         <div
           key={i}
-          className="absolute top-0 bottom-16 border-l border-white/5"
+          className={`absolute top-0 border-l border-white/5 ${fillHeight ? "bottom-0" : "bottom-16"}`}
           style={{ left: `${(i / totalWhite) * 100}%` }}
         />
       ))}
@@ -269,14 +312,14 @@ export default function FallingNotes({
         data-testid="hold-line"
         className="absolute left-0 right-0 z-20 h-0.5"
         style={{
-          bottom: 60,
+          bottom: fillHeight ? 0 : 60,
           background: 'linear-gradient(90deg, transparent, #67e8f9 12%, #ffffff 50%, #67e8f9 88%, transparent)',
           boxShadow: '0 0 9px 2px rgba(34,211,238,0.8)',
         }}
       />
 
       {heldNote && (
-        <div className="absolute bottom-[66px] left-2 z-30 rounded-full border border-cyan-200/50 bg-slate-950/80 px-2 py-0.5 text-[10px] font-black text-cyan-50 shadow-[0_0_9px_rgba(34,211,238,0.45)] backdrop-blur-md">
+        <div className={`absolute left-2 z-30 ${fillHeight ? "bottom-2" : "bottom-[66px]"}`.concat(" ") + " rounded-full border border-cyan-200/50 bg-slate-950/80 px-2 py-0.5 text-[10px] font-black text-cyan-50 shadow-[0_0_9px_rgba(34,211,238,0.45)] backdrop-blur-md"}>
           {heldNote.note} · hold {heldNote.secondsRemaining.toFixed(1)}s
         </div>
       )}
@@ -360,8 +403,9 @@ export default function FallingNotes({
           );
         })}
 
-      {/* Mini keyboard */}
-      <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gray-950 border-t-2 border-cyan-500/40">
+      {/* Mini keyboard — omitted in immersive mode, where the real playable
+          keyboard sits immediately below and would be duplicated here. */}
+      <div className={`absolute bottom-0 left-0 right-0 h-[60px] bg-gray-950 border-t-2 border-cyan-500/40 ${fillHeight ? 'hidden' : ''}`}>
         <div className="relative h-full">
           {keys.map((key) => {
             const layout = getLayout(key.name, whiteKeys, totalWhite);
@@ -390,6 +434,8 @@ export default function FallingNotes({
           })}
         </div>
       </div>
+      </div>
+      {/* end lane-aligned wrapper */}
 
       {/* Status overlay */}
       {!isPlaying && (

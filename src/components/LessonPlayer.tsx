@@ -1046,9 +1046,10 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
           </motion.div>
         )}
 
-        {/* Render Finger Hint */}
+        {/* Render Finger Hint. While playing it is kept out of the centre
+            lanes so it never covers the notes the learner is reading. */}
         {isPlaying && currentNote && (
-          <div className={`absolute left-1/2 -translate-x-1/2 z-20 pointer-events-none ${isPlaying ? 'top-20' : 'top-4'}`}>
+          <div className={`absolute z-20 pointer-events-none ${isPlaying ? 'left-4 top-24' : 'left-1/2 -translate-x-1/2 top-4'}`}>
              <motion.div
               initial={{ opacity: 0, scale: 0.96, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1070,9 +1071,9 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
         )}
 
         {(useFallingNotes || showSheetMusic) && (
-          <div className={`relative flex min-h-[280px] w-full flex-1 items-center ${isPlaying ? 'justify-center px-2 pt-16' : ''}`}>
+          <div className={`relative flex w-full flex-1 ${isPlaying ? 'min-h-0 items-stretch pt-14' : 'min-h-[280px] items-center'}`}>
             {useFallingNotes && (
-              <div className="relative w-full">
+              <div className={`relative w-full ${isPlaying ? 'h-full' : ''}`}>
                 <FallingNotes
                   notes={lesson.notes}
                   tempo={tempo}
@@ -1082,6 +1083,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
                   speed={fallingNotesSpeed}
                   activeNotes={highlightedNotes}
                   sectionMarkers={sectionMarkers}
+                  fillHeight={isPlaying}
                 />
               </div>
             )}
