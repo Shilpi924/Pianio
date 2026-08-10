@@ -86,6 +86,7 @@ export interface Settings {
   claudeApiKey?: string;
   backgroundMusic?: boolean;
   language?: string;
+  requireNoteHoldDuration?: boolean; // Require holding notes for full duration
 }
 
 export interface MIDIDevice {

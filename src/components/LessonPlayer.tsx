@@ -32,7 +32,7 @@ const PREVIEW_TEMPO_BPM = 90;
 const PREVIEW_FALLING_NOTE_SPEED = 1.5;
 
 export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, onLessonChange }: LessonPlayerProps) {
-  const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress, settings } = useAppStore();
+  const { completeLesson, incrementPracticeTime, recordNotePlayed, updateLessonProgress, lessonProgress, settings, updateSettings } = useAppStore();
   const { addCompletedLesson, addExperience, addPracticeTime, addPracticeSession, updateStreak } = useUserProfileStore();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
@@ -588,7 +588,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
       };
 
       if (playedNote === currentNote.note) {
-        if (useMicrophone) {
+        if (useMicrophone || settings.requireNoteHoldDuration) {
           clearAdvanceTimeout();
           const holdMs = Math.max(0, holdDurationMs - (Date.now() - noteStartTime));
           advanceTimeoutRef.current = window.setTimeout(() => {
@@ -651,7 +651,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
         });
       }
     },
-    [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, isPreviewingSong, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo, useMicrophone]
+    [accuracy, addCompletedLesson, addExperience, completeLesson, currentNote, currentNoteIndex, isAudioInitialized, isPlaying, isPreviewingSong, lesson.id, lesson.notes.length, lessonProgress, loopEnabled, noteStartTime, onComplete, practiceMode, recordNotePlayed, selectedHand, tempo, updateLessonProgress, updateStreak, waitModeEnabled, isAdaptiveTraining, adaptiveTargetNotes, adaptiveSuccessCount, originalTempo, useMicrophone, settings.requireNoteHoldDuration]
   );
 
   const handleMIDIMessage = useCallback((message: MIDIMessage) => {
@@ -985,6 +985,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onExit, o
               <div className="space-y-3">
                 <CoachRow label="Wait for me" description="Song pauses until right key is pressed." enabled={waitModeEnabled} onToggle={() => setWaitModeEnabled(!waitModeEnabled)} />
                 <CoachRow label="Metronome" description="Play a tick sound on the beat." enabled={metronomeEnabled} onToggle={() => setMetronomeEnabled(!metronomeEnabled)} />
+                <CoachRow label="Require note hold duration" description="Hold notes for their full duration before advancing." enabled={settings.requireNoteHoldDuration || false} onToggle={() => updateSettings({ requireNoteHoldDuration: !settings.requireNoteHoldDuration })} />
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50">
                   <div className="font-semibold text-gray-900 dark:text-gray-100">Lesson Input</div>
                   <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">

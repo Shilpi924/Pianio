@@ -70,6 +70,7 @@ const defaultSettings: Settings = {
   claudeApiKey: '',
   backgroundMusic: true,
   language: 'en',
+  requireNoteHoldDuration: false, // Default to false for better beginner experience
 };
 
 const defaultStatistics: Statistics = {
