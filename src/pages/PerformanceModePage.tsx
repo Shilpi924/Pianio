@@ -179,7 +179,7 @@ export default function PerformanceModePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-indigo-50 to-slate-50 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-900 p-8 pb-24 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-indigo-50 to-slate-50 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-900 p-8 pb-32 md:pb-16">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

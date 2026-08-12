@@ -13,7 +13,7 @@
 
 ## 🌟 The Learning Experience
 
-Pianio bridges the gap between professional music theory and accessible, gamified learning. Inspired by industry leaders like Skoove and Flowkey, the app provides a premium interactive experience right in your browser.
+Pianio bridges the gap between professional music theory and accessible, gamified learning. Inspired by industry leaders like Skoove and Flowkey, the app provides a premium interactive experience across web, mobile, and desktop platforms.
 
 ### ✨ Core Features
 *   **🎮 Gamified Learning Curriculum:** A structured, level-based path that tracks experience points (XP), unlocking harder songs as students master their skills.
@@ -23,6 +23,9 @@ Pianio bridges the gap between professional music theory and accessible, gamifie
 *   **🎨 Skoove-Inspired UI:** A beautiful, card-based library UI allowing users to easily filter by skill level (Beginner, Intermediate, Advanced) and mood/category.
 *   **🎤 Acoustic Microphone Pitch Detection:** No MIDI keyboard? No problem. Pianio uses an advanced auto-correlation algorithm via the device microphone to hear the notes you play on a real acoustic piano!
 *   **🎧 DJ Remix Free Play:** A built-in studio where users can trigger drum beats, backing tracks, and record their own multi-track masterpieces using Tone.js.
+*   **🤖 AI-Powered Learning Assistant:** Integrated AI chatbot provides personalized guidance, answers music theory questions, and offers practice tips tailored to your progress.
+*   **🌐 Multi-Language Support:** Full internationalization support for learners worldwide, with easy language switching.
+*   **🥽 Immersive 3D/VR Experience:** Optional 3D piano visualization and VR mode for an immersive learning environment using WebXR.
 
 ---
 
@@ -36,7 +39,7 @@ Pianio bridges the gap between professional music theory and accessible, gamifie
 
 ## 🛠 For Developers
 
-Pianio is a robust Progressive Web App (PWA) demonstrating complex browser APIs.
+Pianio is a robust multi-platform application available as a Progressive Web App (PWA), Android mobile app, and Electron desktop application, demonstrating complex browser APIs and cross-platform development.
 
 ### Tech Stack
 | Layer | Technology |
@@ -47,11 +50,18 @@ Pianio is a robust Progressive Web App (PWA) demonstrating complex browser APIs.
 | **Audio Engine** | Tone.js (PolySynth & Sampler) |
 | **State Management**| Zustand (Persisted) |
 | **Database/Auth** | Firebase |
+| **3D/VR Graphics** | React Three Fiber + Three.js + React Three XR |
+| **AI Integration** | Anthropic AI SDK |
+| **Internationalization** | i18next + react-i18next |
+| **Analytics** | Vercel Analytics |
+| **Mobile Platform** | Capacitor (Android) |
+| **Desktop Platform** | Electron |
 
 ### Hardware & Web APIs
 *   **Web MIDI API:** Plug-and-play support for digital pianos via USB.
 *   **Web Audio API:** High-fidelity soundfonts, real-time microphone analysis, and dynamic tempo adjustment.
 *   **PWA (Offline Ready):** Installable on mobile and desktop. Practice built-in lessons without an internet connection!
+*   **WebXR API:** VR/AR support for immersive piano learning experiences.
 
 ### Getting Started
 
@@ -61,10 +71,42 @@ Want to run Pianio locally or contribute?
 # Clone and install dependencies
 npm install
 
-# Start the local server
+# Start the local web server
 npm run dev
 ```
 The app will run locally at `http://localhost:5173`.
+
+### Platform-Specific Builds
+
+**Android (via Capacitor):**
+```bash
+# Sync Capacitor with Android project
+npm run android:sync
+
+# Open Android Studio
+npm run android:open
+
+# Build debug APK
+npm run android:build
+
+# Build release APK for Play Store
+npm run android:release
+```
+
+**Desktop (via Electron):**
+```bash
+# Build for desktop
+npm run build
+```
+
+**Web Production Build:**
+```bash
+# Build for web deployment
+npm run build
+
+# Preview production build
+npm run preview
+```
 
 ### Testing
 

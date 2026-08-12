@@ -8,6 +8,7 @@ import AIChatBot from './components/AIChatBot';
 import PwaBanner from './components/PwaBanner';
 import LevelUpAnimation from './components/LevelUpAnimation';
 import Navigation from './components/Navigation';
+import Footer from './components/Footer';
 import { audioService } from './services/audioService';
 import { useCloudSync } from './hooks/useCloudSync';
 import { contentDatabaseService } from './services/contentDatabaseService';
@@ -38,6 +39,9 @@ const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const RewardsShopPage = lazy(() => import('./pages/RewardsShopPage'));
 const ArcadePage = lazy(() => import('./pages/ArcadePage'));
 const PersonalNotesPage = lazy(() => import('./pages/PersonalNotesPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const DeveloperPage = lazy(() => import('./pages/DeveloperPage'));
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -364,6 +368,24 @@ function App() {
             <PersonalNotesPage />
           </Suspense>
         );
+      case 'terms':
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <TermsPage />
+          </Suspense>
+        );
+      case 'privacy':
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <PrivacyPage />
+          </Suspense>
+        );
+      case 'developer':
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <DeveloperPage />
+          </Suspense>
+        );
       default:
         return <HomePage />;
     }
@@ -383,6 +405,7 @@ function App() {
           <LevelUpAnimation level={levelUpTo} onComplete={() => setLevelUpTo(null)} />
         )}
       </AnimatePresence>
+      <Footer />
     </div>
   );
 }

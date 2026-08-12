@@ -45,7 +45,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-orange-900/20 dark:to-pink-900/20 p-4 md:p-8 pb-24 md:pb-8 font-kid">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-orange-900/20 dark:to-pink-900/20 p-4 md:p-8 pb-32 md:pb-16 font-kid">
       <motion.main
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

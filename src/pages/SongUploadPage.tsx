@@ -133,7 +133,7 @@ export default function SongUploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_30%),radial-gradient(circle_at_80%_20%,_rgba(168,85,247,0.14),_transparent_28%),linear-gradient(180deg,_#f8fbff_0%,_#fff7ed_100%)] p-6 md:p-8 dark:bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.1),_transparent_30%),radial-gradient(circle_at_80%_20%,_rgba(168,85,247,0.16),_transparent_28%),linear-gradient(180deg,_#0f172a_0%,_#111827_100%)] pb-24 md:pb-8">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_30%),radial-gradient(circle_at_80%_20%,_rgba(168,85,247,0.14),_transparent_28%),linear-gradient(180deg,_#f8fbff_0%,_#fff7ed_100%)] p-6 md:p-8 dark:bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.1),_transparent_30%),radial-gradient(circle_at_80%_20%,_rgba(168,85,247,0.16),_transparent_28%),linear-gradient(180deg,_#0f172a_0%,_#111827_100%)] pb-32 md:pb-16">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

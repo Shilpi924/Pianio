@@ -325,7 +325,7 @@ export default function OnboardingPage({ onComplete }: OnboardingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-indigo-50 to-slate-50 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-900 p-8 flex items-center justify-center pb-24 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-indigo-50 to-slate-50 dark:from-gray-900 dark:via-indigo-950 dark:to-gray-900 p-8 flex items-center justify-center pb-32 md:pb-16">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
