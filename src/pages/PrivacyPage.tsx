@@ -24,100 +24,93 @@ export default function PrivacyPage() {
 
           <div className="space-y-6 text-gray-700 dark:text-gray-300">
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">1. Information We Collect</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">1. Local Data Storage</h2>
               <p className="text-lg leading-relaxed">
-                Pianio collects information you provide directly to us, such as when you create an account, use our services, or communicate with us. This may include your name, email address, and practice progress data.
+                Pianio stores your user profiles, practice progress, statistics, completed lessons, achievements, and app settings locally on your device. This data stays on your device unless you sign in with Google to enable cloud sync.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">2. How We Use Your Information</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">2. Optional Cloud Sync (Google Sign-In)</h2>
               <p className="text-lg leading-relaxed">
-                We use the information we collect to provide, maintain, and improve our services, to track your learning progress, to personalize your experience, and to communicate with you about our services.
+                If you choose to sign in with Google, we receive your Google account ID and basic profile information (name, email) for authentication via Firebase Authentication. Your profile and practice progress are then synced to Firebase Cloud Firestore so they can be restored across devices. This is entirely optional — the app is fully usable without signing in.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">3. Data Storage and Security</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">3. Audio and MIDI Data</h2>
               <p className="text-lg leading-relaxed">
-                Your data is stored locally on your device and optionally synced to cloud storage when you enable cloud sync features. We implement appropriate security measures to protect your personal information from unauthorized access, alteration, or disclosure.
+                With your permission, Pianio accesses your device microphone to detect notes played on an acoustic piano for pitch-detection purposes. This audio is processed locally on your device in real time and is never stored or transmitted. When you connect a MIDI keyboard (including via Bluetooth), MIDI note data is likewise processed locally and not stored.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">4. Cookies and Local Storage</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">4. How We Use Your Information</h2>
               <p className="text-lg leading-relaxed">
-                Pianio uses local storage to save your preferences, settings, and practice progress. This data remains on your device and is not shared with third parties unless you explicitly enable cloud sync features.
+                We use the information described above to provide and improve the piano learning experience, track your learning progress, enable multi-profile functionality for families, sync your progress across devices when you sign in, and troubleshoot issues.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">5. Third-Party Services</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">5. Data Storage and Security</h2>
               <p className="text-lg leading-relaxed">
-                We may use third-party services such as Firebase for cloud storage and authentication. These services have their own privacy policies and we encourage you to review them.
+                Most user data is stored locally on your device. When you sign in with Google, your profile and progress data is stored in Firebase, encrypted in transit (HTTPS/TLS) and at rest per Firebase's standard security measures. We retain cloud-synced data only as long as your account exists.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">6. Data Retention</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">6. Third-Party Services</h2>
               <p className="text-lg leading-relaxed">
-                We retain your personal data for as long as necessary to provide our services and fulfill the purposes outlined in this privacy policy. You can request deletion of your account and associated data at any time.
+                We use Firebase (Google LLC) for optional Google sign-in authentication and cloud sync. Firebase processes data according to Google's Privacy Policy. We do not use Google Analytics or any advertising/tracking SDKs.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">7. Your Rights</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">7. Data Sharing</h2>
               <p className="text-lg leading-relaxed">
-                You have the right to access, correct, or delete your personal data. You can also opt out of data collection by disabling cloud sync features in your settings.
+                We do not sell, trade, or rent your personal information to third parties. We may share your information only with Firebase as our cloud infrastructure provider, when required by law, or with your explicit consent.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">8. Children's Privacy</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">8. Your Rights</h2>
               <p className="text-lg leading-relaxed">
-                Pianio is designed to be used by users of all ages, including children. We do not knowingly collect personal information from children under 13 without parental consent. Parents can review and request deletion of their child's data.
+                You have the right to access, correct, or delete your personal data, and to export your data. You can opt out of data collection entirely by not signing in with Google, since cloud sync is optional.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">9. Changes to This Policy</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">9. Children's Privacy</h2>
               <p className="text-lg leading-relaxed">
-                We may update our privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page and updating the "Last updated" date.
+                Pianio is designed to be safe for users of all ages, including children. We do not knowingly collect personal information from children under 13 without parental consent, do not target children with advertising, and comply with COPPA requirements. Parents can review, modify, or request deletion of their child's data by contacting us.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">10. International Data Transfers</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">10. Permissions</h2>
               <p className="text-lg leading-relaxed">
-                Your information may be transferred to and maintained on computers located outside of your state, province, country, or other governmental jurisdiction where the data protection laws may differ. When you enable cloud sync features, your data is processed by Firebase (Google LLC) and may be stored in servers located in the United States or other countries. By using our cloud sync features, you consent to such transfers.
+                Pianio may request Microphone access (for local pitch detection), Bluetooth (for MIDI keyboards), and Internet access (for optional sign-in and cloud sync). All permissions are optional and can be revoked in your device settings; the app remains usable without them, though dependent features will be limited.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">11. Export Compliance</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">11. Changes to This Policy</h2>
               <p className="text-lg leading-relaxed">
-                Pianio complies with United States export laws and regulations. The software may be subject to export controls, including the Export Administration Regulations (EAR). By using Pianio, you agree to comply with all applicable export and re-export control laws and regulations. You may not use, export, re-export, or transfer the software in violation of any applicable laws or regulations, including without limitation U.S. export laws and regulations.
+                We may update this privacy policy from time to time. We will notify you of material changes by posting the new policy on this page and updating the "Last updated" date.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">12. Encryption</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">12. Contact Us</h2>
               <p className="text-lg leading-relaxed">
-                Pianio uses industry-standard encryption (HTTPS/TLS) to protect data in transit between your device and our servers. Cloud-stored data is encrypted using Firebase's security measures. The application uses standard encryption functions that are compliant with U.S. export regulations and does not include any encryption functionality that requires special export authorization.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">13. Contact Us</h2>
-              <p className="text-lg leading-relaxed">
-                If you have any questions about this privacy policy, our data practices, export compliance, or to exercise your data rights, please contact us through our developer page or by email.
+                If you have any questions about this privacy policy or want to exercise your data rights, please contact us at lumina.antigravity@gmail.com.
               </p>
             </section>
           </div>
 
           <div className="mt-12 pt-8 border-t-2 border-orange-200 dark:border-orange-800">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Last updated: August 2026
+              Last updated: August 12, 2026
             </p>
           </div>
         </div>

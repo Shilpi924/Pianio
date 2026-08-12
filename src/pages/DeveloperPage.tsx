@@ -140,11 +140,11 @@ export default function DeveloperPage() {
               </p>
               <div className="space-y-2">
                 <a
-                  href="mailto:developer@pianio.app"
+                  href="mailto:lumina.antigravity@gmail.com"
                   className="inline-flex items-center gap-2 text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-200 font-semibold transition-colors"
                 >
                   <Mail className="w-5 h-5" />
-                  developer@pianio.app
+                  lumina.antigravity@gmail.com
                 </a>
               </div>
             </section>

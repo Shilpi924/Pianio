@@ -27,6 +27,13 @@ coverage/
 .vercel
 .env*
 
+# Android signing secrets
+android/keystore.properties
+android/app/*.keystore
+android/app/*.jks
+android/app/pianio-release.keystore.COMPROMISED.bak
+playstore-assets/Key-info-for-playstore-release
+
 # Codex scratch files
 refactor_player.py
 test_claude.ts

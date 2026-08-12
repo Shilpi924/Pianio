@@ -112,14 +112,13 @@ Download Pianio and discover the joy of playing piano! With our intuitive interf
 ---
 
 ## Privacy Policy URL
-[You will need to host this privacy policy on a website and provide the URL here]
-Example: https://yourwebsite.com/privacy-policy
+[You will need to host PRIVACY_POLICY.md on a public web page and provide that URL here — the Play Console requires a live link, not a repo file]
 
 ## Contact Email
-support@pianio.app
+lumina.antigravity@gmail.com
 
 ## Website
-https://pianio.app [if you have a website]
+[Optional — add if you set one up]
 
 ## Category
 Education
