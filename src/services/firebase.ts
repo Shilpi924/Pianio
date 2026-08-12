@@ -23,6 +23,10 @@ const googleProvider = new GoogleAuthProvider();
 export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
+    // Verify the user object exists before returning
+    if (!result.user) {
+      throw new Error("Authentication failed: No user returned");
+    }
     return result.user;
   } catch (error) {
     console.error("Error signing in with Google", error);
@@ -41,16 +45,25 @@ export const logOut = async () => {
 
 // Helper to save a profile to Firestore
 export const saveProfileToCloud = async (userId: string, profile: UserProfile) => {
+  if (!userId || !profile?.id) {
+    console.error("Invalid parameters: userId and profile.id are required");
+    return;
+  }
   try {
     const docRef = doc(db, "users", userId, "profiles", profile.id);
     await setDoc(docRef, profile, { merge: true });
   } catch (error) {
     console.error("Error saving profile to cloud", error);
+    throw error;
   }
 };
 
 // Helper to get a profile from Firestore
 export const getProfileFromCloud = async (userId: string, profileId: string) => {
+  if (!userId || !profileId) {
+    console.error("Invalid parameters: userId and profileId are required");
+    return null;
+  }
   try {
     const docRef = doc(db, "users", userId, "profiles", profileId);
     const docSnap = await getDoc(docRef);

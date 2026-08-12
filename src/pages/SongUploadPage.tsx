@@ -50,6 +50,14 @@ export default function SongUploadPage() {
     setIsProcessing(true);
     setParsedLesson(null);
 
+    // Add file size validation (10MB max)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File too large. Maximum file size is 10MB.');
+      setIsProcessing(false);
+      return;
+    }
+
     const lower = file.name.toLowerCase();
     const supported = lower.endsWith('.xml') || lower.endsWith('.musicxml') || lower.endsWith('.mid') || lower.endsWith('.midi');
     if (!supported) {
@@ -68,7 +76,7 @@ export default function SongUploadPage() {
       }
 
       const lesson = await SongImportService.parseFile(file);
-      
+
       if (!lesson) {
         setError('Failed to parse the song file. Please check the file format.');
         setIsProcessing(false);

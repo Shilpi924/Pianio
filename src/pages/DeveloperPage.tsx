@@ -1,4 +1,4 @@
-import { ArrowLeft, Github, Mail, Code, Heart, Star, GitBranch } from 'lucide-react';
+import { ArrowLeft, Mail, Code, Heart, Star, GitBranch } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import Navigation from '../components/Navigation';
 
@@ -80,7 +80,7 @@ export default function DeveloperPage() {
 
             <section>
               <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2">
-                <Github className="w-6 h-6" />
+                <Code className="w-6 h-6" />
                 Open Source
               </h2>
               <p className="text-lg leading-relaxed mb-4">
@@ -92,7 +92,7 @@ export default function DeveloperPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-xl hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors font-bold"
               >
-                <Github className="w-5 h-5" />
+                <Code className="w-5 h-5" />
                 View on GitHub
               </a>
             </section>

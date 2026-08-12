@@ -83,6 +83,13 @@ export class SongImportService {
   }
 
   static async parseFile(file: File): Promise<Lesson | null> {
+    // Add file size limit (10MB max)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      console.error('File too large:', file.size);
+      return null;
+    }
+
     const lower = file.name.toLowerCase();
     if (lower.endsWith('.mid') || lower.endsWith('.midi')) {
       return this.parseMidi(await file.arrayBuffer(), file.name);
