@@ -120,7 +120,7 @@ All content updates maintain the same educational and family-friendly standards.
 ## Contact
 
 For questions about content or audience targeting:
-**Email**: [Your support email]
+**Email**: lumina.antigravity@gmail.com
 
 ## Last Updated
-August 2026
+August 12, 2026

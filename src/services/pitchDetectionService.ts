@@ -245,11 +245,6 @@ class PitchDetectionService {
       this.audioLevelCallback(rms);
     }
     
-    // Log detection info every 30 frames (approx 0.5 seconds)
-    if (this.calibrationFrames % 30 === 0) {
-      console.log(`[Pitch Detection] RMS: ${rms.toFixed(4)}, Threshold: ${this.adaptiveThreshold.toFixed(4)}, Frequency: ${frequency.toFixed(1)}Hz, Confidence: ${confidence.toFixed(3)}, Note: ${frequency !== -1 ? this.frequencyToNote(frequency) : 'none'}`);
-    }
-    
     // Improved detection logic with confidence threshold
     if (frequency !== -1 && confidence > 0.3) {
       const noteName = this.frequencyToNote(frequency);

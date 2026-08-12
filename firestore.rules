@@ -1,0 +1,34 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // users/{uid}: profile + progress data, cloud-synced only when signed in.
+    // Only the owning account may read or write its own document.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /profiles/{profileId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // lessons/{id}: app content. Anyone can read published lessons; only a
+    // server-side admin (Cloud Function using the Admin SDK, which bypasses
+    // these rules) may write. No client, authenticated or not, can write here.
+    match /lessons/{lessonId} {
+      allow read: if resource.data.isPublished == true;
+      allow write: if false;
+    }
+
+    // Duet Mode (rooms/{id}) was removed prior to release — it allowed
+    // unsupervised real-time contact between strangers with no auth or
+    // parental safeguard. No rules are defined for "rooms"; the default-deny
+    // fallback below blocks it.
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -14,7 +14,6 @@ import {
   WandSparkles,
   ShieldCheck,
   Volume2,
-  Users,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
@@ -434,13 +433,6 @@ export default function LessonLibraryPage() {
                   }`}
                 >
                   Request
-                </button>
-                <button
-                  onClick={() => setCurrentView('community-library')}
-                  className="flex items-center gap-1.5 rounded-full px-6 py-2 text-sm font-bold text-slate-500 transition-all hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                >
-                  <Users className="h-4 w-4" />
-                  Community
                 </button>
               </div>
             </div>

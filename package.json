@@ -26,7 +26,6 @@
     "@react-three/xr": "^6.6.30",
     "@tonejs/midi": "^2.0.28",
     "@types/three": "^0.185.1",
-    "@vercel/analytics": "^2.0.1",
     "canvas-confetti": "^1.9.4",
     "firebase": "^12.16.0",
     "framer-motion": "^12.42.2",

@@ -6,7 +6,7 @@ export default function DeveloperPage() {
   const { goBack } = useAppStore();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-4 md:p-8 font-kid">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-4 md:p-8">
       <Navigation />
       <div className="max-w-4xl mx-auto mt-8">
         <button
@@ -80,25 +80,6 @@ export default function DeveloperPage() {
 
             <section>
               <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2">
-                <Code className="w-6 h-6" />
-                Open Source
-              </h2>
-              <p className="text-lg leading-relaxed mb-4">
-                Pianio is open source and welcomes contributions from developers worldwide. We believe in the power of community-driven development to create better educational tools.
-              </p>
-              <a
-                href="https://github.com/yourusername/pianio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-xl hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors font-bold"
-              >
-                <Code className="w-5 h-5" />
-                View on GitHub
-              </a>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2">
                 <Star className="w-6 h-6" />
                 Key Features
               </h2>
@@ -136,7 +117,7 @@ export default function DeveloperPage() {
                 Contact & Support
               </h2>
               <p className="text-lg leading-relaxed mb-4">
-                For developer inquiries, bug reports, or feature requests, please reach out through our GitHub repository or contact us directly.
+                For developer inquiries, bug reports, or feature requests, please contact us directly.
               </p>
               <div className="space-y-2">
                 <a
@@ -160,27 +141,19 @@ export default function DeveloperPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">Compliance & Certifications</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">Data & Privacy Practices</h2>
               <div className="space-y-3 text-lg">
                 <div className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">✓</span>
-                  <span><strong>Google Play Developer Program Policies:</strong> Our app complies with all Google Play policies, including user data privacy, content guidelines, and deceptive behavior prevention.</span>
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span><strong>Data Protection:</strong> Data in transit is protected with HTTPS/TLS. Cloud-synced data (only created if you sign in) is restricted by Firestore security rules so only your account can read or write it.</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">✓</span>
-                  <span><strong>US Export Compliance:</strong> Pianio adheres to US export laws and regulations (EAR). The application uses standard encryption that does not require special export authorization.</span>
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span><strong>Children's Privacy:</strong> The app does not knowingly collect personal information from children under 13 without parental consent, and cloud sync is optional. See our Privacy Policy for details.</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">✓</span>
-                  <span><strong>Data Protection:</strong> We implement industry-standard security measures including HTTPS/TLS encryption for data in transit and Firebase security for cloud-stored data.</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">✓</span>
-                  <span><strong>Children's Privacy:</strong> Our app is designed to be safe for users of all ages, with special considerations for children's privacy protection.</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-orange-500 mt-1">✓</span>
-                  <span><strong>Accessibility:</strong> We strive to make Pianio accessible to users with disabilities, following WCAG guidelines where applicable.</span>
+                  <span className="text-orange-500 mt-1">•</span>
+                  <span><strong>Export Compliance:</strong> Pianio uses standard transport encryption (HTTPS/TLS) that does not require special export authorization under US export regulations.</span>
                 </div>
               </div>
             </section>

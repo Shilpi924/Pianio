@@ -7,9 +7,13 @@ import { useAppStore } from '../store/useAppStore';
 import VRPiano from '../components/VRPiano';
 
 // Create the XR store instance (must be outside the component or memoized)
+// emulate: false avoids bundling @pmndrs/xr's device emulator (multi-MB prebaked
+// room scenes) into the production build; it's dev-only tooling for testing
+// without a headset.
 const store = createXRStore({
   depthSensing: true,
-  handTracking: true
+  handTracking: true,
+  emulate: false,
 });
 
 const VRPianoPage: React.FC = () => {

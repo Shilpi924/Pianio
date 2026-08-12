@@ -40,6 +40,7 @@ We use the information described above to:
 
 - **Local Storage**: Most user data — practice progress, settings, and profiles — is stored locally on your device.
 - **Cloud Storage**: When you sign in with Google, your profile and progress data is stored in Firebase (Google LLC), encrypted in transit (HTTPS/TLS) and at rest per Firebase's standard security measures.
+- **Access Control**: Firestore security rules restrict cloud data so only your own signed-in account can read or write it.
 - **Data Retention**: We retain cloud-synced data only as long as your account exists. You can request deletion at any time (see Contact Us).
 
 ## Third-Party Services

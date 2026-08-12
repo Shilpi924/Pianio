@@ -6,17 +6,17 @@ Pianio collects and processes the following types of data to provide piano learn
 ## Data Collection and Sharing
 
 ### 1. Personal Information
-**Collected**: Yes
+**Collected**: Yes, only if you sign in with Google
 **Shared**: No
-**Purpose**: Account creation and profile management
+**Purpose**: Account creation and cloud sync of profile/progress
 
-- **Email address** (when using Google Sign-In)
-- **Name** (optional, for profile personalization)
-- **Age** (optional, for age-appropriate content)
+- **Email address** (from Google Sign-In)
+- **Name** (from Google Sign-In, for profile personalization)
+- **Age group** (optional, self-reported, for age-appropriate content — not verified)
 
 ### 2. App Activity
 **Collected**: Yes
-**Shared**: No
+**Shared**: No — stored locally, and in Firebase only if you sign in
 **Purpose**: Learning progress tracking and personalization
 
 - Lessons completed
@@ -25,23 +25,13 @@ Pianio collects and processes the following types of data to provide piano learn
 - Skill level progression
 - Performance statistics
 
-### 3. Device or Other Identifiers
-**Collected**: Yes
-**Shared**: No
-**Purpose**: Analytics and app improvement
-
-- Device type and model
-- Operating system version
-- Unique device identifiers (for analytics)
-- App version and crash reports
-
-### 4. Audio and MIDI Data
-**Collected**: Yes (processed locally)
+### 3. Audio and MIDI Data
+**Collected**: Yes (processed locally only)
 **Shared**: No
 **Purpose**: Real-time note detection and pitch correction
 
-- Microphone audio input (processed locally, not stored)
-- MIDI note data (processed locally, not stored)
+- Microphone audio input (processed locally, never stored or transmitted)
+- MIDI note data (processed locally, never stored or transmitted)
 
 ## Data Security Practices
 
@@ -52,37 +42,32 @@ Pianio collects and processes the following types of data to provide piano learn
 ### Data Retention
 - Local data: Stored until user deletes app or clears app data
 - Cloud data: Stored until user deletes account or requests deletion
-- Analytics data: Retained for 26 months per Google Analytics policy
 
 ### Data Access
 - User data is accessible only to the user (when signed in)
-- Firebase data is protected by Firebase security rules
+- Firestore security rules restrict cloud data so only the owning signed-in account can read or write it — enforced server-side, not just in the app's UI
 - No third-party access to user data except as required by law
 
 ## Third-Party Data Sharing
 
-We do not sell, rent, or share user data with third parties for advertising or marketing purposes.
+We do not sell, rent, or share user data with third parties for advertising or marketing purposes. We do not use Google Analytics or any advertising/tracking SDK.
 
 **Service Providers:**
-- **Firebase**: Used for authentication, cloud storage, and analytics. Firebase processes data according to Google's privacy policy.
-- **Google Analytics**: Used for anonymous usage analytics. Data is aggregated and anonymized.
+- **Firebase** (Google LLC): Used for optional Google Sign-In authentication and cloud sync of profile/progress data. Firebase processes data according to Google's privacy policy.
 
 ## User Control
 
 Users can:
-- View their data through the app settings
-- Export their data upon request
-- Delete their account and all associated data
-- Opt out of analytics collection
-- Revoke app permissions at any time
+- Use the app fully without signing in (cloud sync is optional)
+- Delete their account and all associated cloud data by contacting us
+- Revoke microphone/Bluetooth permissions at any time in device settings
 
 ## Children's Data
 
 Pianio is designed for users of all ages. For children under 13:
-- We collect minimal personal information
+- We do not knowingly collect personal information without parental consent
 - We do not collect location data
 - We do not use data for advertising purposes
-- Parents can manage their children's accounts
 - We comply with COPPA requirements
 
 ## Permissions and Data Access
@@ -91,7 +76,7 @@ Pianio is designed for users of all ages. For children under 13:
 - **Purpose**: Acoustic piano pitch detection
 - **Data Processing**: All audio is processed locally on the device
 - **Storage**: Audio data is not stored or transmitted
-- **User Control**: Permission can be revoked in device settings
+- **User Control**: Permission can be revoked in device settings; the app remains usable without it (dependent features are limited)
 
 ### Bluetooth Permission
 - **Purpose**: Connect to Bluetooth MIDI keyboards
@@ -99,24 +84,16 @@ Pianio is designed for users of all ages. For children under 13:
 - **Storage**: MIDI data is not stored
 - **User Control**: Permission can be revoked in device settings
 
-### Storage Permission
-- **Purpose**: Save lessons and user data locally
-- **Data Processing**: Data is stored locally on device
-- **Storage**: User can clear app data in device settings
-- **User Control**: Permission can be revoked in device settings
-
 ## Compliance
 
-This app complies with:
+This app is designed to align with:
 - Google Play Developer Data Safety Policy
 - Children's Online Privacy Protection Act (COPPA)
-- General Data Protection Regulation (GDPR) for EU users
-- California Consumer Privacy Act (CCPA) for California residents
 
 ## Contact
 
 For data-related inquiries or to exercise your data rights, contact:
-**Email**: [Your support email]
+**Email**: lumina.antigravity@gmail.com
 
 ## Last Updated
-August 2026
+August 12, 2026

@@ -32,9 +32,7 @@ const resources = {
         rewards: "Rewards Shop",
         rewardsDesc: "Spend your XP!",
         webxr: "WebXR Piano",
-        webxrDesc: "Virtual reality mode",
-        duet: "Duet Mode",
-        duetDesc: "Real-time multiplayer"
+        webxrDesc: "Virtual reality mode"
       },
       onboarding: {
         welcome: "Welcome to Pianio! 🎹",
@@ -147,9 +145,7 @@ const resources = {
         rewards: "奖励商店",
         rewardsDesc: "花掉你的经验值！",
         webxr: "WebXR 钢琴",
-        webxrDesc: "虚拟现实模式",
-        duet: "二重奏模式",
-        duetDesc: "实时多人互动"
+        webxrDesc: "虚拟现实模式"
       },
       onboarding: {
         welcome: "欢迎来到 Pianio！🎹",
@@ -262,9 +258,7 @@ const resources = {
         rewards: "報酬ショップ",
         rewardsDesc: "XP を使おう！",
         webxr: "WebXR ピアノ",
-        webxrDesc: "バーチャルリアリティモード",
-        duet: "デュエットモード",
-        duetDesc: "リアルタイム対戦"
+        webxrDesc: "バーチャルリアリティモード"
       },
       onboarding: {
         welcome: "Pianioへようこそ！🎹",
@@ -377,9 +371,7 @@ const resources = {
         rewards: "Belohnungs-Shop",
         rewardsDesc: "Gib deine XP aus!",
         webxr: "WebXR Piano",
-        webxrDesc: "Virtueller Realitätmodus",
-        duet: "Duett-Modus",
-        duetDesc: "Echtzeit-Multiplayer"
+        webxrDesc: "Virtueller Realitätmodus"
       },
       onboarding: {
         welcome: "Willkommen bei Pianio! 🎹",
@@ -492,9 +484,7 @@ const resources = {
         rewards: "Tienda de recompensas",
         rewardsDesc: "¡Gasta tus XP!",
         webxr: "Piano WebXR",
-        webxrDesc: "Modo de realidad virtual",
-        duet: "Modo dúo",
-        duetDesc: "Multijugador en tiempo real"
+        webxrDesc: "Modo de realidad virtual"
       },
       onboarding: {
         welcome: "¡Bienvenido a Pianio! 🎹",

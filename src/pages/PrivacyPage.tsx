@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   const { goBack } = useAppStore();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-4 md:p-8 font-kid">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-4 md:p-8">
       <Navigation />
       <div className="max-w-4xl mx-auto mt-8">
         <button
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">5. Data Storage and Security</h2>
               <p className="text-lg leading-relaxed">
-                Most user data is stored locally on your device. When you sign in with Google, your profile and progress data is stored in Firebase, encrypted in transit (HTTPS/TLS) and at rest per Firebase's standard security measures. We retain cloud-synced data only as long as your account exists.
+                Most user data is stored locally on your device. When you sign in with Google, your profile and progress data is stored in Firebase, encrypted in transit (HTTPS/TLS) and at rest per Firebase's standard security measures. Access is restricted by Firestore security rules so that only your own signed-in account can read or write your data. We retain cloud-synced data only as long as your account exists.
               </p>
             </section>
 

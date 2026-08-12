@@ -31,10 +31,8 @@ const PerformanceModePage = lazy(() => import('./pages/PerformanceModePage'));
 const IntervalTrainingPage = lazy(() => import('./pages/IntervalTrainingPage'));
 const RhythmTrainingPage = lazy(() => import('./pages/RhythmTrainingPage'));
 const VRPianoPage = lazy(() => import('./pages/VRPianoPage'));
-const MultiplayerPage = lazy(() => import('./pages/MultiplayerPage'));
 const TutorialsPage = lazy(() => import('./pages/TutorialsPage'));
 const SongUploadPage = lazy(() => import('./pages/SongUploadPage'));
-const CommunityLibraryPage = lazy(() => import('./pages/CommunityLibraryPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const RewardsShopPage = lazy(() => import('./pages/RewardsShopPage'));
 const ArcadePage = lazy(() => import('./pages/ArcadePage'));
@@ -64,6 +62,18 @@ function App() {
   const previousLevelRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Direct-link support for /privacy and /terms (e.g. the Play Console privacy
+    // policy URL field) — takes priority over onboarding/persisted view state so
+    // the link works the same regardless of prior app state on this device.
+    const path = window.location.pathname.replace(/\/+$/, '');
+    if (path === '/privacy') {
+      setCurrentView('privacy');
+      return;
+    }
+    if (path === '/terms') {
+      setCurrentView('terms');
+      return;
+    }
     // Send first-time users through onboarding before they reach Home.
     // Empty deps: only check once on mount so it never fights manual navigation afterward.
     if (!hasCompletedOnboarding) {
@@ -289,13 +299,6 @@ function App() {
             <VRPianoPage />
           </Suspense>
         );
-      case 'multiplayer':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <Navigation />
-            <MultiplayerPage />
-          </Suspense>
-        );
       case 'tutorials':
         return (
           <Suspense fallback={<LoadingFallback />}>
@@ -308,13 +311,6 @@ function App() {
           <Suspense fallback={<LoadingFallback />}>
             <Navigation />
             <SongUploadPage />
-          </Suspense>
-        );
-      case 'community-library':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <Navigation />
-            <CommunityLibraryPage />
           </Suspense>
         );
       case 'onboarding':

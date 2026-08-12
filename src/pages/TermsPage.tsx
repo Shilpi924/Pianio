@@ -6,7 +6,7 @@ export default function TermsPage() {
   const { goBack } = useAppStore();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-4 md:p-8 font-kid">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-4 md:p-8">
       <Navigation />
       <div className="max-w-4xl mx-auto mt-8">
         <button
@@ -51,51 +51,58 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">4. Content and Conduct</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">4. Children and Parental Consent</h2>
               <p className="text-lg leading-relaxed">
-                Users are responsible for the content they upload and share. You agree not to upload content that is illegal, harmful, threatening, abusive, defamatory, or otherwise objectionable.
+                Pianio is intended for use by learners of all ages, including children. If you are under the age of 18 (or the age of legal majority in your jurisdiction), you may only use Pianio with the involvement and consent of a parent or legal guardian, who agrees to these Terms on your behalf and is responsible for your use of the app.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">5. Disclaimer</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">5. Content and Conduct</h2>
+              <p className="text-lg leading-relaxed">
+                Users are responsible for the content they upload. You agree not to upload content that is illegal, harmful, threatening, abusive, defamatory, or otherwise objectionable. Imported song files are processed and stored locally on your device for your own personal use only.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">6. Disclaimer</h2>
               <p className="text-lg leading-relaxed">
                 The materials on Pianio are provided on an 'as is' basis. Pianio makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">6. Limitations</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">7. Limitations</h2>
               <p className="text-lg leading-relaxed">
                 In no event shall Pianio or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use Pianio.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">7. Modifications</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">8. Modifications</h2>
               <p className="text-lg leading-relaxed">
-                Pianio may revise these terms of service at any time without notice. By using Pianio, you are agreeing to be bound by the then current version of these terms of service.
+                Pianio may revise these terms of service at any time. Material changes will be reflected in the "Last updated" date below. By continuing to use Pianio after changes take effect, you are agreeing to be bound by the then current version of these terms of service.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">8. Export Compliance</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">9. Export Compliance</h2>
               <p className="text-lg leading-relaxed">
                 You acknowledge that Pianio may be subject to United States export laws and regulations, including the Export Administration Regulations (EAR). You agree to comply with all applicable export and re-export control laws and regulations. You represent and warrant that you are not located in a country that is subject to U.S. government sanctions, or that has been designated by the U.S. government as a "terrorist supporting" country, and that you are not listed on any U.S. government list of prohibited or restricted parties.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">9. Google Play Compliance</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">10. Acceptable Use</h2>
               <p className="text-lg leading-relaxed">
-                Pianio complies with the Google Play Developer Program Policies. The application does not contain malicious code, does not violate user privacy, and does not engage in deceptive practices. The app accurately represents its functionality and does not mislead users about its features or purpose.
+                You agree to use Pianio only for its intended purpose of learning and practicing piano, and not to misuse the app, attempt to disrupt its operation, or use it to violate any applicable law or the rights of others.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">10. Governing Law</h2>
+              <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-4">11. Governing Law</h2>
               <p className="text-lg leading-relaxed">
-                These terms and conditions are governed by and construed in accordance with the laws of your jurisdiction and you irrevocably submit to the exclusive jurisdiction of the courts in that state or location.
+                These terms are governed by and construed in accordance with applicable law, without regard to conflict of law principles. Any disputes arising from these terms or your use of Pianio will be resolved in accordance with that law.
               </p>
             </section>
           </div>

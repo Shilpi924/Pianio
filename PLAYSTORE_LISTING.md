@@ -66,10 +66,10 @@ Pianio makes learning piano interactive, intelligent, and highly accessible acro
 Download Pianio today and start your musical journey!
 
 ## Privacy Policy URL
-[To be hosted on your website]
+https://pianio2.vercel.app/privacy
 
 ## Contact Email
-[Your support email]
+lumina.antigravity@gmail.com
 
 ## Category
 Education

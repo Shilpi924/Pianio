@@ -125,7 +125,7 @@ export interface RecommendedTrack {
 }
 
 export interface AppState {
-  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'community-library' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'rhythm-training' | 'vr-piano' | 'multiplayer' | 'rewards-shop' | 'arcade' | 'personal-notes' | 'terms' | 'privacy' | 'developer';
+  currentView: 'home' | 'lesson' | 'practice' | 'scales' | 'curriculum' | 'ear-training' | 'note-naming' | 'sight-reading' | 'hand-positioning' | 'performance' | 'interval-training' | 'tutorials' | 'song-upload' | 'onboarding' | 'free-play' | 'statistics' | 'settings' | 'rhythm-training' | 'vr-piano' | 'rewards-shop' | 'arcade' | 'personal-notes' | 'terms' | 'privacy' | 'developer';
   currentLesson: Lesson | null;
   isPlaying: boolean;
   tempo: number;

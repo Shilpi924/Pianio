@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Users, Gamepad2, ShoppingBag, ArrowRight, StickyNote, ChevronDown } from 'lucide-react';
+import { Play, Library, Sparkles, Piano, Settings, Award, Globe, Glasses, Gamepad2, ShoppingBag, ArrowRight, StickyNote, ChevronDown } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { getEnhancedLessons } from '../services/musicCatalogService';
@@ -205,14 +205,6 @@ export default function HomePage() {
                     accent="pink"
                     index={2}
                     onClick={() => setCurrentView('rewards-shop')}
-                  />
-                  <SecondaryCard
-                    icon={Users}
-                    title={t('home.duet')}
-                    subtitle={t('home.duetDesc')}
-                    accent="sky"
-                    index={3}
-                    onClick={() => setCurrentView('multiplayer')}
                   />
                   <SecondaryCard
                     icon={Glasses}
