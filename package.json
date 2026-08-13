@@ -1,6 +1,6 @@
 {
   "name": "pianio",
-  "version": "1.0.1",
+  "version": "4.0.0",
   "private": true,
   "type": "module",
   "main": "dist-electron/main.js",
@@ -30,6 +30,7 @@
     "firebase": "^12.16.0",
     "framer-motion": "^12.42.2",
     "i18next": "^26.3.6",
+    "i18next-browser-languagedetector": "^8.2.1",
     "lucide-react": "^1.24.0",
     "markdown-to-jsx": "^9.8.2",
     "react": "^19.2.7",
